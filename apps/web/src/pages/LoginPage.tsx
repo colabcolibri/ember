@@ -54,7 +54,7 @@ function MockLoginForm({
   return (
     <AppPage className="w-full gap-8">
       <LoginIntro demo />
-      <AppCard className={loginFormClass} title={t('login.formTitle')} description={t('login.demoSubtitle')}>
+      <AppCard className={loginFormClass}>
         <form className="relative z-10 grid gap-6" onSubmit={verifyCode}>
           <p className="rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
             {t('login.demoPrefilledHint', { code: MOCK_DEMO_CODE })}
@@ -168,7 +168,7 @@ export function LoginPage() {
     return (
       <AppPage className="w-full gap-8">
         <LoginIntro />
-        <AppCard className={loginFormClass} title={t('login.formTitle')} description={t('login.subtitle')}>
+        <AppCard className={loginFormClass}>
           <form className="relative z-10 grid gap-6" onSubmit={requestCode}>
             <AppFormField label={t('login.email')} htmlFor="email">
               <AppInput
