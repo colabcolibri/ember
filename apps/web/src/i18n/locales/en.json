@@ -11,7 +11,10 @@
     "circles": "My circles",
     "facilitator": "Facilitator",
     "gatherings": "Gatherings",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "logoutConfirmTitle": "Sign out of your account?",
+    "logoutConfirmDescription": "You will need to sign in again to access your circles.",
+    "cancel": "Cancel"
   },
   "login": {
     "title": "Sign in with email",

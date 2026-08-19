@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="apps/web/public/brand/ember-logo.svg" alt="Ember" width="180" />
+</p>
+
 # Ember
 
 **Small gatherings, with intention.**

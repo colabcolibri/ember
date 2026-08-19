@@ -1,31 +1,30 @@
 import { cn } from '@/lib/utils';
 
-const LOGO_SRC = '/brand/ember-mark.png';
+const MARK_SRC = '/brand/ember-mark.svg';
+const LOGO_SRC = '/brand/ember-logo.svg';
 
 type AppBrandProps = {
   className?: string;
   /** Só o mark, sem wordmark — padrão no header */
   markOnly?: boolean;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
 };
 
-export function AppBrand({ className, markOnly = true, size = 'md' }: AppBrandProps) {
-  const sizeClass = size === 'sm' ? 'size-7' : 'size-8';
+const sizeClasses = {
+  sm: 'h-7 w-7',
+  md: 'h-8 w-8',
+  lg: 'h-10 w-auto max-w-[7.5rem]',
+} as const;
 
-  if (markOnly) {
-    return (
-      <img
-        src={LOGO_SRC}
-        alt="Ember"
-        className={cn('shrink-0 object-contain', sizeClass, className)}
-      />
-    );
-  }
+export function AppBrand({ className, markOnly = true, size = 'md' }: AppBrandProps) {
+  const sizeClass = sizeClasses[size];
+  const src = markOnly ? MARK_SRC : LOGO_SRC;
 
   return (
-    <div className={cn('flex items-center gap-2 font-serif text-primary italic', className)}>
-      <img src={LOGO_SRC} alt="" aria-hidden className={cn('shrink-0 object-contain', sizeClass)} />
-      <span className="text-2xl font-bold tracking-tight">Ember</span>
-    </div>
+    <img
+      src={src}
+      alt="Ember"
+      className={cn('shrink-0 object-contain', sizeClass, className)}
+    />
   );
 }

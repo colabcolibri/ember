@@ -11,7 +11,10 @@
     "circles": "Meus encontros",
     "facilitator": "Facilitador",
     "gatherings": "Encontros",
-    "logout": "Sair"
+    "logout": "Sair",
+    "logoutConfirmTitle": "Sair da conta?",
+    "logoutConfirmDescription": "Você precisará entrar novamente para acessar seus encontros.",
+    "cancel": "Cancelar"
   },
   "login": {
     "title": "Entrar com email",

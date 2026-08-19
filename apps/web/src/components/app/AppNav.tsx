@@ -40,13 +40,13 @@ export function AppNav({ homeTo, items, utilities }: AppNavProps) {
       className="rounded-2xl border border-outline-variant/30 bg-paper/90 px-3 py-2 shadow-sm backdrop-blur-md sm:px-4 sm:py-2.5"
       aria-label="Navegação principal"
     >
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-4">
+      <div className="flex items-center gap-x-3">
         <Link to={homeTo} className="shrink-0" aria-label="Ember — início">
           <AppBrand markOnly size="sm" />
         </Link>
 
         {items.length > 0 ? (
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5 sm:gap-1">
+          <div className="hidden min-w-0 flex-1 flex-wrap items-center gap-0.5 sm:flex sm:gap-1">
             {items.map((item) => (
               <NavLinkItem key={item.to} to={item.to} end={item.end}>
                 {item.label}
@@ -54,11 +54,21 @@ export function AppNav({ homeTo, items, utilities }: AppNavProps) {
             ))}
           </div>
         ) : (
-          <div className="flex-1" />
+          <div className="hidden flex-1 sm:block" />
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">{utilities}</div>
       </div>
+
+      {items.length > 0 ? (
+        <div className="mt-2 flex flex-wrap items-center gap-0.5 border-t border-outline-variant/20 pt-2 sm:hidden">
+          {items.map((item) => (
+            <NavLinkItem key={item.to} to={item.to} end={item.end}>
+              {item.label}
+            </NavLinkItem>
+          ))}
+        </div>
+      ) : null}
     </nav>
   );
 }
