@@ -21,7 +21,7 @@ export function AppPageHeader({
   return (
     <header
       className={cn(
-        'mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between',
+        'flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between',
         centered && 'text-center sm:text-center',
         className,
       )}

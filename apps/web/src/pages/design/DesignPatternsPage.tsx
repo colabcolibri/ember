@@ -1,50 +1,33 @@
-import { AppCard, AppEmptyState, AppFormField, AppInput, AppPageHeader, CircleListRow } from '@/components/app';
+import { AppCard, AppEmptyState, AppFormField, AppInput, AppPage, CircleListRow } from '@/components/app';
 
 export function DesignPatternsPage() {
   return (
-    <div className="grid gap-10">
-      <section id="shell">
-        <AppPageHeader
-          eyebrow="pattern"
-          title="App shell"
-          lead="Nav pill fixa, logo Stitch, lang switcher, logout e conteúdo em max-w-member (480px) ou max-w-facilitator (960px)."
-        />
-        <AppCard>Shell + AppPage aplicados em todas as rotas de produto via App.tsx.</AppCard>
-      </section>
+    <AppPage title="Layout do produto" lead="AppLayout → AppShell (max-w-ember-xl único) → AppPage.">
+      <AppCard title="App shell">
+        Um único container com max-w para nav e conteúdo. Rotas definem a largura via handle.
+      </AppCard>
 
-      <section id="form">
-        <AppPageHeader title="Form pattern" lead="Login, perfil e presença." />
-        <AppCard>
-          <div className="grid gap-4">
-            <AppFormField label="Email" htmlFor="pattern-email">
-              <AppInput id="pattern-email" type="email" />
-            </AppFormField>
-          </div>
-        </AppCard>
-      </section>
+      <AppCard title="Form pattern">
+        <AppFormField label="Email" htmlFor="pattern-email">
+          <AppInput id="pattern-email" type="email" />
+        </AppFormField>
+      </AppCard>
 
-      <section id="list">
-        <AppPageHeader title="List pattern" lead="Minhas rodas." />
+      <AppCard title="List pattern">
         <div className="grid gap-3">
           <CircleListRow id="1" communityName="GSA" question="Pergunta da rodada" status="open" />
           <CircleListRow id="2" communityName="GSA" question="Outra roda" />
         </div>
-      </section>
+      </AppCard>
 
-      <section id="detail">
-        <AppPageHeader title="Detail pattern" lead="Convite da roda com ações primárias." />
-        <AppCard title="Convite" description="Jitsi + .ics + confirmar">
-          Ações empilhadas no mobile; inline no desktop.
-        </AppCard>
-      </section>
+      <AppCard title="Detail pattern">
+        Convite da roda com ações primárias empilhadas no mobile.
+      </AppCard>
 
-      <section id="empty">
-        <AppPageHeader title="Empty pattern" />
-        <AppEmptyState
-          title="Nenhuma rodada aberta"
-          description="Volte quando o facilitador abrir uma nova rodada."
-        />
-      </section>
-    </div>
+      <AppEmptyState
+        title="Nenhuma rodada aberta"
+        description="Volte quando o facilitador abrir uma nova rodada."
+      />
+    </AppPage>
   );
 }

@@ -4,30 +4,28 @@ const LOGO_SRC = '/brand/ember-mark.png';
 
 type AppBrandProps = {
   className?: string;
-  compact?: boolean;
-  showWordmark?: boolean;
+  /** Só o mark, sem wordmark — padrão no header */
+  markOnly?: boolean;
+  size?: 'sm' | 'md';
 };
 
-export function AppBrand({ className, compact, showWordmark = true }: AppBrandProps) {
-  return (
-    <div
-      className={cn(
-        'flex items-center gap-2 font-serif text-primary',
-        showWordmark && 'italic',
-        className,
-      )}
-    >
+export function AppBrand({ className, markOnly = true, size = 'md' }: AppBrandProps) {
+  const sizeClass = size === 'sm' ? 'size-7' : 'size-8';
+
+  if (markOnly) {
+    return (
       <img
         src={LOGO_SRC}
-        alt=""
-        aria-hidden
-        className={cn('shrink-0 rounded-full object-cover', compact ? 'size-7' : 'size-8')}
+        alt="Ember"
+        className={cn('shrink-0 object-contain', sizeClass, className)}
       />
-      {showWordmark ? (
-        <span className={cn('font-bold tracking-tight', compact ? 'text-xl' : 'text-2xl')}>
-          Ember
-        </span>
-      ) : null}
+    );
+  }
+
+  return (
+    <div className={cn('flex items-center gap-2 font-serif text-primary italic', className)}>
+      <img src={LOGO_SRC} alt="" aria-hidden className={cn('shrink-0 object-contain', sizeClass)} />
+      <span className="text-2xl font-bold tracking-tight">Ember</span>
     </div>
   );
 }

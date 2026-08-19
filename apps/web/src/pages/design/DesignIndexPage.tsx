@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { AppCard } from '@/components/app';
+import { AppCard, AppPage } from '@/components/app';
 
 const sections = [
   { to: '/design/tokens', title: 'Tokens', desc: 'Cores, tipografia e spacing do 09.' },
@@ -9,8 +9,8 @@ const sections = [
 
 export function DesignIndexPage() {
   return (
-    <div className="grid gap-4">
-      <AppCard title="Ember design catalog" description="Stack: ts-shadcn · light only · dev only">
+    <AppPage title="Ember design catalog" lead="Stack: ts-shadcn · light only · dev only">
+      <AppCard>
         <p className="text-sm text-muted-foreground">
           Contrato visual em <code>docs/09_design_system.md</code>. Showcase importa apenas componentes
           compostos de <code>components/app/</code>.
@@ -23,6 +23,6 @@ export function DesignIndexPage() {
           </Link>
         ))}
       </div>
-    </div>
+    </AppPage>
   );
 }

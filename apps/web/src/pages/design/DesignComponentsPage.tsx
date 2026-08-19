@@ -10,7 +10,7 @@ import {
   AppEmptyState,
   AppFormField,
   AppInput,
-  AppPageHeader,
+  AppPage,
   AttendancePrompt,
   AvailabilityPicker,
   CircleInviteCard,
@@ -25,10 +25,13 @@ export function DesignComponentsPage() {
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
 
   return (
-    <div className="grid gap-8">
+    <AppPage title="Components" lead="Templates App* com variantes e estados.">
       <section id="brand" className="space-y-3">
         <h2 className="font-serif text-2xl">Brand</h2>
-        <AppBrand />
+        <div className="flex flex-wrap items-center gap-8">
+          <AppBrand />
+          <AppBrand markOnly={false} />
+        </div>
       </section>
 
       <section id="button" className="space-y-3">
@@ -180,12 +183,10 @@ export function DesignComponentsPage() {
 
       <section id="page-header" className="space-y-3">
         <h2 className="font-serif text-2xl">Page header</h2>
-        <AppPageHeader
-          eyebrow="rodada aberta"
-          title="Declarar presença"
-          lead="Escolha os horários em que você pode participar."
-        />
+        <p className="text-sm text-muted-foreground">
+          Use <code>AppPage</code> com props <code>title</code> e <code>lead</code>.
+        </p>
       </section>
-    </div>
+    </AppPage>
   );
 }

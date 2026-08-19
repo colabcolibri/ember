@@ -6,7 +6,6 @@ import {
   AppButton,
   AppCard,
   AppPage,
-  AppPageHeader,
   AttendancePrompt,
   CircleInviteCard,
 } from '../components/app/index.js';
@@ -95,15 +94,13 @@ export function CircleDetailPage() {
   const when = `${t('circles.when')}: ${circle.scheduledAt ?? circle.scheduledSlot ?? '—'}`;
 
   return (
-    <AppPage header={<AppPageHeader title={t('circles.inviteTitle')} />}>
-
+    <AppPage title={t('circles.inviteTitle')}>
       <CircleInviteCard
         communityName={circle.communityName}
         question={circle.question}
         when={when}
         status={circle.myStatus}
       />
-
       <AppCard title={t('circles.participants')}>
         <ul className="grid gap-1 text-sm">
           {members.map((m) => (
@@ -119,7 +116,6 @@ export function CircleDetailPage() {
           ))}
         </ul>
       </AppCard>
-
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {circle.jitsiUrl ? (
           <AppButton asChild className="w-full sm:w-auto">
@@ -137,7 +133,6 @@ export function CircleDetailPage() {
           </AppButton>
         ) : null}
       </div>
-
       {circle.canRecordAttendance && !circle.myAttendance ? (
         <AttendancePrompt
           title={t('circles.attendanceTitle')}
@@ -149,7 +144,6 @@ export function CircleDetailPage() {
           loading={loading}
         />
       ) : null}
-
       {message ? <AppAlert variant="success">{message}</AppAlert> : null}
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
     </AppPage>

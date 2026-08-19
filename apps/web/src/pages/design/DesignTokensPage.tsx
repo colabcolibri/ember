@@ -1,4 +1,4 @@
-import { AppCard } from '@/components/app';
+import { AppCard, AppPage } from '@/components/app';
 
 const colors = [
   { name: 'background', className: 'bg-background' },
@@ -12,6 +12,10 @@ const colors = [
   { name: 'success', className: 'bg-[hsl(var(--success))]' },
 ];
 
+const widths = [
+  { name: 'ember-xl', px: '960px', use: 'padrão — todas as telas' },
+];
+
 const typeScale = [
   { label: 'Eyebrow', className: 'text-[11px] font-extrabold tracking-[0.12em] uppercase text-primary' },
   { label: 'Body', className: 'text-base' },
@@ -21,7 +25,19 @@ const typeScale = [
 
 export function DesignTokensPage() {
   return (
-    <div className="grid gap-6">
+    <AppPage title="Tokens" lead="Cores, tipografia, spacing e larguras do shell.">
+      <AppCard title="Shell widths" description="Nav + conteúdo no mesmo container">
+        <ul className="grid gap-2 text-sm">
+          {widths.map((w) => (
+            <li key={w.name} className="flex flex-wrap justify-between gap-2 border-b border-border/60 py-2 last:border-0">
+              <span className="font-mono font-medium">{w.name}</span>
+              <span className="text-muted-foreground">{w.px}</span>
+              <span className="w-full text-muted-foreground">{w.use}</span>
+            </li>
+          ))}
+        </ul>
+      </AppCard>
+
       <AppCard title="Colors" description="Semantic tokens via Tailwind">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {colors.map((color) => (
@@ -33,7 +49,7 @@ export function DesignTokensPage() {
         </div>
       </AppCard>
 
-      <AppCard title="Typography" description="Inter + Georgia">
+      <AppCard title="Typography" description="Inter + EB Garamond">
         <div className="grid gap-4">
           {typeScale.map((item) => (
             <div key={item.label} className="border-b border-border/60 pb-4 last:border-0">
@@ -48,12 +64,12 @@ export function DesignTokensPage() {
         <div className="flex flex-wrap items-end gap-4">
           {[2, 4, 6, 8, 10, 12].map((n) => (
             <div key={n} className="text-center">
-              <div className={`mb-2 bg-primary/20`} style={{ width: `${n * 4}px`, height: `${n * 4}px` }} />
+              <div className="mb-2 bg-primary/20" style={{ width: `${n * 4}px`, height: `${n * 4}px` }} />
               <p className="text-xs text-muted-foreground">{n}</p>
             </div>
           ))}
         </div>
       </AppCard>
-    </div>
+    </AppPage>
   );
 }

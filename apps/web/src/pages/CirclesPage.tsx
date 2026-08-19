@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  AppAlert,
-  AppEmptyState,
-  AppPage,
-  AppPageHeader,
-  CircleListRow,
-} from '../components/app/index.js';
+import { AppAlert, AppEmptyState, AppPage, CircleListRow } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 
 type CircleSummary = {
@@ -31,9 +25,8 @@ export function CirclesPage() {
   }, [t]);
 
   return (
-    <AppPage header={<AppPageHeader title={t('circles.title')} lead={t('circles.subtitle')} />}>
+    <AppPage title={t('circles.title')} lead={t('circles.subtitle')}>
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
-
       {circles.length === 0 ? (
         <AppEmptyState title={t('circles.empty')} />
       ) : (

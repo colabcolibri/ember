@@ -8,12 +8,12 @@ import {
   AppFormField,
   AppInput,
   AppPage,
-  AppPageHeader,
   AvailabilityPicker,
   DeclarationTable,
   TrioPreview,
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
+import { cn } from '@/lib/utils';
 
 const FACILITATOR_SLOTS = ['mon-19h', 'tue-19h', 'wed-19h', 'thu-19h', 'sat-10h'] as const;
 
@@ -155,9 +155,9 @@ export function FacilitatorPage() {
   };
 
   return (
-    <AppPage header={<AppPageHeader title={t('facilitator.title')} lead={t('facilitator.subtitle')} />}>
+    <AppPage title={t('facilitator.title')} lead={t('facilitator.subtitle')}>
 
-      <div className="grid gap-8 lg:grid-cols-12">
+      <div className="grid w-full gap-8 lg:grid-cols-12">
         {template ? (
           <AppCard title={t('facilitator.template')} className="lg:col-span-4">
             <div className="grid gap-4">
@@ -199,7 +199,10 @@ export function FacilitatorPage() {
           </AppCard>
         ) : null}
 
-        <AppCard title={t('facilitator.newRound')} className="lg:col-span-8">
+        <AppCard
+          title={t('facilitator.newRound')}
+          className={cn(template ? 'lg:col-span-8' : 'lg:col-span-12')}
+        >
           <div className="grid gap-4">
             <AppFormField label={t('facilitator.question')} htmlFor="question">
               <textarea
@@ -231,8 +234,11 @@ export function FacilitatorPage() {
       </div>
 
       {roundId ? (
-        <div className="grid gap-8 lg:grid-cols-12">
-          <AppCard title={t('facilitator.declarations')} className="lg:col-span-7">
+        <div className="grid w-full gap-8 lg:grid-cols-12">
+          <AppCard
+            title={t('facilitator.declarations')}
+            className={cn(trios.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12')}
+          >
             <DeclarationTable items={declarations} emptyMessage={t('facilitator.noDeclarations')} />
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
               <AppButton variant="outline" onClick={() => loadDeclarations(roundId)} loading={loading}>

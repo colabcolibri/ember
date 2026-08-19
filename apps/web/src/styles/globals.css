@@ -38,14 +38,16 @@
   --font-serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
   --font-mono: 'Space Mono', ui-monospace, monospace;
   --spacing-page-x: 1.25rem;
-  --width-member: 30rem;
-  --width-facilitator: 60rem;
-  --width-nav: 42rem;
-  --width-nav-wide: 64rem;
-  --max-width-member: var(--width-member);
-  --max-width-facilitator: var(--width-facilitator);
-  --max-width-nav: var(--width-nav);
-  --max-width-nav-wide: var(--width-nav-wide);
+  --width-ember-sm: 30rem;
+  --width-ember-md: 40rem;
+  --width-ember-lg: 48rem;
+  --width-ember-xl: 60rem;
+  --width-ember-2xl: 75rem;
+  --max-width-ember-sm: var(--width-ember-sm);
+  --max-width-ember-md: var(--width-ember-md);
+  --max-width-ember-lg: var(--width-ember-lg);
+  --max-width-ember-xl: var(--width-ember-xl);
+  --max-width-ember-2xl: var(--width-ember-2xl);
 }
 
 @layer base {

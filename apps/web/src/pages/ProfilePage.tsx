@@ -7,7 +7,6 @@ import {
   AppFormField,
   AppInput,
   AppPage,
-  AppPageHeader,
   LanguageChipPicker,
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
@@ -60,7 +59,7 @@ export function ProfilePage() {
   }
 
   return (
-    <AppPage header={<AppPageHeader title={t('profile.title')} />}>
+    <AppPage title={t('profile.title')}>
       <AppCard>
         <form className="relative z-10 grid gap-8" onSubmit={onSubmit}>
           <AppFormField label={t('profile.timezone')} htmlFor="timezone">
@@ -80,9 +79,7 @@ export function ProfilePage() {
               />
             </div>
           </AppFormField>
-
           <hr className="border-outline-variant/50" />
-
           <AppFormField label={t('profile.languages')}>
             <LanguageChipPicker
               options={LANGUAGE_OPTIONS}
@@ -90,13 +87,11 @@ export function ProfilePage() {
               onToggle={toggleLanguage}
             />
           </AppFormField>
-
           <AppButton type="submit" size="lg" loading={loading} className="w-full sm:w-auto">
             {t('profile.save')}
           </AppButton>
         </form>
       </AppCard>
-
       {message ? <AppAlert variant="success">{message}</AppAlert> : null}
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
     </AppPage>

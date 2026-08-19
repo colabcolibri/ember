@@ -1,15 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import {
-  AppAlert,
-  AppButton,
-  AppCard,
-  AppFormField,
-  AppInput,
-  AppPage,
-  AppPageHeader,
-} from '../components/app/index.js';
+import { AppAlert, AppButton, AppCard, AppFormField, AppInput, AppPage } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 
 type Step = 'email' | 'code';
@@ -62,11 +54,7 @@ export function LoginPage() {
 
   if (step === 'email') {
     return (
-      <AppPage
-        header={
-          <AppPageHeader centered title={t('login.title')} lead={t('login.subtitle')} />
-        }
-      >
+      <AppPage centered title={t('login.title')} lead={t('login.subtitle')}>
         <AppCard>
           <form className="relative z-10 grid gap-6" onSubmit={requestCode}>
             <AppFormField label={t('login.email')} htmlFor="email">
@@ -100,7 +88,6 @@ export function LoginPage() {
             </p>
           </div>
         </AppCard>
-
         {message ? <AppAlert variant="success">{message}</AppAlert> : null}
         {error ? <AppAlert variant="error">{error}</AppAlert> : null}
       </AppPage>
@@ -109,17 +96,13 @@ export function LoginPage() {
 
   return (
     <AppPage
-      header={
-        <AppPageHeader
-          centered
-          title={t('login.verifyTitle')}
-          lead={
-            <>
-              {t('login.codeHintPrefix')}{' '}
-              <span className="font-medium text-foreground">{email}</span>
-            </>
-          }
-        />
+      centered
+      title={t('login.verifyTitle')}
+      lead={
+        <>
+          {t('login.codeHintPrefix')}{' '}
+          <span className="font-medium text-foreground">{email}</span>
+        </>
       }
     >
       <AppCard>
@@ -140,7 +123,6 @@ export function LoginPage() {
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             />
           </AppFormField>
-
           <div className="grid gap-4">
             <AppButton
               type="submit"
@@ -170,7 +152,6 @@ export function LoginPage() {
           </div>
         </form>
       </AppCard>
-
       {message ? <AppAlert variant="success">{message}</AppAlert> : null}
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
     </AppPage>

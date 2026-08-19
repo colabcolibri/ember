@@ -6,7 +6,6 @@ import {
   AppCard,
   AppEmptyState,
   AppPage,
-  AppPageHeader,
   AvailabilityPicker,
   IntentionPicker,
 } from '../components/app/index.js';
@@ -64,7 +63,7 @@ export function PresencePage() {
 
   if (!roundId) {
     return (
-      <AppPage header={<AppPageHeader eyebrow={t('presence.eyebrow')} title={t('presence.title')} />}>
+      <AppPage title={t('presence.title')}>
         <AppEmptyState title={t('presence.noRound')} />
         {error ? <AppAlert variant="error">{error}</AppAlert> : null}
       </AppPage>
@@ -72,15 +71,7 @@ export function PresencePage() {
   }
 
   return (
-    <AppPage
-      header={
-        <AppPageHeader
-          eyebrow={t('presence.eyebrow')}
-          title={t('presence.title')}
-          lead={t('presence.subtitle')}
-        />
-      }
-    >
+    <AppPage title={t('presence.title')} lead={t('presence.subtitle')}>
       <form className="grid gap-6" onSubmit={onSubmit}>
         <AppCard sectionLabel={t('presence.slotsLabel')}>
           <AvailabilityPicker
@@ -90,7 +81,6 @@ export function PresencePage() {
             label={(slot) => t(`presence.slots.${slot}`)}
           />
         </AppCard>
-
         <AppCard sectionLabel={t('presence.intention')}>
           <IntentionPicker
             value={intention}
@@ -100,7 +90,6 @@ export function PresencePage() {
             hint={(value) => t(`presence.intentionHints.${value}`)}
           />
         </AppCard>
-
         <AppButton
           type="submit"
           size="lg"
@@ -112,7 +101,6 @@ export function PresencePage() {
           <span className="material-symbols-outlined text-sm">check</span>
         </AppButton>
       </form>
-
       {message ? <AppAlert variant="success">{message}</AppAlert> : null}
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
     </AppPage>

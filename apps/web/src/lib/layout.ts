@@ -1,40 +1,34 @@
-/** Layout tokens alinhados a docs/09_design_system.md e docs/stitch/DESIGN.md */
-export const LAYOUT = {
-  /** Largura máxima do conteúdo — fluxos de membro e auth */
-  memberMax: 'max-w-member',
-  /** Largura máxima — painel do facilitador */
-  facilitatorMax: 'max-w-facilitator',
-  /** Nav pill — membro e auth */
-  navMemberMax: 'max-w-nav',
-  /** Nav pill — facilitador e catálogo */
-  navWideMax: 'max-w-nav-wide',
-  /** Padding horizontal de página */
-  pageX: 'px-page-x',
+import { cn } from '@/lib/utils';
+
+/**
+ * Cinco larguras padrão do produto Ember.
+ * Nav e conteúdo compartilham o MESMO max-w (um único container no shell).
+ *
+ * sm  — 480px  (reservado)
+ * md  — 640px  (reservado)
+ * lg  — 768px  (reservado)
+ * xl  — 960px  padrão de TODAS as telas
+ * 2xl — 1200px (reservado)
+ */
+export const EMBER_WIDTH = {
+  sm: 'max-w-ember-sm',
+  md: 'max-w-ember-md',
+  lg: 'max-w-ember-lg',
+  xl: 'max-w-ember-xl',
+  '2xl': 'max-w-ember-2xl',
 } as const;
 
-export type AppShellVariant = 'auth' | 'app' | 'facilitator' | 'catalog';
+export type EmberWidth = keyof typeof EMBER_WIDTH;
 
-export function contentMaxWidth(variant: AppShellVariant): string {
-  switch (variant) {
-    case 'facilitator':
-    case 'catalog':
-      return LAYOUT.facilitatorMax;
-    case 'auth':
-    case 'app':
-    default:
-      return LAYOUT.memberMax;
-  }
+export const DEFAULT_EMBER_WIDTH: EmberWidth = 'xl';
+
+export function emberWidthClass(width: EmberWidth = DEFAULT_EMBER_WIDTH): string {
+  return EMBER_WIDTH[width];
 }
 
-export function navMaxWidth(variant: AppShellVariant): string {
-  switch (variant) {
-    case 'facilitator':
-    case 'catalog':
-      return LAYOUT.navWideMax;
-    case 'auth':
-      return 'max-w-fit';
-    case 'app':
-    default:
-      return LAYOUT.navMemberMax;
-  }
+/** Padding horizontal de página — único token */
+export const EMBER_PAGE_X = 'px-page-x';
+
+export function shellContainerClass(width: EmberWidth = DEFAULT_EMBER_WIDTH, className?: string) {
+  return cn('mx-auto w-full', EMBER_PAGE_X, emberWidthClass(width), className);
 }
