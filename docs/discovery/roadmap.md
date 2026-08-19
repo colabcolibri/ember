@@ -24,7 +24,7 @@ Plano incremental alinhado ao [product brief](./product-brief.md) e à orientaç
 | Phase docs Meridian (Ember) | ✅ |
 | Schema SQLite + migrations | 🔲 |
 | API: rodadas, magic link, presença | 🔲 |
-| UI: declaração de presença PT/EN/ES | 🔲 |
+| UI: declaração de presença PT/EN | 🔲 |
 | Admin: criar rodada, ver inscritos | 🔲 |
 | Sorteio com memória (assistido) | 🔲 |
 | E-mail: convite + roda formada | 🔲 |

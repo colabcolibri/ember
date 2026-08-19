@@ -53,5 +53,5 @@ export function buildMagicLinkUrl(input: {
     /\/$/,
     '',
   );
-  return `${base}/auth/magic?token=${encodeURIComponent(input.token)}`;
+  return `${base}/api/v1/auth/magic-link/verify?token=${encodeURIComponent(input.token)}`;
 }

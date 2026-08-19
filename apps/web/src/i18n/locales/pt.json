@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "Ember",
+    "tagline": "Encontros pequenos, com intenção"
+  },
+  "nav": {
+    "login": "Entrar",
+    "profile": "Perfil",
+    "presence": "Presença"
+  },
+  "login": {
+    "title": "Entrar com email",
+    "email": "Seu email",
+    "submit": "Enviar link",
+    "success": "Se o email estiver cadastrado, você receberá um link em breve.",
+    "error": "Não foi possível enviar o link. Tente novamente."
+  },
+  "profile": {
+    "title": "Seu perfil",
+    "timezone": "Fuso horário",
+    "languages": "Idiomas",
+    "save": "Salvar perfil",
+    "saved": "Perfil salvo."
+  },
+  "presence": {
+    "title": "Declarar presença",
+    "subtitle": "Escolha os horários em que você pode participar desta rodada.",
+    "intention": "Intenção para esta rodada",
+    "intentions": {
+      "surprise": "Surpresa — aberto ao inesperado",
+      "frontier": "Fronteira — quero sair da zona de conforto",
+      "ease": "Facilidade — prefiro leveza neste encontro"
+    },
+    "slots": {
+      "mon-evening": "Segunda à noite",
+      "wed-evening": "Quarta à noite",
+      "sat-morning": "Sábado de manhã"
+    },
+    "submit": "Confirmar presença",
+    "saved": "Presença registrada.",
+    "noRound": "Nenhuma rodada aberta no momento."
+  },
+  "common": {
+    "loading": "Carregando…",
+    "apiOffline": "API offline"
+  }
+}

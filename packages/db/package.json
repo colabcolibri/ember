@@ -13,6 +13,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ember/domain": "workspace:*",
     "better-sqlite3": "^12.11.1"
   },
   "devDependencies": {

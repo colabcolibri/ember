@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ensureDatabaseReady } from '@ember/db';
 import {
   buildMagicLinkEmailContent,
+  buildMagicLinkUrl,
   countSentEmailsByKind,
   createEmailSenderFromEnv,
   resetEmailSenderCacheForTests,
@@ -113,13 +114,14 @@ describe('sent_emails persistence', () => {
 
 describe('magic link template', () => {
   it('includes expiry and rust brand colors', () => {
+    const magicLinkUrl = buildMagicLinkUrl({ token: 'secret' });
     const content = buildMagicLinkEmailContent({
-      magicLinkUrl: 'http://localhost:3000/auth/magic?token=secret',
+      magicLinkUrl,
       ttlMinutes: 30,
     });
     expect(content.subject).toContain('Ember');
     expect(content.text).toContain('30');
     expect(content.html).toContain('#aa4f36');
-    expect(content.html).toContain('secret');
+    expect(content.html).toContain('magic-link/verify');
   });
 });

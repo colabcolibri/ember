@@ -14,3 +14,4 @@ export { buildMagicLinkEmailContent, buildMagicLinkUrl } from './email/magic-lin
 export { EMAIL_BRAND } from './email/email-brand.js';
 export { recordSentEmail } from './record-sent-email.js';
 export { countSentEmailsByKind, listSentEmails } from './sent-emails-db.js';
+export { requireEmailPepper } from './crypto/email-pepper.js';

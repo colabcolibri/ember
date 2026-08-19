@@ -59,14 +59,14 @@ Ember é a brasa que mantém a rede acesa: uma infraestrutura silenciosa que for
 - GSA é a primeira comunidade e define o template Fogo de Conselho como formato padrão de encontro. `(assumption)`
 - Membros aceitam convites por email (ou link mágico) sem app instalado na v1. `(assumption)`
 - O matching roda em rodadas **quinzenais** com sorteio assistido no MVP 0. `(roadmap)`
-- Idiomas na UI: **PT, EN, ES**. `(roadmap / mockup)`
+- Idiomas na UI: **PT, EN**. `(roadmap / mockup)`
 - "Pontes na rede" = priorizar pares que ainda não se encontraram e conexões de 2º grau dentro da comunidade. `(assumption)`
 
 ## Epic candidates (MVP 0)
 
 - Schema SQLite + migrations
 - API: rodadas, magic link, presença
-- UI: declaração de presença PT/EN/ES
+- UI: declaração de presença PT/EN
 - Admin: criar rodada, ver inscritos
 - Sorteio com memória (assistido)
 - Infra e-mail transacional (copiar padrão Osmo)

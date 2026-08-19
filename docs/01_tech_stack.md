@@ -25,7 +25,7 @@ Ember é um monorepo web para matching de rodas no ritual Fogo de Conselho (pilo
 
 | Surface | Framework / host | Path in repo | Notes |
 | ------- | ---------------- | ------------ | ----- |
-| Web app | Vite + React `(planned — cloud agent)` | `apps/web/` | UI presença PT/EN/ES; mockup editorial como referência |
+| Web app | Vite + React `(planned — cloud agent)` | `apps/web/` | UI presença PT/EN; mockup editorial como referência |
 | API / backend | Node + Hono ou Express `(planned)` | `apps/api/` | Rodadas, magic link, matching, Jitsi, `.ics` |
 | CLI | n/a | — | Fora do escopo v1 |
 | Extension / desktop | n/a | — | — |

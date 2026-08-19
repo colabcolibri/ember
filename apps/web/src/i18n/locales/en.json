@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "Ember",
+    "tagline": "Small gatherings, with intention"
+  },
+  "nav": {
+    "login": "Sign in",
+    "profile": "Profile",
+    "presence": "Presence"
+  },
+  "login": {
+    "title": "Sign in with email",
+    "email": "Your email",
+    "submit": "Send link",
+    "success": "If the email is registered, you will receive a link shortly.",
+    "error": "Could not send the link. Please try again."
+  },
+  "profile": {
+    "title": "Your profile",
+    "timezone": "Timezone",
+    "languages": "Languages",
+    "save": "Save profile",
+    "saved": "Profile saved."
+  },
+  "presence": {
+    "title": "Declare presence",
+    "subtitle": "Choose the time slots when you can join this round.",
+    "intention": "Intention for this round",
+    "intentions": {
+      "surprise": "Surprise — open to the unexpected",
+      "frontier": "Frontier — stretch my comfort zone",
+      "ease": "Ease — prefer a lighter meeting"
+    },
+    "slots": {
+      "mon-evening": "Monday evening",
+      "wed-evening": "Wednesday evening",
+      "sat-morning": "Saturday morning"
+    },
+    "submit": "Confirm presence",
+    "saved": "Presence recorded.",
+    "noRound": "No open round at the moment."
+  },
+  "common": {
+    "loading": "Loading…",
+    "apiOffline": "API offline"
+  }
+}

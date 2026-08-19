@@ -1,38 +1,51 @@
 import { useEffect, useState } from 'react';
-
-type Health = { ok: boolean; service?: string };
+import { useTranslation } from 'react-i18next';
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { LanguageSwitcher } from './components/LanguageSwitcher.js';
+import { LoginPage } from './pages/LoginPage.js';
+import { PresencePage } from './pages/PresencePage.js';
+import { ProfilePage } from './pages/ProfilePage.js';
+import { apiFetch } from './lib/api.js';
 
 export function App() {
-  const [health, setHealth] = useState<Health | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
-    fetch('/api/health')
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        return res.json() as Promise<Health>;
-      })
-      .then(setHealth)
-      .catch((err: Error) => setError(err.message));
-  }, []);
+    apiFetch('/me/profile')
+      .then(() => setAuthed(true))
+      .catch(() => setAuthed(false));
+  }, [location.pathname]);
 
   return (
     <main className="shell">
-      <p className="eyebrow">Ember</p>
-      <h1>Encontros pequenos, com intenção</h1>
-      <p className="lede">MVP 0 — fundação do monorepo e email transacional.</p>
-      <section className="card" aria-live="polite">
-        <h2>API</h2>
-        {health ? (
-          <p className="ok">Conectada — {health.service}</p>
-        ) : error ? (
-          <p className="err">Offline — {error}</p>
-        ) : (
-          <p>Verificando…</p>
-        )}
-      </section>
+      <header className="topbar">
+        <div>
+          <p className="eyebrow">{t('app.title')}</p>
+          <h1>{t('app.tagline')}</h1>
+        </div>
+        <LanguageSwitcher />
+      </header>
+
+      <nav className="nav">
+        <Link to="/login">{t('nav.login')}</Link>
+        <Link to="/profile">{t('nav.profile')}</Link>
+        <Link to="/presence">{t('nav.presence')}</Link>
+      </nav>
+
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/profile"
+          element={authed === false ? <Navigate to="/login" replace /> : <ProfilePage />}
+        />
+        <Route
+          path="/presence"
+          element={authed === false ? <Navigate to="/login" replace /> : <PresencePage />}
+        />
+        <Route path="/" element={<Navigate to={authed ? '/presence' : '/login'} replace />} />
+      </Routes>
     </main>
   );
 }
