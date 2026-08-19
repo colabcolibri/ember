@@ -25,29 +25,34 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-sage: var(--sage);
+  --color-surface: var(--bg);
+  --color-outline-variant: #d6cfc2;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
+  --font-mono: 'Space Mono', ui-monospace, monospace;
 }
 
 @layer base {
   :root {
-    /* Ember product tokens */
     --bg: #f4efe7;
     --paper: #fbf8f3;
     --ink: #20211f;
-    --muted-ink: #68645d;
+    --muted-ink: #5a5957;
     --rust: #aa4f36;
     --rust2: #c67155;
     --sage: #4f6956;
     --sand: #d8cab6;
     --dark: #1c1f1c;
     --line: rgba(32, 33, 31, 0.14);
+    --primary-container: #f1e5df;
 
-    /* shadcn semantic map (HSL channels) */
     --background: 38 39% 93%;
     --foreground: 60 3% 13%;
     --card: 40 50% 97%;
@@ -69,7 +74,7 @@
     --border: 60 3% 13% / 0.14;
     --input: 60 3% 13% / 0.14;
     --ring: 12 52% 44%;
-    --radius: 0.75rem;
+    --radius: 1rem;
     --radius-card: 1.75rem;
   }
 
@@ -80,7 +85,23 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     margin: 0;
-    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.25rem;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    -webkit-font-smoothing: antialiased;
   }
 
   .ember-mark {
@@ -109,5 +130,73 @@
 
   .ember-mark::after {
     right: -3px;
+  }
+
+  .ember-orbit-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .ember-orbit-bg::before {
+    content: '';
+    position: absolute;
+    top: -150px;
+    right: -150px;
+    width: min(400px, 90vw);
+    height: min(400px, 90vw);
+    border: 2px solid rgba(170, 79, 54, 0.1);
+    border-radius: 50%;
+  }
+
+  .ember-orbit-bg::after {
+    content: '';
+    position: absolute;
+    bottom: -200px;
+    left: -400px;
+    width: min(800px, 120vw);
+    height: min(800px, 120vw);
+    border: 1px solid rgba(170, 79, 54, 0.08);
+    border-radius: 50%;
+  }
+
+  .ember-orbit-dot-rust {
+    position: fixed;
+    top: 15%;
+    right: 5%;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(170, 79, 54, 0.4);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ember-orbit-dot-sage {
+    position: fixed;
+    top: 8%;
+    right: 15%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(79, 105, 86, 0.35);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ember-card-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.4), transparent);
+    pointer-events: none;
+  }
+
+  .ember-orbital-radial {
+    background-image:
+      radial-gradient(circle at top right, rgba(170, 79, 54, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at bottom left, rgba(79, 105, 86, 0.05) 0%, transparent 40%);
   }
 }

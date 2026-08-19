@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ember - Convite da roda</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;1,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        body {
+            background-color: #f4efe7; /* Cream background */
+        }
+        .bg-paper {
+            background-color: #fbf8f3;
+        }
+        .text-rust {
+            color: #aa4f36;
+        }
+        .bg-rust {
+            background-color: #aa4f36;
+        }
+        .border-rust {
+            border-color: #aa4f36;
+        }
+        .text-sage {
+            color: #4f6956;
+        }
+        .bg-sage {
+            background-color: #4f6956;
+        }
+        .orbital-bg {
+            background-image: radial-gradient(circle at top right, rgba(170, 79, 54, 0.05) 0%, transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(79, 105, 86, 0.05) 0%, transparent 40%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#aa4f36",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#f4efe7",
+                        "on-primary-container": "#2c1c16",
+                        surface: "#fbf8f3",
+                        "on-surface": "#2c1c16",
+                        "surface-variant": "#e6dfd5",
+                        "on-surface-variant": "#5a4b45",
+                        outline: "#8a7b75",
+                        "outline-variant": "#c9bcb5"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["EB Garamond", "serif"],
+                        display: ["EB Garamond", "serif"],
+                        body: ["Inter", "sans-serif"],
+                        label: ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-body text-on-surface antialiased orbital-bg min-h-screen pb-24">
+<!-- TopAppBar Container -->
+<div class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between">
+<nav aria-label="Navegação superior" class="bg-surface/90 backdrop-blur-md shadow-sm border border-outline-variant/30 rounded-full mt-4 mx-auto max-w-fit px-6 py-2 flex items-center gap-6">
+<div class="flex items-center gap-3">
+<img alt="Ember Logo" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1X5iQB54UtnIU8_qCvCKez_U-fYZGjRFDcGNbOhYf9RmMlDLZk0jvyg4fnV2p2oMU8s2KsYaVVB-ONGo_8iW7W5B0h-nwUI4GOmVIuy_oPUfJJvsQ3GTI7oUjA8Be6ICbz5Ld6gFhNyggfO0co1MZcvD8dlqkaJWOj-5f3qvXKukIjFjcI117dBcdmU5bvcb6zTz9-5cKlHVP0cl1bWnLtqOjUznNhxTrlr4aO11-rhLFKo_SMrqR3pNukB"/>
+<span class="font-headline text-2xl italic tracking-tight text-primary">Ember</span>
+</div>
+<div class="flex items-center gap-2 border-l border-outline-variant/30 pl-4">
+<button class="text-primary font-bold text-sm tracking-wide">PT</button>
+<span class="text-outline-variant/50">/</span>
+<button class="text-on-surface-variant font-medium text-sm tracking-wide hover:text-primary transition-colors duration-300">EN</button>
+</div>
+</nav>
+</div>
+<!-- Main Content -->
+<main class="max-w-[390px] mx-auto pt-28 px-4 pb-12 flex flex-col gap-6">
+<!-- Hero Paper Card -->
+<article class="bg-paper rounded-[28px] p-8 shadow-sm border border-outline-variant/20 relative overflow-hidden">
+<!-- Decorative circle -->
+<div class="absolute -top-12 -right-12 w-32 h-32 rounded-full border border-rust/10"></div>
+<div class="absolute -top-16 -right-16 w-40 h-40 rounded-full border border-rust/5"></div>
+<div class="relative z-10">
+<span class="font-label text-xs font-semibold tracking-widest text-rust uppercase mb-4 block">GSA</span>
+<h1 class="font-headline text-4xl leading-tight text-on-surface mb-6">O que você precisa ouvir hoje?</h1>
+<div class="flex items-center gap-2 text-on-surface-variant font-body text-sm">
+<span class="material-symbols-outlined text-rust" style="font-size: 18px;">schedule</span>
+<span>Horário: Quarta, 19h BRT</span>
+</div>
+</div>
+</article>
+<!-- Participants Card -->
+<section class="bg-paper rounded-[28px] p-6 shadow-sm border border-outline-variant/20">
+<h2 class="font-headline text-xl mb-4 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-size: 20px;">group</span>
+                Participantes
+            </h2>
+<ul class="flex flex-col gap-3">
+<li class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center font-label text-sm font-medium text-on-surface-variant">
+                        AS
+                    </div>
+<span class="font-body text-sm font-medium text-on-surface">Ana S.</span>
+</li>
+<li class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center font-label text-sm font-medium text-on-surface-variant">
+                        BM
+                    </div>
+<span class="font-body text-sm font-medium text-on-surface">Bruno M.</span>
+</li>
+<li class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center font-label text-sm font-medium text-on-surface-variant">
+                        CT
+                    </div>
+<span class="font-body text-sm font-medium text-on-surface">Carla T.</span>
+</li>
+</ul>
+</section>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-3">
+<button class="w-full bg-black text-white rounded-full py-4 px-6 font-label text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-black/90 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 18px;">video_camera_front</span>
+                Entrar no Jitsi
+            </button>
+<button class="w-full bg-transparent border border-rust text-rust rounded-full py-4 px-6 font-label text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-rust/5 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 18px;">calendar_month</span>
+                Baixar calendário (.ics)
+            </button>
+<button class="w-full bg-sage text-white rounded-full py-4 px-6 font-label text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" style="font-size: 18px;">check_circle</span>
+                Confirmar presença
+            </button>
+</div>
+<!-- Follow-up Card -->
+<section class="bg-paper rounded-[28px] p-6 shadow-sm border border-outline-variant/20 mt-4 relative overflow-hidden">
+<!-- Decorative orbital accent -->
+<div class="absolute -bottom-8 -left-8 w-24 h-24 rounded-full border border-sage/10"></div>
+<div class="relative z-10">
+<h3 class="font-headline text-xl text-on-surface mb-2">A roda aconteceu?</h3>
+<p class="font-body text-sm text-on-surface-variant mb-6 leading-relaxed">
+                    Ajude a rede a lembrar quem se encontrou.
+                </p>
+<div class="grid grid-cols-2 gap-3">
+<button class="bg-surface-variant/50 text-on-surface border border-outline-variant/30 rounded-xl py-3 px-4 font-label text-xs font-medium tracking-wide hover:bg-surface-variant transition-colors flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-sage" style="font-size: 16px;">thumb_up</span>
+                        Sim, aconteceu
+                    </button>
+<button class="bg-surface-variant/50 text-on-surface border border-outline-variant/30 rounded-xl py-3 px-4 font-label text-xs font-medium tracking-wide hover:bg-surface-variant transition-colors flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-rust" style="font-size: 16px;">thumb_down</span>
+                        Não aconteceu
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Container (Mobile Nav Shell) -->
+<nav aria-label="Navegação principal" class="fixed bottom-0 left-0 right-0 z-50 flex justify-center md:hidden pb-safe">
+<ul class="bg-surface/80 backdrop-blur-lg shadow-lg border border-outline-variant/10 rounded-full mb-6 mx-auto w-fit px-4 py-3 flex gap-4">
+<li>
+<a aria-label="Grupos (ativo)" class="flex flex-col items-center gap-1 bg-primary text-on-primary rounded-full p-2 transition-transform hover:scale-110 active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+</a>
+</li>
+<li>
+<a aria-label="Histórico" class="flex flex-col items-center gap-1 text-on-surface-variant p-2 transition-transform hover:scale-110 active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+</a>
+</li>
+<li>
+<a aria-label="Hub" class="flex flex-col items-center gap-1 text-on-surface-variant p-2 transition-transform hover:scale-110 active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">hub</span>
+</a>
+</li>
+<li>
+<a aria-label="Configurações" class="flex flex-col items-center gap-1 text-on-surface-variant p-2 transition-transform hover:scale-110 active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</li>
+</ul>
+</nav>
+<style>
+        /* iOS safe area padding support */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pb-safe {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+    </style>
+</body></html>

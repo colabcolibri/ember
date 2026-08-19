@@ -101,11 +101,16 @@ export function CircleDetailPage() {
       />
 
       <AppCard title={t('circles.participants')}>
-        <ul className="grid gap-2 text-sm">
+        <ul className="grid gap-1 text-sm">
           {members.map((m) => (
-            <li key={m.userId} className="flex flex-wrap justify-between gap-2 border-b border-border/60 py-2 last:border-0">
+            <li
+              key={m.userId}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-outline-variant/30 bg-background/50 px-4 py-3"
+            >
               <span className="font-medium">{m.label}</span>
-              <span className="text-muted-foreground">{m.status}</span>
+              <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                {m.status}
+              </span>
             </li>
           ))}
         </ul>

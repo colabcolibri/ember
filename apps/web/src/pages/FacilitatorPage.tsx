@@ -157,9 +157,9 @@ export function FacilitatorPage() {
     <div className="grid gap-8">
       <AppPageHeader title={t('facilitator.title')} lead={t('facilitator.subtitle')} />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-12">
         {template ? (
-          <AppCard title={t('facilitator.template')}>
+          <AppCard title={t('facilitator.template')} className="lg:col-span-4">
             <div className="grid gap-4">
               <AppFormField label={t('facilitator.templateName')} htmlFor="template-name">
                 <AppInput
@@ -192,19 +192,19 @@ export function FacilitatorPage() {
                   }
                 />
               </AppFormField>
-              <AppButton onClick={saveTemplate} loading={loading} className="w-full sm:w-auto">
+              <AppButton onClick={saveTemplate} loading={loading} variant="outline" className="w-full">
                 {t('facilitator.saveTemplate')}
               </AppButton>
             </div>
           </AppCard>
         ) : null}
 
-        <AppCard title={t('facilitator.newRound')}>
+        <AppCard title={t('facilitator.newRound')} className="lg:col-span-8">
           <div className="grid gap-4">
             <AppFormField label={t('facilitator.question')} htmlFor="question">
               <textarea
                 id="question"
-                className="min-h-24 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                className="min-h-24 w-full min-w-0 rounded-xl border border-outline-variant/60 bg-background px-4 py-3 text-sm focus:border-primary focus:ring-primary/20 focus:outline-none"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 rows={3}
@@ -231,8 +231,8 @@ export function FacilitatorPage() {
       </div>
 
       {roundId ? (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <AppCard title={t('facilitator.declarations')}>
+        <div className="grid gap-8 lg:grid-cols-12">
+          <AppCard title={t('facilitator.declarations')} className="lg:col-span-7">
             <DeclarationTable items={declarations} emptyMessage={t('facilitator.noDeclarations')} />
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
               <AppButton variant="outline" onClick={() => loadDeclarations(roundId)} loading={loading}>
@@ -245,7 +245,7 @@ export function FacilitatorPage() {
           </AppCard>
 
           {trios.length > 0 ? (
-            <AppCard title={t('facilitator.preview')}>
+            <AppCard title={t('facilitator.preview')} className="lg:col-span-5">
               <TrioPreview
                 trios={trios}
                 unmatched={unmatched}

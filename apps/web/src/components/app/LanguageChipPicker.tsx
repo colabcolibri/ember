@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type LanguageChipPickerProps = {
@@ -8,7 +9,7 @@ type LanguageChipPickerProps = {
 
 export function LanguageChipPicker({ options, selected, onToggle }: LanguageChipPickerProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-3">
       {options.map((code) => {
         const active = selected.includes(code);
         return (
@@ -17,12 +18,13 @@ export function LanguageChipPicker({ options, selected, onToggle }: LanguageChip
             type="button"
             onClick={() => onToggle(code)}
             className={cn(
-              'min-h-11 rounded-full border px-4 py-2 text-sm font-semibold uppercase transition-colors',
+              'flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border px-4 py-2.5 text-sm font-semibold uppercase transition-all sm:flex-none',
               active
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border bg-background hover:border-primary/30',
+                ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                : 'border-outline-variant bg-background/50 text-foreground hover:border-primary/40',
             )}
           >
+            {active ? <Check className="size-4" aria-hidden /> : null}
             {code}
           </button>
         );

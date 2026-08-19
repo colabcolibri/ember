@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ember - Seu perfil</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        'surface': '#f4efe7', // Cream background
+                        'on-surface': '#2d2a26', // Ink text
+                        'on-surface-variant': '#595551',
+                        'primary': '#2d2a26', // Ink
+                        'on-primary': '#ffffff',
+                        'primary-container': '#a4422e', // Rust
+                        'on-primary-container': '#ffffff',
+                        'outline': '#d8cfc4',
+                        'outline-variant': '#e8e2d9',
+                        'paper': '#ffffff'
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px",
+                        "card": "28px"
+                    },
+                    fontFamily: {
+                        "headline": ["Georgia", "serif"], // Requested Georgia, falling back to EB Garamond isn't strictly requested for 'Seu perfil', but config specifies EB Garamond. I will use Georgia for the title as requested in prompt, and Inter/EB Garamond for the rest.
+                        "display": ["EB Garamond", "serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 24px -4px rgba(45, 42, 38, 0.05), 0 2px 8px -2px rgba(45, 42, 38, 0.02)',
+                        'sm': '0 1px 2px 0 rgba(45, 42, 38, 0.05)',
+                        'md': '0 4px 6px -1px rgba(45, 42, 38, 0.1), 0 2px 4px -1px rgba(45, 42, 38, 0.06)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Orbital Animation */
+        .orbit {
+            animation: spin 30s linear infinite;
+            transform-origin: center;
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex justify-center selection:bg-primary-container selection:text-white">
+<!-- Mobile Container (390px width context) -->
+<div class="w-full max-w-[390px] relative min-h-screen flex flex-col bg-surface overflow-hidden shadow-2xl shadow-black/10">
+<!-- Subtle Orbital Decoration (Background) -->
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+<div class="absolute top-[-20%] right-[-30%] w-[150%] aspect-square border-[0.5px] border-outline-variant/50 rounded-full orbit opacity-60"></div>
+<div class="absolute top-[-10%] right-[-20%] w-[120%] aspect-square border-[0.5px] border-outline-variant/40 rounded-full orbit opacity-40" style="animation-duration: 45s; animation-direction: reverse;"></div>
+</div>
+<!-- TopAppBar (from JSON) -->
+<!-- "name": "TopAppBar", "type": "small_center_aligned", "headline": "Ember", "leading_type": "icon", "leading_icon": "circle_notifications", "trailing_type": "action", "trailing_action_text": "PT / EN", "style_bg_color": "bg-surface/90 backdrop-blur-md", "style_primary_color": "text-primary", "style_typography": "font-headline text-display-sm italic", "style_brand_logo": "font-headline text-2xl font-bold text-primary tracking-tight", "style_component_shape": "fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl rounded-full", "style_separation_logic": "shadow-sm border border-outline-variant/30", "style_shadows_and_elevation": "shadow-md", "style_active_navigation": "text-primary font-bold", "style_inactive_navigation": "text-on-surface-variant font-medium", "style_universal_hover": "hover:bg-primary/5 transition-colors duration-300", "style_interactions": "active:scale-95 transition-transform", "style_shell_layout": "flex items-center justify-between px-8 py-3 z-50" -->
+<header class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[350px] rounded-full bg-surface/90 backdrop-blur-md shadow-sm border border-outline-variant/30 flex items-center justify-between px-6 py-3 z-50">
+<!-- Leading Icon -->
+<button aria-label="Notificações" class="hover:bg-primary/5 transition-colors duration-300 active:scale-95 flex items-center justify-center rounded-full p-1">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 0, 'wght' 300;">circle_notifications</span>
+</button>
+<!-- Headline / Brand -->
+<h1 class="font-display text-2xl font-bold text-primary tracking-tight">Ember</h1>
+<!-- Trailing Action -->
+<button class="text-primary font-label text-xs font-semibold tracking-wide hover:bg-primary/5 transition-colors duration-300 active:scale-95 px-2 py-1 rounded-full">
+                PT / EN
+            </button>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 relative z-10 px-6 pt-32 pb-12 flex flex-col">
+<!-- Page Title -->
+<div class="mb-8 pl-1">
+<h2 class="font-[Georgia] text-4xl text-primary tracking-tight leading-tight">Seu perfil</h2>
+</div>
+<!-- Elevated Paper Card containing form -->
+<div class="bg-paper rounded-[28px] p-6 shadow-soft border border-outline/20">
+<!-- Form Fields -->
+<form class="space-y-8">
+<!-- Field 1: Timezone -->
+<div class="space-y-2">
+<label class="block font-label text-sm font-medium text-on-surface-variant tracking-wide" for="timezone">
+                            Fuso horário
+                        </label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" style="font-variation-settings: 'FILL' 0, 'wght' 300;">schedule</span>
+<input class="w-full bg-surface/50 border border-outline rounded-xl py-3 pl-12 pr-4 text-primary font-body text-base focus:ring-1 focus:ring-primary-container focus:border-primary-container transition-colors" id="timezone" name="timezone" readonly="" type="text" value="America/Sao_Paulo"/>
+</div>
+</div>
+<hr class="border-outline-variant/50"/>
+<!-- Field 2: Languages -->
+<div class="space-y-4">
+<label class="block font-label text-sm font-medium text-on-surface-variant tracking-wide">
+                            Idiomas
+                        </label>
+<div class="flex gap-3">
+<!-- Active Chip (PT) -->
+<button aria-pressed="true" class="flex-1 bg-primary-container text-on-primary-container font-label text-sm font-semibold py-2.5 rounded-full border border-primary-container shadow-sm active:scale-95 transition-transform flex justify-center items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1, 'wght' 400;">check</span>
+                                PT
+                            </button>
+<!-- Inactive Chip (EN) -->
+<button aria-pressed="false" class="flex-1 bg-transparent text-on-surface-variant font-label text-sm font-medium py-2.5 rounded-full border border-outline hover:border-on-surface-variant active:scale-95 transition-all flex justify-center items-center" type="button">
+                                EN
+                            </button>
+</div>
+</div>
+<!-- Spacer before CTA to push it down slightly within card -->
+<div class="pt-4">
+<!-- Primary CTA -->
+<button class="w-full bg-primary text-on-primary font-label text-base font-semibold py-4 rounded-full shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex justify-center items-center gap-2" type="submit">
+                            Salvar perfil
+                            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'wght' 500;">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+</main>
+</div>
+</body></html>

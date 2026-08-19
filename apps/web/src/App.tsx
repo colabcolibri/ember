@@ -20,7 +20,7 @@ function ProductLayout({
   children,
 }: {
   authed: boolean | null;
-  variant: 'auth' | 'app';
+  variant: 'auth' | 'app' | 'facilitator';
   children: ReactNode;
 }) {
   return (
@@ -90,7 +90,7 @@ export function App() {
           authed === false ? (
             <Navigate to="/login" replace />
           ) : (
-            <ProductLayout authed={authed} variant="app">
+            <ProductLayout authed={authed} variant="facilitator">
               <FacilitatorPage />
             </ProductLayout>
           )

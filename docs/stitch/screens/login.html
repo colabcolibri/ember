@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ember - Entrar com email</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        surface: "#f4efe7",
+                        "surface-elevated": "#fbf8f3",
+                        primary: "#aa4f36",
+                        "primary-container": "#f1e5df",
+                        "on-primary-container": "#4a2217",
+                        "on-surface": "#20211f",
+                        "on-surface-variant": "#5a5957",
+                        "outline-variant": "rgba(32, 33, 31, 0.14)",
+                        ink: "#20211f",
+                        sage: "#4f6956"
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                        lg: "1.75rem",
+                        xl: "3rem",
+                        full: "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["EB Garamond", "serif"],
+                        display: ["EB Garamond", "serif"],
+                        body: ["Inter", "sans-serif"],
+                        label: ["Inter", "sans-serif"]
+                    },
+                    fontSize: {
+                        "headline-md": ["2rem", { lineHeight: "1.2", letterSpacing: "-0.02em" }],
+                        "label-sm": ["0.8125rem", { lineHeight: "1.4", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .backdrop-blur-md {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        /* Decorative orbit */
+        .orbit-bg {
+            position: fixed;
+            top: -150px;
+            right: -150px;
+            width: 400px;
+            height: 400px;
+            border: 2px solid rgba(170, 79, 54, 0.1);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .orbit-dot-1 {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #aa4f36;
+            border-radius: 50%;
+            top: 25%;
+            left: -6px;
+        }
+        
+        .orbit-dot-2 {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #4f6956;
+            border-radius: 50%;
+            bottom: -6px;
+            left: 30%;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen relative overflow-x-hidden w-full max-w-[390px] mx-auto bg-surface">
+<!-- Decorative Elements -->
+<div class="orbit-bg">
+<div class="orbit-dot-1"></div>
+<div class="orbit-dot-2"></div>
+</div>
+<!-- Top Navigation Pill (Shared Component) -->
+<header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 max-w-[390px] mx-auto">
+<div class="bg-surface/80 backdrop-blur-md shadow-md rounded-full mx-auto mt-4 w-[calc(100%-2rem)] flex items-center justify-between px-6 py-3 border border-outline-variant/30">
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity scale-95 active:transition-transform flex items-center justify-center p-2 rounded-full hover:bg-black/5">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">audio_file</span>
+</button>
+<div class="flex flex-col items-center justify-center">
+<img alt="Ember Logo Mark" class="w-8 h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCG2mgstpiTkLnUM4jtG8BOkFhcun6HU-HaLlwGVqzuIh52BShxOieDB6zp3DY2T3dEqJ8Bx7Bv-hnUowkUnNw6T6p131rbNbQTJNaaPZT5VXbQWVNO2HWGpYkIZuzgN_heDcqQTPHQ7RdWuVGroDM91z9d24elN8b6cPNC-CpS3om3jWRO0ulMk-HjMC-G7NI2wvSdEm0I9tGj-nU9bWTDdrZzP-zOiip9gC9hNmCtGPGoXr7FG16oMw"/>
+</div>
+<button class="text-on-surface-variant font-label text-xs tracking-wider hover:opacity-80 transition-opacity scale-95 active:transition-transform p-2 rounded-full hover:bg-black/5 font-semibold">
+                PT/EN
+            </button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="relative z-10 px-6 pt-32 pb-24 flex flex-col min-h-screen justify-center">
+<div class="mb-10 text-center flex flex-col items-center">
+<h1 class="font-headline text-headline-md text-ink mb-3 font-semibold">Entrar com email</h1>
+<p class="font-body text-on-surface-variant text-base max-w-[280px]">Entre com o email da sua comunidade.</p>
+</div>
+<div class="bg-surface-elevated rounded-lg p-[30px] shadow-sm border border-outline-variant w-full max-w-sm mx-auto relative overflow-hidden">
+<!-- Subtle gradient overlay on card -->
+<div class="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none"></div>
+<form class="flex flex-col gap-6 relative z-10">
+<div class="flex flex-col gap-2 relative">
+<label class="font-label text-[13px] font-bold text-ink tracking-wide" for="email">Seu email</label>
+<div class="relative">
+<input class="w-full bg-surface border-outline-variant text-ink placeholder-on-surface-variant/50 focus:ring-primary focus:border-primary rounded-xl px-4 py-3.5 transition-all text-base border" id="email" name="email" placeholder="nome@exemplo.com" type="email"/>
+</div>
+</div>
+<div class="mt-4">
+<button class="w-full bg-ink text-surface font-label font-bold py-4 px-6 rounded-full hover:bg-ink/90 transition-colors shadow-sm flex items-center justify-center gap-2 group" type="submit">
+                        Enviar código
+                        <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</button>
+</div>
+</form>
+<div class="mt-8 text-center border-t border-outline-variant pt-6">
+<p class="font-body text-xs text-on-surface-variant">
+                    Ao continuar, você concorda com nossos <a class="text-primary hover:underline font-medium" href="#">Termos</a> e <a class="text-primary hover:underline font-medium" href="#">Privacidade</a>.
+                 </p>
+</div>
+</div>
+</main>
+</body></html>

@@ -12,6 +12,13 @@
   },
   "login": {
     "title": "Entrar com email",
+    "subtitle": "Entre com o email da sua comunidade.",
+    "verifyTitle": "Verificar código",
+    "codeHintPrefix": "Enviamos um código para",
+    "termsPrefix": "Ao continuar, você concorda com nossos",
+    "terms": "Termos",
+    "termsAnd": "e",
+    "privacy": "Privacidade",
     "email": "Seu email",
     "submit": "Enviar código",
     "code": "Código de 6 dígitos",
@@ -32,12 +39,19 @@
   },
   "presence": {
     "title": "Declarar presença",
+    "eyebrow": "Rodada aberta",
     "subtitle": "Escolha os horários em que você pode participar desta rodada.",
+    "slotsLabel": "Horários disponíveis",
     "intention": "Intenção para esta rodada",
     "intentions": {
-      "surprise": "Surpresa — aberto ao inesperado",
-      "frontier": "Fronteira — quero sair da zona de conforto",
-      "ease": "Facilidade — prefiro leveza neste encontro"
+      "surprise": "Surpresa",
+      "frontier": "Fronteira",
+      "ease": "Facilidade"
+    },
+    "intentionHints": {
+      "surprise": "aberto ao inesperado",
+      "frontier": "quero sair da zona de conforto",
+      "ease": "prefiro leveza neste encontro"
     },
     "slots": {
       "mon-evening": "Segunda à noite",

@@ -9,7 +9,7 @@ type AvailabilityPickerProps = {
 
 export function AvailabilityPicker({ slots, selected, onToggle, label }: AvailabilityPickerProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-3">
       {slots.map((slot) => {
         const active = selected.includes(slot);
         return (
@@ -18,10 +18,10 @@ export function AvailabilityPicker({ slots, selected, onToggle, label }: Availab
             type="button"
             onClick={() => onToggle(slot)}
             className={cn(
-              'min-h-11 rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+              'rounded-full border px-5 py-2.5 text-sm font-medium transition-all',
               active
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-border bg-background text-foreground hover:border-primary/30',
+                ? 'border-2 border-primary bg-primary/10 text-primary'
+                : 'border border-outline-variant bg-transparent text-foreground hover:bg-background',
             )}
           >
             {label(slot)}

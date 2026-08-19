@@ -13,7 +13,7 @@ type AppFormFieldProps = {
 export function AppFormField({ label, htmlFor, error, children, className }: AppFormFieldProps) {
   return (
     <div className={cn('grid gap-2', className)}>
-      <Label htmlFor={htmlFor} className="text-sm font-medium">
+      <Label htmlFor={htmlFor} className="text-[13px] font-bold tracking-wide text-ink">
         {label}
       </Label>
       {children}

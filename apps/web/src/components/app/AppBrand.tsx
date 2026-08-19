@@ -1,10 +1,21 @@
 import { cn } from '@/lib/utils';
 
-export function AppBrand({ className }: { className?: string }) {
+type AppBrandProps = {
+  className?: string;
+  compact?: boolean;
+};
+
+export function AppBrand({ className, compact }: AppBrandProps) {
   return (
-    <div className={cn('flex items-center gap-2.5 font-bold tracking-tight text-foreground', className)}>
+    <div
+      className={cn(
+        'flex items-center gap-2 font-serif text-primary italic',
+        compact ? 'text-xl' : 'text-2xl',
+        className,
+      )}
+    >
       <span className="ember-mark" aria-hidden="true" />
-      <span>Ember</span>
+      <span className="font-bold tracking-tight">Ember</span>
     </div>
   );
 }

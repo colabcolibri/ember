@@ -64,7 +64,7 @@ export function PresencePage() {
   if (!roundId) {
     return (
       <div className="grid gap-6">
-        <AppPageHeader eyebrow="rodada" title={t('presence.title')} />
+        <AppPageHeader eyebrow={t('presence.eyebrow')} title={t('presence.title')} />
         <AppEmptyState title={t('presence.noRound')} />
       </div>
     );
@@ -73,13 +73,13 @@ export function PresencePage() {
   return (
     <div className="grid gap-6">
       <AppPageHeader
-        eyebrow="rodada aberta"
+        eyebrow={t('presence.eyebrow')}
         title={t('presence.title')}
         lead={t('presence.subtitle')}
       />
 
       <form className="grid gap-6" onSubmit={onSubmit}>
-        <AppCard title={t('presence.title')}>
+        <AppCard sectionLabel={t('presence.slotsLabel')}>
           <AvailabilityPicker
             slots={slots}
             selected={selectedSlots}
@@ -88,17 +88,25 @@ export function PresencePage() {
           />
         </AppCard>
 
-        <AppCard title={t('presence.intention')}>
+        <AppCard sectionLabel={t('presence.intention')}>
           <IntentionPicker
             value={intention}
             onChange={setIntention}
             options={['surprise', 'frontier', 'ease'] as const}
             label={(value) => t(`presence.intentions.${value}`)}
+            hint={(value) => t(`presence.intentionHints.${value}`)}
           />
         </AppCard>
 
-        <AppButton type="submit" loading={loading} disabled={selectedSlots.length === 0} className="w-full sm:w-auto">
+        <AppButton
+          type="submit"
+          size="lg"
+          loading={loading}
+          disabled={selectedSlots.length === 0}
+          className="w-full sm:w-auto"
+        >
           {t('presence.submit')}
+          <span className="material-symbols-outlined text-sm">check</span>
         </AppButton>
       </form>
 

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ember - Minhas rodas</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Georgia&amp;family=Inter:wght@400;500;700;800&amp;family=JetBrains+Mono:wght@500&amp;family=Libre+Caslon+Text:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error-container": "#93000a",
+                      "line": "rgba(32,33,31,0.14)",
+                      "primary-fixed-dim": "#ffb5a1",
+                      "on-primary-fixed": "#3b0800",
+                      "on-secondary-fixed": "#072012",
+                      "paper": "#fbf8f3",
+                      "on-surface-variant": "#55423d",
+                      "error-container": "#ffdad6",
+                      "inverse-primary": "#ffb5a1",
+                      "on-background": "#231917",
+                      "surface-variant": "#f1dfda",
+                      "on-error": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "secondary-fixed": "#cdead2",
+                      "muted": "#68645d",
+                      "secondary": "#4a6452",
+                      "secondary-container": "#cae7cf",
+                      "primary": "#8b3821",
+                      "tertiary-fixed-dim": "#7cd5d1",
+                      "rust-soft": "#c67155",
+                      "tertiary-fixed": "#98f2ee",
+                      "on-primary-fixed-variant": "#7c2d17",
+                      "tertiary-container": "#007774",
+                      "surface-container-low": "#fff1ed",
+                      "surface-container-lowest": "#ffffff",
+                      "ink": "#20211f",
+                      "primary-fixed": "#ffdbd1",
+                      "surface-container-highest": "#f1dfda",
+                      "dark": "#1c1f1c",
+                      "background": "#f4efe7",
+                      "on-tertiary-fixed-variant": "#00504e",
+                      "primary-container": "#aa4f36",
+                      "on-tertiary": "#ffffff",
+                      "sand": "#d8cab6",
+                      "on-primary-container": "#ffe6e0",
+                      "outline": "#89726c",
+                      "surface-tint": "#9b442c",
+                      "on-tertiary-fixed": "#00201f",
+                      "surface-dim": "#e8d6d2",
+                      "inverse-surface": "#392e2b",
+                      "outline-variant": "#dcc1ba",
+                      "tertiary": "#005c5a",
+                      "surface-container": "#fceae6",
+                      "on-secondary-fixed-variant": "#334c3b",
+                      "surface-bright": "#fff8f6",
+                      "secondary-fixed-dim": "#b1ceb7",
+                      "on-tertiary-container": "#a1fbf7",
+                      "inverse-on-surface": "#ffede9",
+                      "on-secondary-container": "#4f6956",
+                      "on-surface": "#231917",
+                      "error": "#ba1a1a",
+                      "surface": "#fff8f6",
+                      "surface-container-high": "#f7e4e0",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "page-x": "20px",
+                      "section": "48px",
+                      "max-width-facilitator": "960px",
+                      "base": "4px",
+                      "card-padding": "30px",
+                      "max-width-member": "480px",
+                      "card": "30px"
+              },
+              "fontFamily": {
+                      "label": [
+                              "Inter"
+                      ],
+                      "display": [
+                              "Georgia"
+                      ],
+                      "page-title": [
+                              "Georgia"
+                      ],
+                      "display-mobile": [
+                              "Libre Caslon Text"
+                      ],
+                      "otp-input": [
+                              "JetBrains Mono"
+                      ],
+                      "eyebrow": [
+                              "Inter"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "page-title-mobile": [
+                              "Libre Caslon Text"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label": [
+                              "13px",
+                              {
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display": [
+                              "clamp(40px, 6vw, 64px)",
+                              {
+                                      "lineHeight": "1.05",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "page-title": [
+                              "clamp(28px, 5vw, 40px)",
+                              {
+                                      "lineHeight": "1.15",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-mobile": [
+                              "40px",
+                              {
+                                      "lineHeight": "1.05",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "otp-input": [
+                              "32px",
+                              {
+                                      "letterSpacing": "0.5em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "eyebrow": [
+                              "11px",
+                              {
+                                      "letterSpacing": "0.12em",
+                                      "fontWeight": "850"
+                              }
+                      ],
+                      "body": [
+                              "17px",
+                              {
+                                      "lineHeight": "1.55",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "page-title-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "1.15",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            -webkit-font-smoothing: antialiased;
+        }
+        .max-w-member {
+            max-width: 480px;
+        }
+        .orbital-motif {
+            position: relative;
+            overflow: hidden;
+        }
+        .orbital-motif::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            border: 1px dashed theme('colors.rust-soft');
+            border-radius: 50%;
+            opacity: 0.1;
+            pointer-events: none;
+            animation: rotate 60s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .orbital-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: theme('colors.primary');
+            border-radius: 50%;
+            top: 10%;
+            right: 20%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen items-center">
+<!-- TopAppBar from JSON -->
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center w-[90%] md:w-full bg-paper/80 backdrop-blur-md rounded-full max-w-facilitator mx-auto mt-4 px-6 py-3 border border-line shadow-[0_10px_38px_rgba(35,28,22,0.06)]">
+<div class="font-display text-page-title-mobile font-medium text-ink flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">radio_button_checked</span>
+            Ember
+        </div>
+<button class="text-primary font-display text-page-title-mobile md:text-page-title hover:text-rust-soft transition-colors duration-300 active:scale-95 transition-transform">
+            PT / EN
+        </button>
+</header>
+<!-- Main Content Area -->
+<main class="w-full max-w-member mx-auto px-page-x pt-[100px] pb-section flex-grow flex flex-col gap-8">
+<!-- Header -->
+<div class="flex flex-col gap-2 pt-6">
+<h1 class="font-page-title-mobile text-page-title-mobile text-ink">Minhas rodas</h1>
+<p class="font-body text-body text-muted">Convites e encontros formados para você</p>
+</div>
+<!-- Cards List -->
+<div class="flex flex-col gap-6">
+<!-- Card 1 -->
+<article class="bg-paper rounded-[28px] border border-line p-card-padding flex flex-col gap-4 relative overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_10px_38px_rgba(35,28,22,0.06)] cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="font-eyebrow text-eyebrow text-primary uppercase bg-primary-fixed border border-outline-variant px-3 py-1 rounded-full inline-block">GSA</span>
+<span class="font-label text-label text-secondary bg-secondary-container px-3 py-1 rounded-full">confirmado</span>
+</div>
+<h2 class="font-page-title-mobile text-page-title-mobile text-ink mt-2">O que você precisa ouvir hoje?</h2>
+</article>
+<!-- Card 2 -->
+<article class="bg-paper rounded-[28px] border border-line p-card-padding flex flex-col gap-4 relative overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_10px_38px_rgba(35,28,22,0.06)] cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="font-eyebrow text-eyebrow text-primary uppercase bg-primary-fixed border border-outline-variant px-3 py-1 rounded-full inline-block">GSA</span>
+<span class="font-label text-label text-muted bg-surface-dim px-3 py-1 rounded-full">convidado</span>
+</div>
+<h2 class="font-page-title-mobile text-page-title-mobile text-ink mt-2">Como você cultiva sua paz?</h2>
+</article>
+<!-- Card 3 -->
+<article class="bg-paper rounded-[28px] border border-line p-card-padding flex flex-col gap-4 relative overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_10px_38px_rgba(35,28,22,0.06)] cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="font-eyebrow text-eyebrow text-primary uppercase bg-primary-fixed border border-outline-variant px-3 py-1 rounded-full inline-block">COMUNIDADE ALFA</span>
+<span class="font-label text-label text-secondary bg-secondary-container px-3 py-1 rounded-full">confirmado</span>
+</div>
+<h2 class="font-page-title-mobile text-page-title-mobile text-ink mt-2">O que o silêncio te ensinou recentemente?</h2>
+</article>
+<!-- Empty State Example -->
+<div class="mt-8 border border-dashed border-outline-variant bg-paper rounded-[28px] p-card-padding flex flex-col items-center justify-center text-center py-16 orbital-motif">
+<div class="orbital-dot"></div>
+<span class="material-symbols-outlined text-4xl text-muted mb-4 opacity-50" style="font-variation-settings: 'wght' 200;">motion_photos_on</span>
+<p class="font-body-sm text-body-sm text-muted">Nenhuma roda no momento</p>
+</div>
+</div>
+</main>
+<script>
+        // Simple micro-interaction for cards
+        document.querySelectorAll('article').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = '';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+    </script>
+</body></html>

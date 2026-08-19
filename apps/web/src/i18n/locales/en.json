@@ -12,6 +12,13 @@
   },
   "login": {
     "title": "Sign in with email",
+    "subtitle": "Use the email from your community.",
+    "verifyTitle": "Verify code",
+    "codeHintPrefix": "We sent a code to",
+    "termsPrefix": "By continuing, you agree to our",
+    "terms": "Terms",
+    "termsAnd": "and",
+    "privacy": "Privacy",
     "email": "Your email",
     "submit": "Send code",
     "code": "6-digit code",
@@ -32,12 +39,19 @@
   },
   "presence": {
     "title": "Declare presence",
+    "eyebrow": "Open round",
     "subtitle": "Choose the time slots when you can join this round.",
+    "slotsLabel": "Available times",
     "intention": "Intention for this round",
     "intentions": {
-      "surprise": "Surprise — open to the unexpected",
-      "frontier": "Frontier — stretch my comfort zone",
-      "ease": "Ease — prefer a lighter meeting"
+      "surprise": "Surprise",
+      "frontier": "Frontier",
+      "ease": "Ease"
+    },
+    "intentionHints": {
+      "surprise": "open to the unexpected",
+      "frontier": "stretch my comfort zone",
+      "ease": "prefer a lighter meeting"
     },
     "slots": {
       "mon-evening": "Monday evening",

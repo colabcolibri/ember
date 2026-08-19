@@ -59,67 +59,115 @@ export function LoginPage() {
     }
   }
 
-  return (
-    <div className="grid gap-6">
-      <AppPageHeader title={t('login.title')} />
+  if (step === 'email') {
+    return (
+      <div className="grid gap-8">
+        <AppPageHeader
+          centered
+          title={t('login.title')}
+          lead={t('login.subtitle')}
+        />
 
-      <AppCard>
-        {step === 'email' ? (
-          <form className="grid gap-4" onSubmit={requestCode}>
+        <AppCard>
+          <form className="relative z-10 grid gap-6" onSubmit={requestCode}>
             <AppFormField label={t('login.email')} htmlFor="email">
               <AppInput
                 id="email"
                 type="email"
                 name="email"
                 autoComplete="email"
+                placeholder="nome@exemplo.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </AppFormField>
-            <AppButton type="submit" loading={loading} className="w-full sm:w-auto">
+            <AppButton type="submit" variant="ink" size="lg" loading={loading} className="w-full">
               {t('login.submit')}
+              <span className="material-symbols-outlined text-lg">arrow_forward</span>
             </AppButton>
           </form>
-        ) : (
-          <form className="grid gap-4" onSubmit={verifyCode}>
-            <p className="text-sm text-muted-foreground">{t('login.codeHint', { email })}</p>
-            <AppFormField label={t('login.code')} htmlFor="code">
-              <AppInput
-                id="code"
-                type="text"
-                name="code"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                pattern="\d{6}"
-                maxLength={6}
-                required
-                otp
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              />
-            </AppFormField>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <AppButton type="submit" loading={loading} disabled={code.length !== 6} className="w-full sm:w-auto">
-                {t('login.verify')}
-              </AppButton>
-              <AppButton
-                type="button"
-                variant="outline"
-                disabled={loading}
-                className="w-full sm:w-auto"
-                onClick={() => {
-                  setStep('email');
-                  setCode('');
-                  setMessage(null);
-                  setError(null);
-                }}
-              >
-                {t('login.changeEmail')}
-              </AppButton>
-            </div>
-          </form>
-        )}
+          <div className="relative z-10 mt-8 border-t border-outline-variant/60 pt-6 text-center">
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              {t('login.termsPrefix')}{' '}
+              <a href="#" className="font-medium text-primary hover:underline">
+                {t('login.terms')}
+              </a>{' '}
+              {t('login.termsAnd')}{' '}
+              <a href="#" className="font-medium text-primary hover:underline">
+                {t('login.privacy')}
+              </a>
+              .
+            </p>
+          </div>
+        </AppCard>
+
+        {message ? <AppAlert variant="success">{message}</AppAlert> : null}
+        {error ? <AppAlert variant="error">{error}</AppAlert> : null}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-8">
+      <AppPageHeader
+        centered
+        title={t('login.verifyTitle')}
+        lead={
+          <>
+            {t('login.codeHintPrefix')}{' '}
+            <span className="font-medium text-foreground">{email}</span>
+          </>
+        }
+      />
+
+      <AppCard>
+        <form className="relative z-10 grid gap-8" onSubmit={verifyCode}>
+          <AppFormField label={t('login.code')} htmlFor="code">
+            <AppInput
+              id="code"
+              type="text"
+              name="code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              pattern="\d{6}"
+              maxLength={6}
+              placeholder="000000"
+              required
+              otp
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            />
+          </AppFormField>
+
+          <div className="grid gap-4">
+            <AppButton
+              type="submit"
+              size="lg"
+              loading={loading}
+              disabled={code.length !== 6}
+              className="w-full"
+            >
+              {t('login.verify')}
+              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </AppButton>
+            <AppButton
+              type="button"
+              variant="outline"
+              size="lg"
+              disabled={loading}
+              className="w-full"
+              onClick={() => {
+                setStep('email');
+                setCode('');
+                setMessage(null);
+                setError(null);
+              }}
+            >
+              {t('login.changeEmail')}
+            </AppButton>
+          </div>
+        </form>
       </AppCard>
 
       {message ? <AppAlert variant="success">{message}</AppAlert> : null}

@@ -63,15 +63,26 @@ export function ProfilePage() {
       <AppPageHeader title={t('profile.title')} />
 
       <AppCard>
-        <form className="grid gap-6" onSubmit={onSubmit}>
+        <form className="relative z-10 grid gap-8" onSubmit={onSubmit}>
           <AppFormField label={t('profile.timezone')} htmlFor="timezone">
-            <AppInput
-              id="timezone"
-              value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <span
+                className="material-symbols-outlined absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground"
+                style={{ fontSize: 20 }}
+              >
+                schedule
+              </span>
+              <AppInput
+                id="timezone"
+                className="pl-12"
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+                required
+              />
+            </div>
           </AppFormField>
+
+          <hr className="border-outline-variant/50" />
 
           <AppFormField label={t('profile.languages')}>
             <LanguageChipPicker
@@ -81,7 +92,7 @@ export function ProfilePage() {
             />
           </AppFormField>
 
-          <AppButton type="submit" loading={loading} className="w-full sm:w-auto">
+          <AppButton type="submit" size="lg" loading={loading} className="w-full sm:w-auto">
             {t('profile.save')}
           </AppButton>
         </form>
