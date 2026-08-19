@@ -1,0 +1,26 @@
+{
+  "name": "@ember/email",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ember/db": "workspace:*",
+    "better-sqlite3": "^12.11.1",
+    "nodemailer": "^9.0.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.15.29",
+    "@types/nodemailer": "^8.0.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.1"
+  }
+}

@@ -6,6 +6,9 @@
 # Dependencies
 node_modules/
 
+# Local data
+data/
+
 # Build
 dist/
 build/

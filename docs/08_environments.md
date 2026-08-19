@@ -24,8 +24,8 @@ blocks: [10_test_strategy.md]
 | Tool | Version | Install |
 | ---- | ------- | ------- |
 | Node.js | 22 LTS | nvm / fnm |
-| pnpm | 9.x | `corepack enable` |
-| PostgreSQL ou Supabase CLI | latest | docker / brew |
+| pnpm | 9+ | `corepack enable` |
+| Mailpit (opcional) | latest | `brew install mailpit` |
 
 ### First-time setup
 
@@ -36,13 +36,11 @@ pnpm install
 cp .env.example .env
 # editar .env — nunca commitar
 
-# banco (candidato Supabase)
-supabase start
-supabase db reset  # NÃO usar em ambientes compartilhados — apenas local isolado
-
 pnpm db:migrate
 pnpm dev
 ```
+
+Portas locais: `config/dev-ports.json` — web `3000`, API `3001`, Mailpit SMTP `1025`, UI `8025`.
 
 ### Daily commands
 
@@ -58,15 +56,8 @@ pnpm dev
 
 | Variable | Required | Secret | Purpose | Example (non-secret) |
 | -------- | -------- | ------ | ------- | -------------------- |
-| `DATABASE_URL` | yes | yes | Postgres connection | `postgres://localhost:5432/ember` |
-| `NEXT_PUBLIC_APP_URL` | yes | no | base URL para links | `http://localhost:3000` |
-| `AUTH_SECRET` | yes | yes | assinatura de sessão | — |
-| `EMAIL_API_KEY` | yes | yes | Resend (prod) | — |
-| `EMBER_EMAIL_PROVIDER` | dev | no | `noop` / `smtp` / `resend` | `smtp` |
-| `EMBER_SMTP_HOST` | dev | no | Mailpit | `127.0.0.1` |
-| `EMBER_SMTP_PORT` | dev | no | Mailpit SMTP | `1025` |
-| `EMBER_EMAIL_FROM` | yes | no | remetente | `Ember <dev@localhost>` |
-| `EMBER_EMAIL_PEPPER` | yes | yes | hash/vault destinatário + corpo | — |
+| `EMBER_DB_PATH` | yes | no | SQLite MVP 0 | `data/ember.db` |
+| `EMBER_API_PORT` | no | no | porta da API | `3001` |
 | `EMBER_APP_URL` | yes | no | links em templates | `http://localhost:3000` |
 
 ## Staging

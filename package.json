@@ -1,0 +1,14 @@
+{
+  "name": "ember",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "db:migrate": "pnpm --filter @ember/db migrate"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
