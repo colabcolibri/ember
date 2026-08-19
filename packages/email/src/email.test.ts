@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ensureDatabaseReady } from '@ember/db';
 import {
+  buildLoginCodeEmailContent,
   buildMagicLinkEmailContent,
   buildMagicLinkUrl,
   countSentEmailsByKind,
@@ -64,8 +65,8 @@ describe('sent_emails persistence', () => {
   });
 
   it('records sent email only after successful send', async () => {
-    const content = buildMagicLinkEmailContent({
-      magicLinkUrl: 'http://localhost:3000/auth/magic?token=abc',
+    const content = buildLoginCodeEmailContent({
+      code: '123456',
       ttlMinutes: 15,
     });
 
@@ -77,21 +78,21 @@ describe('sent_emails persistence', () => {
       delivery: {
         db,
         pepper: 'test-pepper',
-        kind: 'magic_link',
+        kind: 'login_code',
         meta: { locale: 'pt' },
       },
     });
 
     expect(result.ok).toBe(true);
-    expect(countSentEmailsByKind(db, 'magic_link')).toBe(1);
+    expect(countSentEmailsByKind(db, 'login_code')).toBe(1);
   });
 
   it('does not record when send fails', async () => {
     process.env.EMBER_EMAIL_PROVIDER = 'resend';
     resetEmailSenderCacheForTests();
 
-    const content = buildMagicLinkEmailContent({
-      magicLinkUrl: 'http://localhost:3000/auth/magic?token=abc',
+    const content = buildLoginCodeEmailContent({
+      code: '123456',
       ttlMinutes: 15,
     });
 
@@ -103,16 +104,31 @@ describe('sent_emails persistence', () => {
       delivery: {
         db,
         pepper: 'test-pepper',
-        kind: 'magic_link',
+        kind: 'login_code',
       },
     });
 
     expect(result.ok).toBe(false);
-    expect(countSentEmailsByKind(db, 'magic_link')).toBe(0);
+    expect(countSentEmailsByKind(db, 'login_code')).toBe(0);
   });
 });
 
-describe('magic link template', () => {
+describe('login code template', () => {
+  it('includes code and expiry', () => {
+    const content = buildLoginCodeEmailContent({
+      code: '654321',
+      ttlMinutes: 15,
+      locale: 'pt',
+    });
+    expect(content.subject).toContain('Ember');
+    expect(content.text).toContain('654321');
+    expect(content.text).toContain('15');
+    expect(content.html).toContain('654321');
+    expect(content.html).toContain('#aa4f36');
+  });
+});
+
+describe('magic link template (legacy)', () => {
   it('includes expiry and rust brand colors', () => {
     const magicLinkUrl = buildMagicLinkUrl({ token: 'secret' });
     const content = buildMagicLinkEmailContent({

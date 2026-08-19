@@ -1,14 +1,36 @@
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { LanguageSwitcher } from './components/LanguageSwitcher.js';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { AppShell } from './components/app/index.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { PresencePage } from './pages/PresencePage.js';
+import { CirclesPage } from './pages/CirclesPage.js';
+import { CircleDetailPage } from './pages/CircleDetailPage.js';
+import { FacilitatorPage } from './pages/FacilitatorPage.js';
 import { ProfilePage } from './pages/ProfilePage.js';
+import { DesignLayout } from './pages/design/DesignLayout.js';
+import { DesignIndexPage } from './pages/design/DesignIndexPage.js';
+import { DesignTokensPage } from './pages/design/DesignTokensPage.js';
+import { DesignComponentsPage } from './pages/design/DesignComponentsPage.js';
+import { DesignPatternsPage } from './pages/design/DesignPatternsPage.js';
 import { apiFetch } from './lib/api.js';
 
+function ProductLayout({
+  authed,
+  variant,
+  children,
+}: {
+  authed: boolean | null;
+  variant: 'auth' | 'app';
+  children: ReactNode;
+}) {
+  return (
+    <AppShell variant={variant} authed={authed}>
+      {children}
+    </AppShell>
+  );
+}
+
 export function App() {
-  const { t } = useTranslation();
   const [authed, setAuthed] = useState<boolean | null>(null);
   const location = useLocation();
 
@@ -19,33 +41,86 @@ export function App() {
   }, [location.pathname]);
 
   return (
-    <main className="shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">{t('app.title')}</p>
-          <h1>{t('app.tagline')}</h1>
-        </div>
-        <LanguageSwitcher />
-      </header>
+    <Routes>
+      {import.meta.env.DEV ? (
+        <Route path="/design" element={<DesignLayout />}>
+          <Route index element={<DesignIndexPage />} />
+          <Route path="tokens" element={<DesignTokensPage />} />
+          <Route path="components" element={<DesignComponentsPage />} />
+          <Route path="patterns" element={<DesignPatternsPage />} />
+        </Route>
+      ) : null}
 
-      <nav className="nav">
-        <Link to="/login">{t('nav.login')}</Link>
-        <Link to="/profile">{t('nav.profile')}</Link>
-        <Link to="/presence">{t('nav.presence')}</Link>
-      </nav>
+      <Route
+        path="/login"
+        element={
+          <ProductLayout authed={authed} variant="auth">
+            <LoginPage />
+          </ProductLayout>
+        }
+      />
 
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/profile"
-          element={authed === false ? <Navigate to="/login" replace /> : <ProfilePage />}
-        />
-        <Route
-          path="/presence"
-          element={authed === false ? <Navigate to="/login" replace /> : <PresencePage />}
-        />
-        <Route path="/" element={<Navigate to={authed ? '/presence' : '/login'} replace />} />
-      </Routes>
-    </main>
+      <Route
+        path="/circles"
+        element={
+          authed === false ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <ProductLayout authed={authed} variant="app">
+              <CirclesPage />
+            </ProductLayout>
+          )
+        }
+      />
+      <Route
+        path="/circles/:id"
+        element={
+          authed === false ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <ProductLayout authed={authed} variant="app">
+              <CircleDetailPage />
+            </ProductLayout>
+          )
+        }
+      />
+      <Route
+        path="/facilitator"
+        element={
+          authed === false ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <ProductLayout authed={authed} variant="app">
+              <FacilitatorPage />
+            </ProductLayout>
+          )
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          authed === false ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <ProductLayout authed={authed} variant="app">
+              <ProfilePage />
+            </ProductLayout>
+          )
+        }
+      />
+      <Route
+        path="/presence"
+        element={
+          authed === false ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <ProductLayout authed={authed} variant="app">
+              <PresencePage />
+            </ProductLayout>
+          )
+        }
+      />
+      <Route path="/" element={<Navigate to={authed ? '/presence' : '/login'} replace />} />
+    </Routes>
   );
 }

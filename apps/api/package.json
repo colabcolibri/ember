@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ember/config": "workspace:*",
     "@ember/db": "workspace:*",
     "@ember/domain": "workspace:*",
     "@ember/email": "workspace:*",

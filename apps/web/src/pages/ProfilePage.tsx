@@ -1,5 +1,14 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  AppAlert,
+  AppButton,
+  AppCard,
+  AppFormField,
+  AppInput,
+  AppPageHeader,
+  LanguageChipPicker,
+} from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 
 type Profile = {
@@ -15,6 +24,7 @@ export function ProfilePage() {
   const [languages, setLanguages] = useState<string[]>(['pt']);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     apiFetch<Profile>('/me/profile')
@@ -33,6 +43,7 @@ export function ProfilePage() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    setLoading(true);
     setError(null);
     try {
       await apiFetch('/me/profile', {
@@ -42,42 +53,42 @@ export function ProfilePage() {
       setMessage(t('profile.saved'));
     } catch {
       setError(t('common.apiOffline'));
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <section className="card">
-      <h2>{t('profile.title')}</h2>
-      <form className="form" onSubmit={onSubmit}>
-        <label className="field">
-          <span>{t('profile.timezone')}</span>
-          <input
-            value={timezone}
-            onChange={(e) => setTimezone(e.target.value)}
-            required
-          />
-        </label>
-        <fieldset className="fieldset">
-          <legend>{t('profile.languages')}</legend>
-          <div className="chip-row">
-            {LANGUAGE_OPTIONS.map((code) => (
-              <label key={code} className="chip">
-                <input
-                  type="checkbox"
-                  checked={languages.includes(code)}
-                  onChange={() => toggleLanguage(code)}
-                />
-                <span>{code.toUpperCase()}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <button type="submit" className="btn">
-          {t('profile.save')}
-        </button>
-      </form>
-      {message ? <p className="ok">{message}</p> : null}
-      {error ? <p className="err">{error}</p> : null}
-    </section>
+    <div className="grid gap-6">
+      <AppPageHeader title={t('profile.title')} />
+
+      <AppCard>
+        <form className="grid gap-6" onSubmit={onSubmit}>
+          <AppFormField label={t('profile.timezone')} htmlFor="timezone">
+            <AppInput
+              id="timezone"
+              value={timezone}
+              onChange={(e) => setTimezone(e.target.value)}
+              required
+            />
+          </AppFormField>
+
+          <AppFormField label={t('profile.languages')}>
+            <LanguageChipPicker
+              options={LANGUAGE_OPTIONS}
+              selected={languages}
+              onToggle={toggleLanguage}
+            />
+          </AppFormField>
+
+          <AppButton type="submit" loading={loading} className="w-full sm:w-auto">
+            {t('profile.save')}
+          </AppButton>
+        </form>
+      </AppCard>
+
+      {message ? <AppAlert variant="success">{message}</AppAlert> : null}
+      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
+    </div>
   );
 }

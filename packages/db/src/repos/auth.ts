@@ -1,4 +1,4 @@
-import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { createHash, randomInt, randomUUID } from 'node:crypto';
 import type Database from 'better-sqlite3';
 import {
   encryptRecipientEmail,
@@ -7,33 +7,45 @@ import {
   decryptRecipientEmail,
 } from '../crypto/recipient-email-vault.js';
 
-const TOKEN_TTL_MINUTES = 15;
+const CODE_TTL_MINUTES = 15;
 
+export function hashLoginCode(email: string, code: string, pepper: string): string {
+  return createHash('sha256')
+    .update(`${pepper}:${normalizeRecipientEmail(email)}:${code}`)
+    .digest('hex');
+}
+
+/** @deprecated use hashLoginCode — mantido para testes legados */
 export function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 
-export function createMagicToken(
+export function createLoginCode(
   db: Database.Database,
   email: string,
   pepper: string,
-): { token: string; expiresAt: string } {
-  const token = randomBytes(32).toString('base64url');
-  const tokenHash = hashToken(token);
+): { code: string; expiresAt: string } {
+  const code = String(randomInt(100000, 1000000));
   const normalized = normalizeRecipientEmail(email);
   const emailHash = hashRecipientEmail(normalized, pepper);
   const emailVault = encryptRecipientEmail(normalized, pepper);
-  const expiresAt = new Date(Date.now() + TOKEN_TTL_MINUTES * 60 * 1000).toISOString();
+  const codeHash = hashLoginCode(normalized, code, pepper);
+  const now = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + CODE_TTL_MINUTES * 60 * 1000).toISOString();
+
+  db.prepare(
+    'UPDATE auth_magic_tokens SET used_at = ? WHERE email_hash = ? AND used_at IS NULL',
+  ).run(now, emailHash);
 
   db.prepare(
     `INSERT INTO auth_magic_tokens (id, token_hash, email_hash, email_vault, expires_at, created_at)
      VALUES (?, ?, ?, ?, ?, ?)`,
-  ).run(randomUUID(), tokenHash, emailHash, emailVault, expiresAt, new Date().toISOString());
+  ).run(randomUUID(), codeHash, emailHash, emailVault, expiresAt, now);
 
-  return { token, expiresAt };
+  return { code, expiresAt };
 }
 
-export type MagicTokenRow = {
+export type LoginCodeRow = {
   id: string;
   email_hash: string;
   email_vault: string | null;
@@ -41,28 +53,34 @@ export type MagicTokenRow = {
   used_at: string | null;
 };
 
-export function findValidMagicToken(
+export function findValidLoginCode(
   db: Database.Database,
-  token: string,
-): MagicTokenRow | null {
+  email: string,
+  code: string,
+  pepper: string,
+): LoginCodeRow | null {
+  const normalized = normalizeRecipientEmail(email);
+  const emailHash = hashRecipientEmail(normalized, pepper);
+  const codeHash = hashLoginCode(normalized, code, pepper);
   const row = db
     .prepare(
-      'SELECT id, email_hash, email_vault, expires_at, used_at FROM auth_magic_tokens WHERE token_hash = ?',
+      `SELECT id, email_hash, email_vault, expires_at, used_at
+       FROM auth_magic_tokens WHERE email_hash = ? AND token_hash = ?`,
     )
-    .get(hashToken(token)) as MagicTokenRow | undefined;
+    .get(emailHash, codeHash) as LoginCodeRow | undefined;
   if (!row || row.used_at) return null;
   if (new Date(row.expires_at).getTime() < Date.now()) return null;
   return row;
 }
 
-export function resolveEmailFromMagicToken(row: MagicTokenRow, pepper: string): string | null {
+export function resolveEmailFromLoginCode(row: LoginCodeRow, pepper: string): string | null {
   if (row.email_vault) {
     return decryptRecipientEmail(row.email_vault, pepper);
   }
   return null;
 }
 
-export function markMagicTokenUsed(db: Database.Database, id: string): void {
+export function markLoginCodeUsed(db: Database.Database, id: string): void {
   db.prepare('UPDATE auth_magic_tokens SET used_at = ? WHERE id = ?').run(
     new Date().toISOString(),
     id,

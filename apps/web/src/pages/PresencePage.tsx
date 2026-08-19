@@ -1,5 +1,14 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  AppAlert,
+  AppButton,
+  AppCard,
+  AppEmptyState,
+  AppPageHeader,
+  AvailabilityPicker,
+  IntentionPicker,
+} from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 
 type RoundResponse = {
@@ -17,6 +26,7 @@ export function PresencePage() {
   const [intention, setIntention] = useState<PresenceIntention>('surprise');
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     apiFetch<RoundResponse>('/rounds/current')
@@ -36,6 +46,7 @@ export function PresencePage() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!roundId) return;
+    setLoading(true);
     setError(null);
     try {
       await apiFetch(`/rounds/${roundId}/presence`, {
@@ -45,59 +56,54 @@ export function PresencePage() {
       setMessage(t('presence.saved'));
     } catch {
       setError(t('common.apiOffline'));
+    } finally {
+      setLoading(false);
     }
   }
 
   if (!roundId) {
     return (
-      <section className="card">
-        <h2>{t('presence.title')}</h2>
-        <p>{t('presence.noRound')}</p>
-      </section>
+      <div className="grid gap-6">
+        <AppPageHeader eyebrow="rodada" title={t('presence.title')} />
+        <AppEmptyState title={t('presence.noRound')} />
+      </div>
     );
   }
 
   return (
-    <section className="card">
-      <h2>{t('presence.title')}</h2>
-      <p className="lede">{t('presence.subtitle')}</p>
-      <form className="form" onSubmit={onSubmit}>
-        <fieldset className="fieldset">
-          <legend>{t('presence.title')}</legend>
-          <div className="slot-grid">
-            {slots.map((slot) => (
-              <label key={slot} className="slot">
-                <input
-                  type="checkbox"
-                  checked={selectedSlots.includes(slot)}
-                  onChange={() => toggleSlot(slot)}
-                />
-                <span>{t(`presence.slots.${slot}`)}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset className="fieldset">
-          <legend>{t('presence.intention')}</legend>
-          {(['surprise', 'frontier', 'ease'] as const).map((value) => (
-            <label key={value} className="radio">
-              <input
-                type="radio"
-                name="intention"
-                value={value}
-                checked={intention === value}
-                onChange={() => setIntention(value)}
-              />
-              <span>{t(`presence.intentions.${value}`)}</span>
-            </label>
-          ))}
-        </fieldset>
-        <button type="submit" className="btn" disabled={selectedSlots.length === 0}>
+    <div className="grid gap-6">
+      <AppPageHeader
+        eyebrow="rodada aberta"
+        title={t('presence.title')}
+        lead={t('presence.subtitle')}
+      />
+
+      <form className="grid gap-6" onSubmit={onSubmit}>
+        <AppCard title={t('presence.title')}>
+          <AvailabilityPicker
+            slots={slots}
+            selected={selectedSlots}
+            onToggle={toggleSlot}
+            label={(slot) => t(`presence.slots.${slot}`)}
+          />
+        </AppCard>
+
+        <AppCard title={t('presence.intention')}>
+          <IntentionPicker
+            value={intention}
+            onChange={setIntention}
+            options={['surprise', 'frontier', 'ease'] as const}
+            label={(value) => t(`presence.intentions.${value}`)}
+          />
+        </AppCard>
+
+        <AppButton type="submit" loading={loading} disabled={selectedSlots.length === 0} className="w-full sm:w-auto">
           {t('presence.submit')}
-        </button>
+        </AppButton>
       </form>
-      {message ? <p className="ok">{message}</p> : null}
-      {error ? <p className="err">{error}</p> : null}
-    </section>
+
+      {message ? <AppAlert variant="success">{message}</AppAlert> : null}
+      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
+    </div>
   );
 }

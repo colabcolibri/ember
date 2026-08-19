@@ -6,14 +6,22 @@
   "nav": {
     "login": "Sign in",
     "profile": "Profile",
-    "presence": "Presence"
+    "presence": "Presence",
+    "circles": "My circles",
+    "facilitator": "Facilitator"
   },
   "login": {
     "title": "Sign in with email",
     "email": "Your email",
-    "submit": "Send link",
-    "success": "If the email is registered, you will receive a link shortly.",
-    "error": "Could not send the link. Please try again."
+    "submit": "Send code",
+    "code": "6-digit code",
+    "codeHint": "We sent a code to {{email}}.",
+    "codeSent": "If the email is registered, you will receive a code shortly.",
+    "verify": "Sign in",
+    "changeEmail": "Use another email",
+    "success": "If the email is registered, you will receive a code shortly.",
+    "error": "Could not send the code. Please try again.",
+    "codeError": "Invalid or expired code. Please try again."
   },
   "profile": {
     "title": "Your profile",
@@ -43,5 +51,56 @@
   "common": {
     "loading": "Loading…",
     "apiOffline": "API offline"
+  },
+  "facilitator": {
+    "title": "Facilitator panel",
+    "subtitle": "Open rounds, review sign-ups, and publish trios.",
+    "template": "Meeting template",
+    "templateName": "Ritual name",
+    "circleSize": "Circle size",
+    "duration": "Duration (min)",
+    "saveTemplate": "Save template",
+    "templateSaved": "Template saved.",
+    "newRound": "New round",
+    "question": "Round question",
+    "pickSlots": "Pick exactly 5 time slots",
+    "createRound": "Open round",
+    "roundCreated": "Round opened.",
+    "declarations": "Sign-ups",
+    "noDeclarations": "No sign-ups yet.",
+    "refresh": "Refresh list",
+    "runMatch": "Run matching",
+    "matchReady": "Preview ready — review before publishing.",
+    "preview": "Trio preview",
+    "unmatched": "{{count}} member(s) without a trio",
+    "publish": "Publish circles",
+    "published": "Circles published.",
+    "error": "Could not complete the action.",
+    "slots": {
+      "mon-19h": "Mon 7pm",
+      "tue-19h": "Tue 7pm",
+      "wed-19h": "Wed 7pm",
+      "thu-19h": "Thu 7pm",
+      "sat-10h": "Sat 10am"
+    }
+  },
+  "circles": {
+    "title": "My circles",
+    "subtitle": "Invites and gatherings formed for you.",
+    "empty": "No circles at the moment.",
+    "noQuestion": "Ember circle",
+    "inviteTitle": "Circle invite",
+    "when": "When",
+    "participants": "Participants",
+    "joinJitsi": "Join Jitsi",
+    "downloadIcs": "Download calendar (.ics)",
+    "confirm": "Confirm attendance",
+    "confirmed": "Attendance confirmed.",
+    "attendanceTitle": "Did the circle happen?",
+    "attendanceSubtitle": "Help the network remember who met.",
+    "attendanceYesBtn": "Yes, it happened",
+    "attendanceNoBtn": "It did not happen",
+    "attendanceYes": "Thanks — we recorded that the circle happened.",
+    "attendanceNo": "We recorded that the circle did not happen."
   }
 }

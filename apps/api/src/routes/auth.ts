@@ -1,43 +1,59 @@
 import { Hono } from 'hono';
 import type { ensureDatabaseReady } from '@ember/db';
 import { requireEmailPepper } from '@ember/email';
+import { buildLoginCodeEmailContent, createEmailDeliveryContext, sendTransactionalEmail } from '@ember/email';
+import { loginCodeRequestSchema, loginCodeVerifySchema } from '@ember/domain';
 import {
-  buildMagicLinkEmailContent,
-  buildMagicLinkUrl,
-  createEmailDeliveryContext,
-  sendTransactionalEmail,
-} from '@ember/email';
-import { magicLinkRequestSchema } from '@ember/domain';
-import {
-  createMagicToken,
+  createLoginCode,
   createSession,
-  findCommunityBySlug,
-  findValidMagicToken,
-  markMagicTokenUsed,
-  resolveEmailFromMagicToken,
-  upsertUserByEmail,
   ensureCommunityMember,
+  findCommunityBySlug,
+  findValidLoginCode,
+  markLoginCodeUsed,
+  resolveEmailFromLoginCode,
+  upsertUserByEmail,
 } from '@ember/db';
 import { createRateLimit, resetRateLimitsForTests } from '../lib/rate-limit.js';
 import { setSessionCookie } from '../lib/session.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
+const CODE_TTL_MINUTES = 15;
+
 const GENERIC_MESSAGE =
-  'Se o email estiver cadastrado, você receberá um link em breve.';
+  'Se o email estiver cadastrado, você receberá um código em breve.';
+
+function bootstrapUser(db: Db, email: string, pepper: string): string {
+  const userId = upsertUserByEmail(db, email, pepper);
+  const communitySlug = process.env.EMBER_DEFAULT_COMMUNITY_SLUG ?? 'gsa-pilot';
+  const community = findCommunityBySlug(db, communitySlug);
+  if (community) {
+    const bootstrapEmail = process.env.EMBER_BOOTSTRAP_FACILITATOR_EMAIL?.trim().toLowerCase();
+    const role =
+      bootstrapEmail && email.toLowerCase() === bootstrapEmail ? 'facilitador' : 'member';
+    ensureCommunityMember(db, community.id, userId, role);
+  }
+  return userId;
+}
 
 export function createAuthRoutes(db: Db) {
   const auth = new Hono();
 
-  const magicLinkRateLimit = createRateLimit({
+  const codeRequestRateLimit = createRateLimit({
     limit: 5,
     windowMs: 60 * 60 * 1000,
-    keyPrefix: 'magic-link',
+    keyPrefix: 'login-code-request',
   });
 
-  auth.post('/magic-link', magicLinkRateLimit, async (c) => {
+  const codeVerifyRateLimit = createRateLimit({
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+    keyPrefix: 'login-code-verify',
+  });
+
+  auth.post('/code', codeRequestRateLimit, async (c) => {
     const body = await c.req.json().catch(() => null);
-    const parsed = magicLinkRequestSchema.safeParse(body);
+    const parsed = loginCodeRequestSchema.safeParse(body);
     if (!parsed.success) {
       return c.json(
         { error: { code: 'VALIDATION_ERROR', message: 'Email inválido', details: parsed.error.issues } },
@@ -50,9 +66,8 @@ export function createAuthRoutes(db: Db) {
     const communitySlug = parsed.data.communitySlug ?? process.env.EMBER_DEFAULT_COMMUNITY_SLUG ?? 'gsa-pilot';
     const community = findCommunityBySlug(db, communitySlug);
 
-    const { token } = createMagicToken(db, email, pepper);
-    const magicLinkUrl = buildMagicLinkUrl({ token });
-    const content = buildMagicLinkEmailContent({ magicLinkUrl, ttlMinutes: 15, locale: 'pt' });
+    const { code } = createLoginCode(db, email, pepper);
+    const content = buildLoginCodeEmailContent({ code, ttlMinutes: CODE_TTL_MINUTES, locale: 'pt' });
 
     await sendTransactionalEmail({
       to: email,
@@ -60,7 +75,7 @@ export function createAuthRoutes(db: Db) {
       text: content.text,
       html: content.html,
       delivery: createEmailDeliveryContext({
-        kind: 'magic_link',
+        kind: 'login_code',
         db,
         meta: {
           locale: 'pt',
@@ -73,44 +88,37 @@ export function createAuthRoutes(db: Db) {
     return c.json({ message: GENERIC_MESSAGE }, 202);
   });
 
-  auth.get('/magic-link/verify', async (c) => {
-    const token = c.req.query('token')?.trim();
-    if (!token) {
-      return c.json({ error: { code: 'INVALID_TOKEN', message: 'Token ausente' } }, 400);
-    }
-
-    const row = findValidMagicToken(db, token);
-    if (!row) {
+  auth.post('/code/verify', codeVerifyRateLimit, async (c) => {
+    const body = await c.req.json().catch(() => null);
+    const parsed = loginCodeVerifySchema.safeParse(body);
+    if (!parsed.success) {
       return c.json(
-        { error: { code: 'TOKEN_EXPIRED', message: 'Link expirado ou inválido. Solicite um novo.' } },
-        410,
+        { error: { code: 'VALIDATION_ERROR', message: 'Código inválido', details: parsed.error.issues } },
+        400,
       );
     }
 
+    const email = parsed.data.email.trim().toLowerCase();
     const pepper = requireEmailPepper();
-    const email = resolveEmailFromMagicToken(row, pepper);
-    if (!email) {
-      return c.json({ error: { code: 'INVALID_TOKEN', message: 'Token inválido' } }, 410);
+    const row = findValidLoginCode(db, email, parsed.data.code, pepper);
+    if (!row) {
+      return c.json(
+        { error: { code: 'CODE_INVALID', message: 'Código expirado ou inválido. Solicite um novo.' } },
+        401,
+      );
     }
 
-    markMagicTokenUsed(db, row.id);
-    const userId = upsertUserByEmail(db, email, pepper);
-
-    const communitySlug = process.env.EMBER_DEFAULT_COMMUNITY_SLUG ?? 'gsa-pilot';
-    const community = findCommunityBySlug(db, communitySlug);
-    if (community) {
-      ensureCommunityMember(db, community.id, userId);
+    const resolvedEmail = resolveEmailFromLoginCode(row, pepper);
+    if (!resolvedEmail) {
+      return c.json({ error: { code: 'CODE_INVALID', message: 'Código inválido' } }, 401);
     }
 
+    markLoginCodeUsed(db, row.id);
+    const userId = bootstrapUser(db, resolvedEmail, pepper);
     const { sessionId, expiresAt } = createSession(db, userId);
     setSessionCookie(c, sessionId, expiresAt);
 
-    const appUrl = (process.env.EMBER_APP_URL ?? 'http://localhost:3000').replace(/\/$/, '');
-    const wantsJson = c.req.header('accept')?.includes('application/json');
-    if (wantsJson) {
-      return c.json({ ok: true, redirect: appUrl });
-    }
-    return c.redirect(appUrl, 302);
+    return c.json({ ok: true });
   });
 
   return auth;

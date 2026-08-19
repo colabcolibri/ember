@@ -6,7 +6,9 @@ import { createEmailSenderFromEnv, resolveEmailFrom } from './email/create-email
 import { emailLogoAttachments } from './email/email-brand.js';
 import { recordSentEmail } from './record-sent-email.js';
 
-export type { EmailSendResult };
+import type { EmailFileAttachment } from './email/email-sender.types.js';
+
+export type { EmailFileAttachment, EmailSendResult };
 
 export type EmailDeliveryRecord = {
   db: Database.Database;
@@ -23,6 +25,7 @@ export async function sendTransactionalEmail(input: {
   replyTo?: string;
   delivery?: EmailDeliveryRecord;
   meta?: Record<string, string>;
+  files?: EmailFileAttachment[];
 }): Promise<EmailSendResult> {
   const sender = createEmailSenderFromEnv();
   const result = await sender.send({
@@ -33,6 +36,7 @@ export async function sendTransactionalEmail(input: {
     html: input.html,
     replyTo: input.replyTo,
     attachments: emailLogoAttachments(),
+    files: input.files,
   });
 
   if (result.ok) {

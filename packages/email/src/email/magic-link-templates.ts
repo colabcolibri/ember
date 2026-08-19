@@ -1,6 +1,7 @@
 import { EMAIL_BRAND } from './email-brand.js';
 import { ctaButton, emailPlainLink, escapeHtml, wrapEmailDocument } from './email-layout.js';
 import type { EmailLocale } from './email-locale.js';
+import { resolveAppUrl } from './email-env.js';
 
 export type MagicLinkEmailContent = {
   subject: string;
@@ -49,9 +50,6 @@ export function buildMagicLinkUrl(input: {
   token: string;
   appUrl?: string;
 }): string {
-  const base = (input.appUrl ?? process.env.EMBER_APP_URL?.trim() ?? 'http://localhost:3000').replace(
-    /\/$/,
-    '',
-  );
+  const base = input.appUrl ?? resolveAppUrl();
   return `${base}/api/v1/auth/magic-link/verify?token=${encodeURIComponent(input.token)}`;
 }

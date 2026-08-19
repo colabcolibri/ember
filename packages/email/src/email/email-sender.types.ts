@@ -5,6 +5,12 @@ export type EmailInlineAttachment = {
   content_type: string;
 };
 
+export type EmailFileAttachment = {
+  filename: string;
+  content: string;
+  contentType: string;
+};
+
 export interface EmailSendInput {
   to: string;
   subject: string;
@@ -13,6 +19,7 @@ export interface EmailSendInput {
   from?: string;
   replyTo?: string;
   attachments?: EmailInlineAttachment[];
+  files?: EmailFileAttachment[];
 }
 
 export interface EmailSendResult {

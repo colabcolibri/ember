@@ -6,14 +6,22 @@
   "nav": {
     "login": "Entrar",
     "profile": "Perfil",
-    "presence": "Presença"
+    "presence": "Presença",
+    "circles": "Minhas rodas",
+    "facilitator": "Facilitador"
   },
   "login": {
     "title": "Entrar com email",
     "email": "Seu email",
-    "submit": "Enviar link",
-    "success": "Se o email estiver cadastrado, você receberá um link em breve.",
-    "error": "Não foi possível enviar o link. Tente novamente."
+    "submit": "Enviar código",
+    "code": "Código de 6 dígitos",
+    "codeHint": "Enviamos um código para {{email}}.",
+    "codeSent": "Se o email estiver cadastrado, você receberá um código em breve.",
+    "verify": "Entrar",
+    "changeEmail": "Usar outro email",
+    "success": "Se o email estiver cadastrado, você receberá um código em breve.",
+    "error": "Não foi possível enviar o código. Tente novamente.",
+    "codeError": "Código inválido ou expirado. Tente novamente."
   },
   "profile": {
     "title": "Seu perfil",
@@ -43,5 +51,56 @@
   "common": {
     "loading": "Carregando…",
     "apiOffline": "API offline"
+  },
+  "facilitator": {
+    "title": "Painel do facilitador",
+    "subtitle": "Abra rodadas, revise inscrições e publique trios.",
+    "template": "Template de encontro",
+    "templateName": "Nome do ritual",
+    "circleSize": "Tamanho do círculo",
+    "duration": "Duração (min)",
+    "saveTemplate": "Salvar template",
+    "templateSaved": "Template salvo.",
+    "newRound": "Nova rodada",
+    "question": "Pergunta da rodada",
+    "pickSlots": "Escolha exatamente 5 horários",
+    "createRound": "Abrir rodada",
+    "roundCreated": "Rodada aberta.",
+    "declarations": "Inscritos",
+    "noDeclarations": "Nenhum inscrito ainda.",
+    "refresh": "Atualizar lista",
+    "runMatch": "Sortear trios",
+    "matchReady": "Preview pronto — revise antes de publicar.",
+    "preview": "Preview dos trios",
+    "unmatched": "{{count}} membro(s) sem trio",
+    "publish": "Publicar círculos",
+    "published": "Círculos publicados.",
+    "error": "Não foi possível concluir a ação.",
+    "slots": {
+      "mon-19h": "Seg 19h",
+      "tue-19h": "Ter 19h",
+      "wed-19h": "Qua 19h",
+      "thu-19h": "Qui 19h",
+      "sat-10h": "Sáb 10h"
+    }
+  },
+  "circles": {
+    "title": "Minhas rodas",
+    "subtitle": "Convites e encontros formados para você.",
+    "empty": "Nenhuma roda no momento.",
+    "noQuestion": "Roda Ember",
+    "inviteTitle": "Convite da roda",
+    "when": "Horário",
+    "participants": "Participantes",
+    "joinJitsi": "Entrar no Jitsi",
+    "downloadIcs": "Baixar calendário (.ics)",
+    "confirm": "Confirmar presença",
+    "confirmed": "Presença confirmada.",
+    "attendanceTitle": "A roda aconteceu?",
+    "attendanceSubtitle": "Ajude a rede a lembrar quem se encontrou.",
+    "attendanceYesBtn": "Sim, aconteceu",
+    "attendanceNoBtn": "Não aconteceu",
+    "attendanceYes": "Obrigado — registramos que a roda aconteceu.",
+    "attendanceNo": "Registramos que a roda não aconteceu."
   }
 }

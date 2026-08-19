@@ -34,14 +34,29 @@ export class SmtpEmailSender implements EmailSender {
         ...(input.replyTo ? { replyTo: input.replyTo } : {}),
         ...(input.attachments?.length
           ? {
-              attachments: input.attachments.map((attachment) => ({
-                filename: attachment.filename,
-                content: Buffer.from(attachment.content, 'base64'),
-                cid: attachment.content_id,
-                contentType: attachment.content_type,
-              })),
+              attachments: [
+                ...input.attachments.map((attachment) => ({
+                  filename: attachment.filename,
+                  content: Buffer.from(attachment.content, 'base64'),
+                  cid: attachment.content_id,
+                  contentType: attachment.content_type,
+                })),
+                ...(input.files?.map((file) => ({
+                  filename: file.filename,
+                  content: file.content,
+                  contentType: file.contentType,
+                })) ?? []),
+              ],
             }
-          : {}),
+          : input.files?.length
+            ? {
+                attachments: input.files.map((file) => ({
+                  filename: file.filename,
+                  content: file.content,
+                  contentType: file.contentType,
+                })),
+              }
+            : {}),
       });
 
       return { ok: true, provider: 'smtp', id: info.messageId };
