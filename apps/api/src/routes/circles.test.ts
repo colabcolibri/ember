@@ -16,6 +16,18 @@ import { resetEmailSenderCacheForTests } from '@ember/email';
 import { createCircleRoutes } from './circles.js';
 import { SESSION_COOKIE } from '../lib/session.js';
 
+const samplePlace = {
+  provider: 'geoapify' as const,
+  placeId: 'place-sp',
+  city: 'São Paulo',
+  adminArea: 'SP',
+  country: 'Brazil',
+  countryCode: 'BR',
+  latitude: -23.55,
+  longitude: -46.63,
+  label: 'São Paulo, SP · Brazil',
+};
+
 describe('circle routes', () => {
   let dbPath: string;
   let db: ReturnType<typeof ensureDatabaseReady>;
@@ -43,6 +55,8 @@ describe('circle routes', () => {
       editionYear: 2020,
       timezone: 'America/Sao_Paulo',
       languages: ['pt'],
+      originPlace: samplePlace,
+      residencePlace: samplePlace,
     });
     sessionId = createSession(db, userId).sessionId;
 
@@ -54,6 +68,8 @@ describe('circle routes', () => {
         editionYear: 2019,
         timezone: 'America/Sao_Paulo',
         languages: ['pt'],
+        originPlace: samplePlace,
+        residencePlace: samplePlace,
       });
       return id;
     });

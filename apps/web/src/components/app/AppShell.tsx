@@ -27,7 +27,7 @@ export function AppShell({
     mode === 'catalog' ? '/design' : authed ? '/presence' : '/login';
 
   const memberItems =
-    mode === 'member' && authed === true
+    mode === 'member' && authed !== false
       ? [
           { to: '/presence', label: t('nav.presence') },
           { to: '/circles', label: t('nav.circles') },

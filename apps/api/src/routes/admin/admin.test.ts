@@ -15,6 +15,22 @@ import { createAdminRoutes } from './index.js';
 import { SESSION_COOKIE } from '../../lib/session.js';
 
 const SLOTS = ['mon-19h', 'tue-19h', 'wed-19h', 'thu-19h', 'sat-10h'] as const;
+const roundBody = {
+  theme: 'Conexão',
+  questions: ['Como estamos?'],
+  slots: SLOTS,
+};
+
+const samplePlace = {
+  provider: 'geoapify' as const,
+  placeId: 'place-sp',
+  city: 'São Paulo',
+  country: 'Brazil',
+  countryCode: 'BR',
+  latitude: -23.55,
+  longitude: -46.63,
+  label: 'São Paulo · Brazil',
+};
 
 describe('admin routes', () => {
   let dbPath: string;
@@ -56,7 +72,7 @@ describe('admin routes', () => {
         'Content-Type': 'application/json',
         Cookie: `${SESSION_COOKIE}=${memberSession}`,
       },
-      body: JSON.stringify({ question: 'Como estamos?', slots: SLOTS }),
+      body: JSON.stringify(roundBody),
     });
     expect(res.status).toBe(403);
   });
@@ -68,7 +84,7 @@ describe('admin routes', () => {
         'Content-Type': 'application/json',
         Cookie: `${SESSION_COOKIE}=${facilitatorSession}`,
       },
-      body: JSON.stringify({ question: 'Como estamos?', slots: SLOTS, templateId: 'tpl-gsa-fogo' }),
+      body: JSON.stringify({ ...roundBody, templateId: 'tpl-gsa-fogo' }),
     });
     expect(res.status).toBe(201);
     const body = (await res.json()) as { round: { id: string; status: string } };
@@ -82,7 +98,7 @@ describe('admin routes', () => {
         'Content-Type': 'application/json',
         Cookie: `${SESSION_COOKIE}=${facilitatorSession}`,
       },
-      body: JSON.stringify({ question: 'Tema piloto', slots: SLOTS, templateId: 'tpl-gsa-fogo' }),
+      body: JSON.stringify({ theme: 'Tema piloto', questions: ['Pergunta 1'], slots: SLOTS, templateId: 'tpl-gsa-fogo' }),
     });
     const { round } = (await create.json()) as { round: { id: string } };
 
@@ -96,6 +112,8 @@ describe('admin routes', () => {
         editionYear: 2021,
         timezone: 'America/Sao_Paulo',
         languages: ['pt'],
+        originPlace: samplePlace,
+        residencePlace: samplePlace,
       });
       upsertRoundDeclaration(db, round.id, id, {
         slots: ['mon-evening'],

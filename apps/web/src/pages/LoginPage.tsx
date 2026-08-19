@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
+import type { AppOutletContext } from '../layouts/AppLayout.js';
 import { AppAlert, AppButton, AppCard, AppFormField, AppInput, AppPage } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 
@@ -9,6 +10,7 @@ type Step = 'email' | 'code';
 export function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { onAuthenticated } = useOutletContext<AppOutletContext>();
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -44,6 +46,7 @@ export function LoginPage() {
         method: 'POST',
         body: JSON.stringify({ email, code }),
       });
+      onAuthenticated();
       navigate('/presence', { replace: true });
     } catch {
       setError(t('login.codeError'));

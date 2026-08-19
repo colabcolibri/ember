@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { ensureDatabaseReady } from '@ember/db';
 import { profileInputSchema } from '@ember/domain';
-import { getMemberProfile, upsertMemberProfile } from '@ember/db';
+import { getMemberProfile, parseMemberProfilePlaces, upsertMemberProfile } from '@ember/db';
 import { createRequireAuth, resolveCommunityId, type AppVariables } from '../lib/session.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
@@ -11,6 +11,8 @@ function serializeProfile(
   userId: string,
   row: ReturnType<typeof getMemberProfile>,
 ) {
+  const { originPlace, residencePlace } = parseMemberProfilePlaces(row);
+
   if (!row) {
     return {
       communityId,
@@ -19,6 +21,8 @@ function serializeProfile(
       editionYear: null as number | null,
       timezone: 'America/Sao_Paulo',
       languages: ['pt'] as string[],
+      originPlace: null,
+      residencePlace: null,
       updatedAt: null as string | null,
     };
   }
@@ -30,6 +34,8 @@ function serializeProfile(
     editionYear: row.edition_year,
     timezone: row.timezone ?? 'America/Sao_Paulo',
     languages: row.languages_json ? (JSON.parse(row.languages_json) as string[]) : ['pt'],
+    originPlace,
+    residencePlace,
     updatedAt: row.updated_at,
   };
 }

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { placeRefSchema } from './place.js';
+
 export const memberLanguageSchema = z.enum(['pt', 'en']);
 export type MemberLanguage = z.infer<typeof memberLanguageSchema>;
 
@@ -10,6 +12,8 @@ export const profileInputSchema = z.object({
   editionYear: z.number().int().min(1990).max(currentYear),
   timezone: z.string().min(1).max(64),
   languages: z.array(memberLanguageSchema).min(1).max(2),
+  originPlace: placeRefSchema,
+  residencePlace: placeRefSchema,
 });
 
 export type ProfileInput = z.infer<typeof profileInputSchema>;
@@ -21,6 +25,8 @@ export const profileResponseSchema = z.object({
   editionYear: z.number().int().nullable(),
   timezone: z.string(),
   languages: z.array(memberLanguageSchema),
+  originPlace: placeRefSchema.nullable(),
+  residencePlace: placeRefSchema.nullable(),
   updatedAt: z.string().nullable(),
 });
 

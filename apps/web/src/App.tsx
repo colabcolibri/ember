@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { AppShell } from './components/app/AppShell.js';
 import { AppLayout } from './layouts/AppLayout.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { PresencePage } from './pages/PresencePage.js';
@@ -13,23 +15,44 @@ import { DesignComponentsPage } from './pages/design/DesignComponentsPage.js';
 import { DesignPatternsPage } from './pages/design/DesignPatternsPage.js';
 import { apiFetch } from './lib/api.js';
 
+function HomeRedirect({ authed }: { authed: boolean | null }) {
+  const { t } = useTranslation();
+
+  if (authed === null) {
+    return (
+      <AppShell mode="member" authed={null}>
+        <p className="text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+      </AppShell>
+    );
+  }
+
+  return <Navigate to={authed ? '/presence' : '/login'} replace />;
+}
+
 export function App() {
   const [authed, setAuthed] = useState<boolean | null>(null);
-  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     apiFetch('/me/profile')
       .then(() => setAuthed(true))
       .catch(() => setAuthed(false));
-  }, [location.pathname]);
+  }, []);
 
   function handleLoggedOut() {
     setAuthed(false);
     navigate('/login', { replace: true });
   }
 
-  const layoutProps = { authed, onLoggedOut: handleLoggedOut };
+  function handleAuthenticated() {
+    setAuthed(true);
+  }
+
+  const layoutProps = {
+    authed,
+    onLoggedOut: handleLoggedOut,
+    onAuthenticated: handleAuthenticated,
+  };
 
   return (
     <Routes>
@@ -54,7 +77,7 @@ export function App() {
         </Route>
       ) : null}
 
-      <Route path="/" element={<Navigate to={authed ? '/presence' : '/login'} replace />} />
+      <Route path="/" element={<HomeRedirect authed={authed} />} />
     </Routes>
   );
 }

@@ -21,14 +21,21 @@ type Db = ReturnType<typeof ensureDatabaseReady>;
 
 export async function sendRoundOpenNotifications(
   db: Db,
-  input: { communityId: string; roundId: string; question: string; slots: string[] },
+  input: {
+    communityId: string;
+    roundId: string;
+    theme: string;
+    questions: string[];
+    slots: string[];
+  },
 ): Promise<void> {
   const pepper = requireEmailPepper();
   const appUrl = resolveAppUrl();
   const presenceUrl = `${appUrl}/presence`;
   const members = listCommunityMemberEmails(db, input.communityId, pepper);
   const content = buildRoundOpenEmailContent({
-    question: input.question,
+    theme: input.theme,
+    questions: input.questions,
     slots: input.slots,
     presenceUrl,
   });

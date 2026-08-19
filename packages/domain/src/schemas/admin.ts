@@ -11,7 +11,8 @@ export const FACILITATOR_ROUND_SLOTS = [
 export type FacilitatorRoundSlot = (typeof FACILITATOR_ROUND_SLOTS)[number];
 
 export const createRoundSchema = z.object({
-  question: z.string().min(3).max(500),
+  theme: z.string().trim().min(3).max(200),
+  questions: z.array(z.string().trim().min(3).max(500)).min(1).max(8),
   slots: z.array(z.enum(FACILITATOR_ROUND_SLOTS)).length(5),
   templateId: z.string().optional(),
 });

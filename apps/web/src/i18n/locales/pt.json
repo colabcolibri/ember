@@ -40,6 +40,14 @@
     "timezoneSearch": "Buscar cidade ou região…",
     "timezoneEmpty": "Nenhum fuso encontrado.",
     "timezoneBrowseHint": "Mostrando os primeiros resultados. Busque para ver todos os fusos.",
+    "originPlace": "Cidade de origem",
+    "residencePlace": "Onde mora hoje",
+    "originPlaceholder": "De onde você veio",
+    "residencePlaceholder": "Onde você mora",
+    "placeSearch": "Buscar cidade, estado ou país…",
+    "placeSearchHint": "Digite pelo menos 2 caracteres para buscar.",
+    "placeEmpty": "Nenhum lugar encontrado.",
+    "placesRequired": "Informe cidade de origem e onde mora hoje.",
     "languages": "Idiomas",
     "save": "Salvar perfil",
     "saved": "Perfil salvo."
@@ -67,7 +75,9 @@
     },
     "submit": "Confirmar presença",
     "saved": "Presença registrada.",
-    "noRound": "Nenhuma rodada aberta no momento."
+    "noRound": "Nenhuma rodada aberta no momento.",
+    "roundRitual": "Ritual desta rodada",
+    "roundTheme": "Tema"
   },
   "common": {
     "loading": "Carregando…",
@@ -87,6 +97,11 @@
     "saveTemplate": "Salvar template",
     "templateSaved": "Template salvo.",
     "newRound": "Nova rodada",
+    "theme": "Tema da rodada",
+    "themePlaceholder": "Ex.: Pontes entre gerações",
+    "questions": "Perguntas comuns",
+    "questionPlaceholder": "Pergunta {{n}}",
+    "addQuestion": "Adicionar pergunta",
     "question": "Pergunta da rodada",
     "pickSlots": "Escolha exatamente 5 horários",
     "createRound": "Abrir rodada",

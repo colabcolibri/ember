@@ -12,6 +12,17 @@ import {
 import { createProfileRoutes } from './profile.js';
 import { SESSION_COOKIE } from '../lib/session.js';
 
+const samplePlace = {
+  provider: 'geoapify' as const,
+  placeId: 'place-lisbon',
+  city: 'Lisbon',
+  country: 'Portugal',
+  countryCode: 'PT',
+  latitude: 38.7223,
+  longitude: -9.1393,
+  label: 'Lisbon · Portugal',
+};
+
 describe('profile routes', () => {
   let dbPath: string;
   let db: ReturnType<typeof ensureDatabaseReady>;
@@ -62,6 +73,8 @@ describe('profile routes', () => {
         editionYear: 2020,
         timezone: 'Europe/Lisbon',
         languages: ['pt', 'en'],
+        originPlace: samplePlace,
+        residencePlace: { ...samplePlace, placeId: 'place-porto', city: 'Porto', label: 'Porto · Portugal' },
       }),
     });
     expect(put.status).toBe(200);

@@ -23,3 +23,4 @@ export { AttendancePrompt } from './AttendancePrompt.js';
 export { DeclarationTable } from './DeclarationTable.js';
 export { TrioPreview } from './TrioPreview.js';
 export { TimezoneCombobox } from './TimezoneCombobox.js';
+export { PlaceAutocomplete } from './PlaceAutocomplete.js';

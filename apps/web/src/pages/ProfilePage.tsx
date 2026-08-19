@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { PlaceRef } from '../lib/place.js';
 import {
   AppAlert,
   AppButton,
@@ -8,6 +9,7 @@ import {
   AppInput,
   AppPage,
   LanguageChipPicker,
+  PlaceAutocomplete,
   TimezoneCombobox,
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
@@ -18,6 +20,8 @@ type Profile = {
   editionYear: number | null;
   timezone: string;
   languages: string[];
+  originPlace: PlaceRef | null;
+  residencePlace: PlaceRef | null;
 };
 
 const LANGUAGE_OPTIONS = ['pt', 'en'] as const;
@@ -28,9 +32,12 @@ export function ProfilePage() {
   const [editionYear, setEditionYear] = useState('');
   const [timezone, setTimezone] = useState('America/Sao_Paulo');
   const [languages, setLanguages] = useState<string[]>(['pt']);
+  const [originPlace, setOriginPlace] = useState<PlaceRef | null>(null);
+  const [residencePlace, setResidencePlace] = useState<PlaceRef | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
     apiFetch<Profile>('/me/profile')
@@ -39,8 +46,11 @@ export function ProfilePage() {
         setEditionYear(profile.editionYear ? String(profile.editionYear) : '');
         setTimezone(profile.timezone);
         setLanguages(profile.languages);
+        setOriginPlace(profile.originPlace);
+        setResidencePlace(profile.residencePlace);
       })
-      .catch((err) => setError(formatApiError(err, t)));
+      .catch((err) => setError(formatApiError(err, t)))
+      .finally(() => setInitialLoading(false));
   }, [t]);
 
   function toggleLanguage(code: string) {
@@ -51,6 +61,10 @@ export function ProfilePage() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!originPlace || !residencePlace) {
+      setError(t('profile.placesRequired'));
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -62,6 +76,8 @@ export function ProfilePage() {
           editionYear: year,
           timezone,
           languages,
+          originPlace,
+          residencePlace,
         }),
       });
       setMessage(t('profile.saved'));
@@ -70,6 +86,14 @@ export function ProfilePage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (initialLoading) {
+    return (
+      <AppPage title={t('profile.title')}>
+        <p className="text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+      </AppPage>
+    );
   }
 
   return (
@@ -98,6 +122,30 @@ export function ProfilePage() {
                 value={editionYear}
                 onChange={(e) => setEditionYear(e.target.value)}
                 required
+              />
+            </AppFormField>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 sm:gap-x-5">
+            <AppFormField label={t('profile.originPlace')} htmlFor="origin-place">
+              <PlaceAutocomplete
+                id="origin-place"
+                value={originPlace}
+                onChange={setOriginPlace}
+                placeholder={t('profile.originPlaceholder')}
+                searchPlaceholder={t('profile.placeSearch')}
+                emptyMessage={t('profile.placeEmpty')}
+              />
+            </AppFormField>
+
+            <AppFormField label={t('profile.residencePlace')} htmlFor="residence-place">
+              <PlaceAutocomplete
+                id="residence-place"
+                value={residencePlace}
+                onChange={setResidencePlace}
+                placeholder={t('profile.residencePlaceholder')}
+                searchPlaceholder={t('profile.placeSearch')}
+                emptyMessage={t('profile.placeEmpty')}
               />
             </AppFormField>
           </div>

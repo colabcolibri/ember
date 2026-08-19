@@ -10,7 +10,9 @@ export type RoundRow = {
 };
 
 export type RoundDetailRow = RoundRow & {
+  theme: string | null;
   question: string | null;
+  questions_json: string | null;
   slots_json: string | null;
   template_id: string | null;
 };
@@ -19,7 +21,7 @@ export function findOpenRound(db: Database.Database, communityId: string): Round
   return (
     (db
       .prepare(
-        `SELECT id, community_id, status, question, slots_json, template_id
+        `SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id
          FROM rounds WHERE community_id = ? AND status = 'open' ORDER BY created_at DESC LIMIT 1`,
       )
       .get(communityId) as RoundDetailRow | undefined) ?? null
@@ -30,7 +32,7 @@ export function findRoundById(db: Database.Database, roundId: string): RoundDeta
   return (
     (db
       .prepare(
-        'SELECT id, community_id, status, question, slots_json, template_id FROM rounds WHERE id = ?',
+        'SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id FROM rounds WHERE id = ?',
       )
       .get(roundId) as RoundDetailRow | undefined) ?? null
   );
@@ -51,10 +53,21 @@ export function createMatchingRound(
   closeOpenRoundsInCommunity(db, communityId);
   const id = randomUUID();
   const now = new Date().toISOString();
+  const primaryQuestion = input.questions[0] ?? '';
+  const questionsJson = JSON.stringify(input.questions);
   db.prepare(
-    `INSERT INTO rounds (id, community_id, status, question, slots_json, template_id, created_at)
-     VALUES (?, ?, 'open', ?, ?, ?, ?)`,
-  ).run(id, communityId, input.question, JSON.stringify(input.slots), templateId, now);
+    `INSERT INTO rounds (id, community_id, status, theme, question, questions_json, slots_json, template_id, created_at)
+     VALUES (?, ?, 'open', ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    id,
+    communityId,
+    input.theme,
+    primaryQuestion,
+    questionsJson,
+    JSON.stringify(input.slots),
+    templateId,
+    now,
+  );
   return findRoundById(db, id)!;
 }
 

@@ -74,7 +74,8 @@ export function createAdminRoundRoutes(db: Db) {
     await sendRoundOpenNotifications(db, {
       communityId,
       roundId: round.id,
-      question: parsed.data.question,
+      theme: parsed.data.theme,
+      questions: parsed.data.questions,
       slots: parsed.data.slots,
     });
     return c.json(
@@ -82,6 +83,8 @@ export function createAdminRoundRoutes(db: Db) {
         round: {
           id: round.id,
           status: round.status,
+          theme: round.theme,
+          questions: round.questions_json ? JSON.parse(round.questions_json) : [],
           question: round.question,
           slots: round.slots_json ? JSON.parse(round.slots_json) : [],
           templateId: round.template_id,
@@ -113,6 +116,8 @@ export function createAdminRoundRoutes(db: Db) {
       round: {
         id: round.id,
         status: round.status,
+        theme: round.theme,
+        questions: round.questions_json ? JSON.parse(round.questions_json) : [],
         question: round.question,
         slots: round.slots_json ? JSON.parse(round.slots_json) : [],
         templateId: round.template_id,

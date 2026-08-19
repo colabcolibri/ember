@@ -40,6 +40,14 @@
     "timezoneSearch": "Search city or region…",
     "timezoneEmpty": "No time zone found.",
     "timezoneBrowseHint": "Showing the first results. Search to browse all time zones.",
+    "originPlace": "Origin city",
+    "residencePlace": "Where you live now",
+    "originPlaceholder": "Where you are from",
+    "residencePlaceholder": "Where you live",
+    "placeSearch": "Search city, state or country…",
+    "placeSearchHint": "Type at least 2 characters to search.",
+    "placeEmpty": "No place found.",
+    "placesRequired": "Please set both origin and current residence.",
     "languages": "Languages",
     "save": "Save profile",
     "saved": "Profile saved."
@@ -67,7 +75,9 @@
     },
     "submit": "Confirm presence",
     "saved": "Presence recorded.",
-    "noRound": "No open round at the moment."
+    "noRound": "No open round at the moment.",
+    "roundRitual": "Round ritual",
+    "roundTheme": "Theme"
   },
   "common": {
     "loading": "Loading…",
@@ -87,6 +97,11 @@
     "saveTemplate": "Save template",
     "templateSaved": "Template saved.",
     "newRound": "New round",
+    "theme": "Round theme",
+    "themePlaceholder": "E.g. Bridges across generations",
+    "questions": "Shared questions",
+    "questionPlaceholder": "Question {{n}}",
+    "addQuestion": "Add question",
     "question": "Round question",
     "pickSlots": "Pick exactly 5 time slots",
     "createRound": "Open round",

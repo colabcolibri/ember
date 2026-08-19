@@ -24,9 +24,19 @@ export function createRoundRoutes(db: Db) {
     if (!round) {
       return c.json({ round: null, slots: ROUND_SLOTS });
     }
+    const questions = round.questions_json
+      ? (JSON.parse(round.questions_json) as string[])
+      : round.question
+        ? [round.question]
+        : [];
     return c.json({
-      round: { id: round.id, status: round.status },
-      slots: ROUND_SLOTS,
+      round: {
+        id: round.id,
+        status: round.status,
+        theme: round.theme,
+        questions,
+      },
+      slots: round.slots_json ? (JSON.parse(round.slots_json) as string[]) : ROUND_SLOTS,
     });
   });
 

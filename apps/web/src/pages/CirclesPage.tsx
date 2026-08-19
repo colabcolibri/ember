@@ -18,12 +18,22 @@ export function CirclesPage() {
   const { t } = useTranslation();
   const [circles, setCircles] = useState<CircleSummary[]>([]);
   const [error, setError] = useState('');
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
     apiFetch<{ circles: CircleSummary[] }>('/circles')
       .then((res) => setCircles(res.circles))
-      .catch((e) => setError(formatApiError(e, t)));
+      .catch((e) => setError(formatApiError(e, t)))
+      .finally(() => setInitialLoading(false));
   }, [t]);
+
+  if (initialLoading) {
+    return (
+      <AppPage title={t('circles.title')} lead={t('circles.subtitle')}>
+        <p className="text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+      </AppPage>
+    );
+  }
 
   return (
     <AppPage title={t('circles.title')} lead={t('circles.subtitle')}>

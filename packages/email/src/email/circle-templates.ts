@@ -9,17 +9,19 @@ export type RoundOpenEmailContent = {
 };
 
 export function buildRoundOpenEmailContent(input: {
-  question: string;
+  theme: string;
+  questions: string[];
   slots: string[];
   presenceUrl: string;
   locale?: EmailLocale;
 }): RoundOpenEmailContent {
   const locale = input.locale ?? 'pt';
   const slotsText = input.slots.join(', ');
+  const questionsText = input.questions.map((q, index) => `${index + 1}. ${q}`).join(' ');
   const intro =
     locale === 'pt'
-      ? `Nova rodada aberta na Ember. Pergunta: "${input.question}". Horários: ${slotsText}.`
-      : `A new Ember round is open. Question: "${input.question}". Slots: ${slotsText}.`;
+      ? `Nova rodada aberta na Ember. Tema: "${input.theme}". Perguntas: ${questionsText}. Horários: ${slotsText}.`
+      : `A new Ember round is open. Theme: "${input.theme}". Questions: ${questionsText}. Slots: ${slotsText}.`;
   const cta = locale === 'pt' ? 'Declarar presença' : 'Declare presence';
   const footer =
     locale === 'pt'
