@@ -2,7 +2,6 @@ import { FormEvent, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
-  AppAlert,
   AppButton,
   AppCard,
   AppEmptyState,
@@ -17,6 +16,7 @@ import {
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { showError, showSuccess } from '../lib/app-toast.js';
 import { isMockMode, MOCK_DEMO_PRESENCE } from '../lib/mock-mode.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
 
@@ -60,8 +60,6 @@ export function PresencePage() {
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [intention, setIntention] = useState<PresenceIntention>('surprise');
   const [alreadyDeclared, setAlreadyDeclared] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [slotsLoading, setSlotsLoading] = useState(false);
 
@@ -101,7 +99,7 @@ export function PresencePage() {
         }
       }
     } catch (err) {
-      setError(formatApiError(err, t));
+      showError(formatApiError(err, t));
     }
   }, [applyRoundData, t]);
 
@@ -117,20 +115,18 @@ export function PresencePage() {
 
   async function handleTimezoneChange(timezone: string) {
     setMemberTimezone(timezone);
-    setMessage(null);
     setSlotsLoading(true);
     try {
       const data = await fetchRoundData(timezone);
       applyRoundData(data);
     } catch (err) {
-      setError(formatApiError(err, t));
+      showError(formatApiError(err, t));
     } finally {
       setSlotsLoading(false);
     }
   }
 
   function toggleSlot(slot: string) {
-    setMessage(null);
     setSelectedSlots((prev) =>
       prev.includes(slot) ? prev.filter((s) => s !== slot) : [...prev, slot],
     );
@@ -140,17 +136,15 @@ export function PresencePage() {
     e.preventDefault();
     if (!roundId || selectedSlots.length === 0) return;
     setLoading(true);
-    setError(null);
-    setMessage(null);
     try {
       await apiFetch(`/rounds/${roundId}/presence`, {
         method: 'POST',
         body: JSON.stringify({ slots: selectedSlots, intention, timezone: memberTimezone }),
       });
       setAlreadyDeclared(true);
-      setMessage(t('presence.saved'));
+      showSuccess(t('presence.saved'), t('presence.savedTitle'));
     } catch (err) {
-      setError(formatApiError(err, t));
+      showError(formatApiError(err, t));
     } finally {
       setLoading(false);
     }
@@ -176,7 +170,6 @@ export function PresencePage() {
             </AppButton>
           }
         />
-        {error ? <AppAlert variant="error">{error}</AppAlert> : null}
       </AppPage>
     );
   }
@@ -189,9 +182,6 @@ export function PresencePage() {
       centered
       className="pb-28 sm:pb-8"
     >
-      {message ? <AppAlert variant="success" title={t('presence.savedTitle')}>{message}</AppAlert> : null}
-      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
-
       <PresenceRoundHero
         theme={roundTheme}
         questions={roundQuestions}
@@ -259,7 +249,6 @@ export function PresencePage() {
               <IntentionPicker
                 value={intention}
                 onChange={(value) => {
-                  setMessage(null);
                   setIntention(value);
                 }}
                 options={['surprise', 'frontier', 'ease'] as const}

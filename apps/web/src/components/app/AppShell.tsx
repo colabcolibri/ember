@@ -28,7 +28,7 @@ export function AppShell({
   const { t } = useTranslation();
 
   const homeTo =
-    mode === 'catalog' ? '/design' : authed ? '/presence' : '/login';
+    mode === 'catalog' ? '/design' : authed ? '/presence' : '/';
 
   const memberItems =
     mode === 'member' && authed !== false

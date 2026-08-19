@@ -38,6 +38,11 @@
     "success": "Se o email estiver cadastrado, você receberá um código em breve.",
     "error": "Não foi possível enviar o código. Tente novamente.",
     "codeError": "Código inválido ou expirado. Tente novamente.",
+    "communityCall": "Você já faz parte.",
+    "communityLead": "Entre para ver os convites abertos e marcar presença nos próximos encontros da sua comunidade.",
+    "communityNote": "Use o email que sua comunidade cadastrou para você.",
+    "demoCommunityNote": "Demonstração — explore o fluxo como membro ou facilitador.",
+    "formTitle": "Entrar",
     "demoTitle": "Modo demonstração",
     "demoSubtitle": "Tudo já vem preenchido — é só clicar em entrar.",
     "demoPrefilledHint": "Email e código já estão prontos ({{code}}). Toque em entrar na demo ou escolha membro/facilitador abaixo.",
@@ -47,6 +52,81 @@
     "demoHint": "Use qualquer email. O código de verificação é {{code}}.",
     "demoCodeHint": "Digite {{code}} para entrar.",
     "demoFacilitatorHint": "Para ver o painel do facilitador, use um email com \"facilitador\"."
+  },
+  "landing": {
+    "headlineLine1": "tecer a comunidade,",
+    "headlineLine2": "um encontro de cada vez",
+    "lead": "Pequenos grupos em torno de propostas de diálogo da sua rede. Aproxime quem já compartilha uma história, mas raramente se encontra.",
+    "howTitle": "Como funciona",
+    "howLead": "Da abertura do encontro ao que o Ember aprende, em seis passos.",
+    "stepLabel": "{{step}}",
+    "steps": {
+      "create": {
+        "title": "Você abre a rodada",
+        "body": "Escolhe tema, pergunta e horários possíveis. Convida quem faz parte da comunidade."
+      },
+      "register": {
+        "title": "Membros respondem",
+        "body": "Cada um diz quando pode, em que idioma prefere falar e como quer chegar na conversa."
+      },
+      "match": {
+        "title": "Ember monta os grupos",
+        "body": "Cruza disponibilidade, idioma e quem já se encontrou. Você revisa e publica."
+      },
+      "meet": {
+        "title": "Todos recebem o convite",
+        "body": "Link da conversa, horário no fuso de cada um e calendário. Tudo pronto para o dia."
+      },
+      "gather": {
+        "title": "As pessoas se encontram",
+        "body": "No horário marcado, entram e conversam, poucas pessoas, mesma pergunta, presença de verdade."
+      },
+      "followup": {
+        "title": "O Ember aprende",
+        "body": "Ao terminar a conversa, os participantes indicam que estiveram presentes. O Ember aprende quem já se viu, e na próxima rodada aproxima quem ainda não conversou."
+      }
+    },
+    "hostingTitle": "Como colocar no ar",
+    "hostingLead": "Ember é open source. Você escolhe quem cuida da operação, sua equipe ou a nossa.",
+    "hostingOptions": {
+      "self": {
+        "title": "Por conta própria",
+        "body": "Sua comunidade instala e mantém tudo com a própria equipe. O software é gratuito; vocês cuidam da infraestrutura."
+      },
+      "managed": {
+        "title": "Com nossa operação",
+        "body": "Podemos hospedar, manter no ar e cuidar da manutenção por você. Cobramos pelo serviço, não por membro nem por encontro."
+      }
+    },
+    "hostingNote": "Em qualquer modelo, os dados e os membros continuam sendo da sua comunidade.",
+    "hostingGithubLink": "Ver código e instalar no GitHub",
+    "hostingCta": "Conversar sobre implantação",
+    "notTitle": "O que o Ember não é",
+    "notLead": "Feito para pertencimento que já existe, não para ganhar audiência.",
+    "notPrefix": "Não é",
+    "notItems": {
+      "networking": "Networking",
+      "mentoring": "Mentoria",
+      "meeting": "Reunião de pauta"
+    },
+    "manifesto": "É espaço para presença entre pessoas que já compartilham uma história.",
+    "finalTitle": "Quer sentir na prática?",
+    "finalLead": "A demo roda no navegador, com personagens fictícios. Navegue como quem cuida da comunidade ou como membro.",
+    "demoCta": "Ver demo",
+    "demoHint": "Sem cadastro real, só para explorar o fluxo.",
+    "contactTitle": "Me mande uma mensagem",
+    "contactLead": "Ember é um projeto independente, eu que mantenho. Se a sua comunidade quiser usar ou você precisar de ajuda para começar, me mande um e-mail.",
+    "contactNav": "Contato",
+    "contactEmailTitle": "E-mail",
+    "contactEmailHint": "Dúvidas, implantação ou parceria com a sua comunidade.",
+    "contactGithubTitle": "Instalar o Ember",
+    "contactGithubHint": "Repositório open source com código e instruções para colocar no ar.",
+    "contactLinkedInTitle": "LinkedIn",
+    "contactLinkedInHint": "Perfil de quem mantém o projeto.",
+    "contactEmailAria": "Enviar e-mail para Sergio Luciano",
+    "contactGithubAria": "Abrir repositório do Ember no GitHub",
+    "contactLinkedInAria": "Abrir perfil no LinkedIn",
+    "footer": "Ember, encontros intencionais para comunidades fechadas."
   },
   "profile": {
     "title": "Seu perfil",

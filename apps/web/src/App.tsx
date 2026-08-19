@@ -1,8 +1,10 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { AppLoading, AppShell } from './components/app/index.js';
+import { AppLoading } from './components/app/index.js';
 import { AppLayout } from './layouts/AppLayout.js';
+import { LandingLayout } from './layouts/LandingLayout.js';
 import { LoginPage } from './pages/LoginPage.js';
+import { LandingPage } from './pages/LandingPage.js';
 import { PresencePage } from './pages/PresencePage.js';
 import { CirclesPage } from './pages/CirclesPage.js';
 import { CircleDetailPage } from './pages/CircleDetailPage.js';
@@ -16,16 +18,16 @@ import { DesignComponentsPage } from './pages/design/DesignComponentsPage.js';
 import { DesignPatternsPage } from './pages/design/DesignPatternsPage.js';
 import { useSession } from './lib/useSession.js';
 
-function HomeRedirect({ authed }: { authed: boolean | null }) {
+function PublicRoot({ authed }: { authed: boolean | null }) {
   if (authed === null) {
-    return (
-      <AppShell mode="member" authed={null}>
-        <AppLoading />
-      </AppShell>
-    );
+    return <AppLoading />;
   }
 
-  return <Navigate to={authed ? '/presence' : '/login'} replace />;
+  if (authed) {
+    return <Navigate to="/presence" replace />;
+  }
+
+  return <LandingPage />;
 }
 
 function FacilitatorRoute({
@@ -60,6 +62,10 @@ export function App() {
 
   return (
     <Routes>
+      <Route element={<LandingLayout />}>
+        <Route path="/" element={<PublicRoot authed={authed} />} />
+      </Route>
+
       <Route element={<AppLayout {...layoutProps} mode="auth" auth="guest" />}>
         <Route path="/login" element={<LoginPage />} />
       </Route>
@@ -99,8 +105,6 @@ export function App() {
           <Route path="/design/patterns" element={<DesignPatternsPage />} />
         </Route>
       ) : null}
-
-      <Route path="/" element={<HomeRedirect authed={authed} />} />
     </Routes>
   );
 }

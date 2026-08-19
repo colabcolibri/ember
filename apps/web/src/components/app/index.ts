@@ -1,4 +1,5 @@
 export { AppBrand } from './AppBrand.js';
+export { LoginIntro } from './LoginIntro.js';
 export { AppButton } from './AppButton.js';
 export { AppCard } from './AppCard.js';
 export { AppPageHeader } from './AppPageHeader.js';

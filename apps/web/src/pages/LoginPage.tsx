@@ -2,8 +2,16 @@ import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../layouts/AppLayout.js';
-import { AppAlert, AppButton, AppCard, AppFormField, AppInput, AppPage } from '../components/app/index.js';
+import {
+  AppButton,
+  AppCard,
+  AppFormField,
+  AppInput,
+  AppPage,
+  LoginIntro,
+} from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
+import { showError, showSuccess } from '../lib/app-toast.js';
 import {
   isMockMode,
   MOCK_DEMO_CODE,
@@ -12,6 +20,8 @@ import {
 } from '../lib/mock-mode.js';
 
 type Step = 'email' | 'code';
+
+const loginFormClass = 'mx-auto w-full max-w-xl';
 
 function MockLoginForm({
   onAuthenticated,
@@ -22,13 +32,11 @@ function MockLoginForm({
   const navigate = useNavigate();
   const [email, setEmail] = useState(MOCK_DEMO_EMAIL);
   const [code, setCode] = useState(MOCK_DEMO_CODE);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function verifyCode(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
     try {
       await apiFetch('/auth/code/verify', {
         method: 'POST',
@@ -37,19 +45,21 @@ function MockLoginForm({
       onAuthenticated();
       navigate('/presence', { replace: true });
     } catch {
-      setError(t('login.codeError'));
+      showError(t('login.codeError'));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <AppPage centered title={t('login.title')} lead={t('login.demoSubtitle')}>
-      <AppAlert variant="info" title={t('login.demoTitle')}>
-        {t('login.demoPrefilledHint', { code: MOCK_DEMO_CODE })}
-      </AppAlert>
-      <AppCard>
+    <AppPage className="w-full gap-8">
+      <LoginIntro demo />
+      <AppCard className={loginFormClass} title={t('login.formTitle')} description={t('login.demoSubtitle')}>
         <form className="relative z-10 grid gap-6" onSubmit={verifyCode}>
+          <p className="rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+            {t('login.demoPrefilledHint', { code: MOCK_DEMO_CODE })}
+          </p>
+
           <div className="flex flex-wrap gap-2">
             <AppButton
               type="button"
@@ -103,7 +113,6 @@ function MockLoginForm({
           </AppButton>
         </form>
       </AppCard>
-      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
     </AppPage>
   );
 }
@@ -115,8 +124,6 @@ export function LoginPage() {
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   if (isMockMode) {
@@ -126,17 +133,15 @@ export function LoginPage() {
   async function requestCode(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setMessage(null);
     try {
       await apiFetch('/auth/code', {
         method: 'POST',
         body: JSON.stringify({ email }),
       });
       setStep('code');
-      setMessage(t('login.codeSent'));
+      showSuccess(t('login.codeSent'));
     } catch {
-      setError(t('login.error'));
+      showError(t('login.error'));
     } finally {
       setLoading(false);
     }
@@ -145,7 +150,6 @@ export function LoginPage() {
   async function verifyCode(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
     try {
       await apiFetch('/auth/code/verify', {
         method: 'POST',
@@ -154,7 +158,7 @@ export function LoginPage() {
       onAuthenticated();
       navigate('/presence', { replace: true });
     } catch {
-      setError(t('login.codeError'));
+      showError(t('login.codeError'));
     } finally {
       setLoading(false);
     }
@@ -162,8 +166,9 @@ export function LoginPage() {
 
   if (step === 'email') {
     return (
-      <AppPage centered title={t('login.title')} lead={t('login.subtitle')}>
-        <AppCard>
+      <AppPage className="w-full gap-8">
+        <LoginIntro />
+        <AppCard className={loginFormClass} title={t('login.formTitle')} description={t('login.subtitle')}>
           <form className="relative z-10 grid gap-6" onSubmit={requestCode}>
             <AppFormField label={t('login.email')} htmlFor="email">
               <AppInput
@@ -196,24 +201,23 @@ export function LoginPage() {
             </p>
           </div>
         </AppCard>
-        {message ? <AppAlert variant="success">{message}</AppAlert> : null}
-        {error ? <AppAlert variant="error">{error}</AppAlert> : null}
       </AppPage>
     );
   }
 
   return (
-    <AppPage
-      centered
-      title={t('login.verifyTitle')}
-      lead={
-        <>
-          {t('login.codeHintPrefix')}{' '}
-          <span className="font-medium text-foreground">{email}</span>
-        </>
-      }
-    >
-      <AppCard>
+    <AppPage className="w-full gap-8">
+      <LoginIntro compact />
+      <AppCard
+        className={loginFormClass}
+        title={t('login.verifyTitle')}
+        description={
+          <>
+            {t('login.codeHintPrefix')}{' '}
+            <span className="font-medium text-foreground">{email}</span>
+          </>
+        }
+      >
         <form className="relative z-10 grid gap-8" onSubmit={verifyCode}>
           <AppFormField label={t('login.code')} htmlFor="code">
             <AppInput
@@ -251,8 +255,6 @@ export function LoginPage() {
               onClick={() => {
                 setStep('email');
                 setCode('');
-                setMessage(null);
-                setError(null);
               }}
             >
               {t('login.changeEmail')}
@@ -260,8 +262,6 @@ export function LoginPage() {
           </div>
         </form>
       </AppCard>
-      {message ? <AppAlert variant="success">{message}</AppAlert> : null}
-      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
     </AppPage>
   );
 }

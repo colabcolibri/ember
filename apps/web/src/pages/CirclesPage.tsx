@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppAlert, AppEmptyState, AppLoading, AppPage, CircleListRow } from '../components/app/index.js';
+import { AppEmptyState, AppLoading, AppPage, CircleListRow } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { showError } from '../lib/app-toast.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
 
 type CircleSummary = {
@@ -18,14 +19,13 @@ type CircleSummary = {
 export function CirclesPage() {
   const { t } = useTranslation();
   const [circles, setCircles] = useState<CircleSummary[]>([]);
-  const [error, setError] = useState('');
 
   const { initialLoading } = useInitialLoad(async () => {
     try {
       const res = await apiFetch<{ circles: CircleSummary[] }>('/circles');
       setCircles(res.circles);
     } catch (e) {
-      setError(formatApiError(e, t));
+      showError(formatApiError(e, t));
     }
   }, [t]);
 
@@ -39,7 +39,6 @@ export function CirclesPage() {
 
   return (
     <AppPage title={t('circles.title')} lead={t('circles.subtitle')}>
-      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
       {circles.length === 0 ? (
         <AppEmptyState title={t('circles.empty')} />
       ) : (

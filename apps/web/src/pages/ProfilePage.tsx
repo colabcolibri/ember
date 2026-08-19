@@ -2,7 +2,6 @@ import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PlaceRef } from '../lib/place.js';
 import {
-  AppAlert,
   AppButton,
   AppCard,
   AppFormField,
@@ -15,6 +14,7 @@ import {
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { showError, showSuccess } from '../lib/app-toast.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
 
 type Profile = {
@@ -36,8 +36,6 @@ export function ProfilePage() {
   const [languages, setLanguages] = useState<string[]>(['pt']);
   const [originPlace, setOriginPlace] = useState<PlaceRef | null>(null);
   const [residencePlace, setResidencePlace] = useState<PlaceRef | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const { initialLoading } = useInitialLoad(async () => {
@@ -50,7 +48,7 @@ export function ProfilePage() {
       setOriginPlace(profile.originPlace);
       setResidencePlace(profile.residencePlace);
     } catch (err) {
-      setError(formatApiError(err, t));
+      showError(formatApiError(err, t));
     }
   }, [t]);
 
@@ -63,11 +61,10 @@ export function ProfilePage() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!originPlace || !residencePlace) {
-      setError(t('profile.placesRequired'));
+      showError(t('profile.placesRequired'));
       return;
     }
     setLoading(true);
-    setError(null);
     try {
       const year = Number(editionYear);
       await apiFetch('/me/profile', {
@@ -81,9 +78,9 @@ export function ProfilePage() {
           residencePlace,
         }),
       });
-      setMessage(t('profile.saved'));
+      showSuccess(t('profile.saved'));
     } catch (err) {
-      setError(formatApiError(err, t));
+      showError(formatApiError(err, t));
     } finally {
       setLoading(false);
     }
@@ -178,8 +175,6 @@ export function ProfilePage() {
           </AppButton>
         </form>
       </AppCard>
-      {message ? <AppAlert variant="success">{message}</AppAlert> : null}
-      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
     </AppPage>
   );
 }

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
-  AppAlert,
   AppButton,
   AppEmptyState,
   AppLoading,
@@ -11,20 +10,20 @@ import {
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { showError } from '../lib/app-toast.js';
 import type { GatheringSummary } from '../lib/gathering.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
 
 export function FacilitatorGatheringsPage() {
   const { t } = useTranslation();
   const [gatherings, setGatherings] = useState<GatheringSummary[]>([]);
-  const [error, setError] = useState('');
 
   const { initialLoading } = useInitialLoad(async () => {
     try {
       const res = await apiFetch<{ rounds: GatheringSummary[] }>('/admin/matching-rounds');
       setGatherings(res.rounds);
     } catch (err) {
-      setError(formatApiError(err, t));
+      showError(formatApiError(err, t));
     }
   }, [t]);
 
@@ -55,8 +54,6 @@ export function FacilitatorGatheringsPage() {
 
   return (
     <AppPage title={t('facilitator.gatheringsTitle')} lead={t('facilitator.gatheringsSubtitle')}>
-      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
-
       {gatherings.length === 0 ? (
         <AppEmptyState
           title={t('facilitator.noGatherings')}

@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
-  AppAlert,
   AppButton,
   AppCard,
+  AppEmptyState,
   AppLoading,
   AppPage,
   AttendancePrompt,
@@ -12,6 +12,7 @@ import {
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { showError, showSuccess } from '../lib/app-toast.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
 
 type CircleDetail = {
@@ -40,8 +41,6 @@ export function CircleDetailPage() {
   const { id } = useParams();
   const [circle, setCircle] = useState<CircleDetail | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
@@ -55,7 +54,7 @@ export function CircleDetailPage() {
     try {
       await load();
     } catch (e) {
-      setError(formatApiError(e, t));
+      showError(formatApiError(e, t));
     }
   }, [id, t]);
 
@@ -64,10 +63,10 @@ export function CircleDetailPage() {
     setLoading(true);
     try {
       await apiFetch(`/circles/${id}/confirm`, { method: 'POST', body: '{}' });
-      setMessage(t('circles.confirmed'));
+      showSuccess(t('circles.confirmed'));
       await load();
     } catch (e) {
-      setError(formatApiError(e, t));
+      showError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -81,10 +80,10 @@ export function CircleDetailPage() {
         method: 'POST',
         body: JSON.stringify({ happened }),
       });
-      setMessage(happened ? t('circles.attendanceYes') : t('circles.attendanceNo'));
+      showSuccess(happened ? t('circles.attendanceYes') : t('circles.attendanceNo'));
       await load();
     } catch (e) {
-      setError(formatApiError(e, t));
+      showError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -100,8 +99,8 @@ export function CircleDetailPage() {
 
   if (!circle) {
     return (
-      <AppPage>
-        {error ? <AppAlert variant="error">{error}</AppAlert> : null}
+      <AppPage title={t('circles.title')}>
+        <AppEmptyState title={t('circles.empty')} />
       </AppPage>
     );
   }
@@ -159,8 +158,6 @@ export function CircleDetailPage() {
           loading={loading}
         />
       ) : null}
-      {message ? <AppAlert variant="success">{message}</AppAlert> : null}
-      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
     </AppPage>
   );
 }

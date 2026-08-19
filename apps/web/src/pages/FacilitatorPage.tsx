@@ -17,6 +17,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiFetch, ApiError } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { showError, showSuccess } from '../lib/app-toast.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
 import { cn } from '@/lib/utils';
 
@@ -44,8 +45,7 @@ export function FacilitatorPage() {
   const [declarations, setDeclarations] = useState<Declaration[]>([]);
   const [trios, setTrios] = useState<Trio[]>([]);
   const [unmatched, setUnmatched] = useState(0);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [accessDeniedMessage, setAccessDeniedMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
@@ -74,8 +74,10 @@ export function FacilitatorPage() {
     } catch (err) {
       if (err instanceof ApiError && err.status === 403) {
         setAccessDenied(true);
+        setAccessDeniedMessage(formatApiError(err, t));
+        return;
       }
-      setError(formatApiError(err, t));
+      showError(formatApiError(err, t));
     }
   }, [t]);
 
@@ -86,8 +88,6 @@ export function FacilitatorPage() {
     slots: Array<{ timezone: string; localDate: string; localTime: string }>;
   }) => {
     setLoading(true);
-    setError('');
-    setMessage('');
     try {
       const res = await apiFetch<{ round: { id: string } }>('/admin/matching-rounds', {
         method: 'POST',
@@ -95,11 +95,11 @@ export function FacilitatorPage() {
       });
       setRoundId(res.round.id);
       setActiveTab('round');
-      setMessage(t('facilitator.roundCreated'));
+      showSuccess(t('facilitator.roundCreated'));
       setSlotLabels({});
       await loadDeclarations(res.round.id);
     } catch (e) {
-      setError(formatApiError(e, t));
+      showError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -107,17 +107,15 @@ export function FacilitatorPage() {
 
   const createTemplate = async (input: Omit<MeetingTemplate, 'id'>) => {
     setLoading(true);
-    setError('');
-    setMessage('');
     try {
       await apiFetch('/admin/templates', {
         method: 'POST',
         body: JSON.stringify(input),
       });
       await loadTemplates();
-      setMessage(t('facilitator.templateCreated'));
+      showSuccess(t('facilitator.templateCreated'));
     } catch (e) {
-      setError(formatApiError(e, t));
+      showError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -125,17 +123,15 @@ export function FacilitatorPage() {
 
   const updateTemplate = async (id: string, input: Omit<MeetingTemplate, 'id'>) => {
     setLoading(true);
-    setError('');
-    setMessage('');
     try {
       await apiFetch(`/admin/templates/${id}`, {
         method: 'PUT',
         body: JSON.stringify(input),
       });
       await loadTemplates();
-      setMessage(t('facilitator.templateSaved'));
+      showSuccess(t('facilitator.templateSaved'));
     } catch (e) {
-      setError(formatApiError(e, t));
+      showError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -149,7 +145,6 @@ export function FacilitatorPage() {
   const runMatch = async () => {
     if (!roundId) return;
     setLoading(true);
-    setError('');
     try {
       const res = await apiFetch<{ trios: Trio[]; unmatched: number }>(
         `/admin/matching-rounds/${roundId}/match`,
@@ -157,9 +152,9 @@ export function FacilitatorPage() {
       );
       setTrios(res.trios);
       setUnmatched(res.unmatched);
-      setMessage(t('facilitator.matchReady'));
+      showSuccess(t('facilitator.matchReady'));
     } catch (e) {
-      setError(formatApiError(e, t));
+      showError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -168,16 +163,15 @@ export function FacilitatorPage() {
   const publish = async () => {
     if (!roundId || trios.length === 0) return;
     setLoading(true);
-    setError('');
     try {
       await apiFetch(`/admin/matching-rounds/${roundId}/publish`, {
         method: 'POST',
         body: JSON.stringify({ trios }),
       });
       setPublishOpen(false);
-      setMessage(t('facilitator.published'));
+      showSuccess(t('facilitator.published'));
     } catch (e) {
-      setError(formatApiError(e, t));
+      showError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -193,15 +187,12 @@ export function FacilitatorPage() {
 
   return (
     <AppPage title={t('facilitator.title')} lead={t('facilitator.subtitle')}>
-      {error ? (
-        <AppAlert variant="error" title={accessDenied ? t('facilitator.accessDeniedTitle') : undefined}>
-          {error}
-          {accessDenied ? (
-            <span className="mt-1 block text-sm opacity-90">{t('facilitator.accessDeniedHint')}</span>
-          ) : null}
+      {accessDeniedMessage ? (
+        <AppAlert variant="error" title={t('facilitator.accessDeniedTitle')}>
+          {accessDeniedMessage}
+          <span className="mt-1 block text-sm opacity-90">{t('facilitator.accessDeniedHint')}</span>
         </AppAlert>
       ) : null}
-      {message ? <AppAlert variant="success">{message}</AppAlert> : null}
 
       {accessDenied ? null : (
         <>

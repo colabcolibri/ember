@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import {
-  AppAlert,
   AppButton,
   AppCard,
   AppLoading,
@@ -12,6 +11,7 @@ import {
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { showError } from '../lib/app-toast.js';
 import type { GatheringDetail } from '../lib/gathering.js';
 import { gatheringTitle } from '../lib/gathering.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
@@ -31,7 +31,6 @@ export function FacilitatorGatheringDetailPage() {
   const { id } = useParams();
   const [gathering, setGathering] = useState<GatheringDetail | null>(null);
   const [declarations, setDeclarations] = useState<Declaration[]>([]);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
@@ -46,17 +45,16 @@ export function FacilitatorGatheringDetailPage() {
     try {
       await load();
     } catch (err) {
-      setError(formatApiError(err, t));
+      showError(formatApiError(err, t));
     }
   }, [id, t]);
 
   async function refresh() {
     setLoading(true);
-    setError('');
     try {
       await load();
     } catch (err) {
-      setError(formatApiError(err, t));
+      showError(formatApiError(err, t));
     } finally {
       setLoading(false);
     }
@@ -73,7 +71,6 @@ export function FacilitatorGatheringDetailPage() {
   if (!gathering) {
     return (
       <AppPage title={t('facilitator.gatheringDetailTitle')}>
-        {error ? <AppAlert variant="error">{error}</AppAlert> : null}
         <AppButton asChild variant="outline">
           <Link to="/facilitator/gatherings">{t('facilitator.backToGatherings')}</Link>
         </AppButton>
@@ -95,8 +92,6 @@ export function FacilitatorGatheringDetailPage() {
         </AppButton>
       }
     >
-      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
-
       <AppButton asChild variant="outline" className="w-fit">
         <Link to="/facilitator/gatherings">{t('facilitator.backToGatherings')}</Link>
       </AppButton>
