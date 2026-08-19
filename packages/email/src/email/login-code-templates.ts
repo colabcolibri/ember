@@ -1,5 +1,5 @@
 import { EMAIL_BRAND } from './email-brand.js';
-import { escapeHtml, wrapEmailDocument } from './email-layout.js';
+import { emailLead, emailMuted, escapeHtml, wrapEmailDocument } from './email-layout.js';
 import type { EmailLocale } from './email-locale.js';
 
 export type LoginCodeEmailContent = {
@@ -29,11 +29,12 @@ export function buildLoginCodeEmailContent(input: {
 
   const text = [intro, '', input.code, '', expiry, '', footer].join('\n');
 
-  const { text: textColor, textSoft } = EMAIL_BRAND.colors;
+  const { text: textColor } = EMAIL_BRAND.colors;
   const panelHtml = `
-    <p style="margin:0 0 20px;font-size:17px;line-height:1.55;color:${textColor};">${escapeHtml(intro)}</p>
-    <p style="margin:0 0 8px;font-size:32px;font-weight:700;letter-spacing:0.35em;color:${textColor};">${escapeHtml(input.code)}</p>
-    <p style="margin:20px 0 0;font-size:14px;line-height:1.5;color:${textSoft};">${escapeHtml(expiry)}</p>`;
+    ${emailLead(locale === 'pt' ? 'Seu código de acesso' : 'Your sign-in code')}
+    ${emailMuted(intro)}
+    <p style="margin:16px 0 8px;font-size:32px;font-weight:700;letter-spacing:0.35em;color:${textColor};">${escapeHtml(input.code)}</p>
+    ${emailMuted(expiry)}`;
 
   const html = wrapEmailDocument(locale, panelHtml, footer);
   const subject = locale === 'pt' ? 'Seu código de acesso — Ember' : 'Your sign-in code — Ember';

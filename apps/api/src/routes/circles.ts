@@ -99,7 +99,7 @@ export function createCircleRoutes(db: Db) {
     }
     return c.body(ics, 200, {
       'Content-Type': 'text/calendar; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="ember-roda.ics"',
+      'Content-Disposition': 'attachment; filename="ember-encontro.ics"',
     });
   });
 

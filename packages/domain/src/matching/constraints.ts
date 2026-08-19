@@ -1,16 +1,10 @@
 import type { MemberLanguage } from '../schemas/profile.js';
-import type { PresenceIntention, RoundSlot } from '../schemas/auth.js';
-
-/** Mapa membro → slot da rodada (facilitador). */
-export const SLOT_COMPAT: Record<RoundSlot, string> = {
-  'mon-evening': 'mon-19h',
-  'wed-evening': 'wed-19h',
-  'sat-morning': 'sat-10h',
-};
+import type { PresenceIntention } from '../schemas/auth.js';
+import { SLOT_COMPAT } from '../schemas/auth.js';
 
 export type MatchingMember = {
   userId: string;
-  slots: RoundSlot[];
+  slots: string[];
   languages: MemberLanguage[];
   intention: PresenceIntention;
 };
@@ -36,10 +30,10 @@ export function trioHasCommonLanguage(members: MatchingMember[]): boolean {
 }
 
 export function resolveCommonFacilitatorSlot(members: MatchingMember[]): string | null {
-  const facilitatorSlots = members.map((m) =>
-    m.slots.map((s) => SLOT_COMPAT[s]).filter(Boolean),
+  const normalized = members.map((member) =>
+    member.slots.map((slot) => SLOT_COMPAT[slot as keyof typeof SLOT_COMPAT] ?? slot),
   );
-  const [first, ...rest] = facilitatorSlots;
+  const [first, ...rest] = normalized;
   if (!first?.length) return null;
   for (const slot of first) {
     if (rest.every((set) => set.includes(slot))) return slot;

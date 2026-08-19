@@ -4,9 +4,11 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ensureDatabaseReady } from '@ember/db';
 import {
+  buildCircleFormedEmailContent,
   buildLoginCodeEmailContent,
   buildMagicLinkEmailContent,
   buildMagicLinkUrl,
+  buildRoundOpenEmailContent,
   countSentEmailsByKind,
   createEmailSenderFromEnv,
   resetEmailSenderCacheForTests,
@@ -139,5 +141,48 @@ describe('magic link template (legacy)', () => {
     expect(content.text).toContain('30');
     expect(content.html).toContain('#aa4f36');
     expect(content.html).toContain('magic-link/verify');
+    expect(content.html).toContain('color-scheme');
+  });
+});
+
+describe('round open template', () => {
+  it('renders structured content with readable slot labels', () => {
+    const content = buildRoundOpenEmailContent({
+      theme: 'Encontro 001 - A gente é tudo junto',
+      questions: [
+        'Como você se vê em 10 anos?',
+        'Quais medos mais te assombram?',
+      ],
+      slotLabels: [
+        'seg., 24 de ago., 19:00 (America/Sao_Paulo)',
+        'qua., 26 de ago., 19:00 (America/Sao_Paulo)',
+      ],
+      presenceUrl: 'https://ember.test/presence',
+      locale: 'pt',
+    });
+
+    expect(content.text).toContain('Encontro 001');
+    expect(content.text).toContain('1. Como você se vê em 10 anos?');
+    expect(content.text).toContain('• seg., 24 de ago., 19:00');
+    expect(content.text).not.toContain('dt:');
+    expect(content.html).toContain('Horários disponíveis');
+    expect(content.html).toContain('email-header-tagline');
+    expect(content.html).toContain('#c9c4bc');
+  });
+});
+
+describe('circle formed template', () => {
+  it('renders structured sections', () => {
+    const content = buildCircleFormedEmailContent({
+      question: 'O que te move hoje?',
+      whenLabel: 'seg. 24 ago 19:00 (America/Sao_Paulo)',
+      jitsiUrl: 'https://meet.jit.si/ember-test',
+      circleUrl: 'https://ember.test/circles/abc',
+      locale: 'pt',
+    });
+
+    expect(content.text).toContain('Pergunta do encontro');
+    expect(content.html).toContain('Seu círculo está pronto');
+    expect(content.html).toContain('Entrar no Jitsi');
   });
 });

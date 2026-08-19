@@ -9,7 +9,7 @@ type AvailabilityPickerProps = {
 
 export function AvailabilityPicker({ slots, selected, onToggle, label }: AvailabilityPickerProps) {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="grid gap-3 sm:grid-cols-2">
       {slots.map((slot) => {
         const active = selected.includes(slot);
         return (
@@ -17,14 +17,26 @@ export function AvailabilityPicker({ slots, selected, onToggle, label }: Availab
             key={slot}
             type="button"
             onClick={() => onToggle(slot)}
+            aria-pressed={active}
             className={cn(
-              'rounded-full border px-5 py-2.5 text-sm font-medium transition-all',
+              'group relative rounded-xl border px-4 py-3.5 text-left text-sm font-semibold transition-all',
               active
-                ? 'border-2 border-primary bg-primary/10 text-primary'
-                : 'border border-outline-variant bg-transparent text-foreground hover:bg-background',
+                ? 'border-2 border-primary bg-primary/10 text-primary shadow-sm'
+                : 'border border-outline-variant bg-background text-foreground hover:border-primary/30',
             )}
           >
-            {label(slot)}
+            <span
+              className={cn(
+                'absolute top-3 right-3 flex size-5 items-center justify-center rounded-full border transition-colors',
+                active
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-outline-variant bg-background text-transparent group-hover:border-primary/40',
+              )}
+              aria-hidden="true"
+            >
+              <span className="material-symbols-outlined text-[14px]">check</span>
+            </span>
+            <span className="block pr-8">{label(slot)}</span>
           </button>
         );
       })}

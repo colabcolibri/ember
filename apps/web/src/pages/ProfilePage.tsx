@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PlaceRef } from '../lib/place.js';
 import {
@@ -7,6 +7,7 @@ import {
   AppCard,
   AppFormField,
   AppInput,
+  AppLoading,
   AppPage,
   LanguageChipPicker,
   PlaceAutocomplete,
@@ -14,6 +15,7 @@ import {
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { useInitialLoad } from '../lib/useInitialLoad.js';
 
 type Profile = {
   displayName: string;
@@ -37,20 +39,19 @@ export function ProfilePage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
 
-  useEffect(() => {
-    apiFetch<Profile>('/me/profile')
-      .then((profile) => {
-        setDisplayName(profile.displayName);
-        setEditionYear(profile.editionYear ? String(profile.editionYear) : '');
-        setTimezone(profile.timezone);
-        setLanguages(profile.languages);
-        setOriginPlace(profile.originPlace);
-        setResidencePlace(profile.residencePlace);
-      })
-      .catch((err) => setError(formatApiError(err, t)))
-      .finally(() => setInitialLoading(false));
+  const { initialLoading } = useInitialLoad(async () => {
+    try {
+      const profile = await apiFetch<Profile>('/me/profile');
+      setDisplayName(profile.displayName);
+      setEditionYear(profile.editionYear ? String(profile.editionYear) : '');
+      setTimezone(profile.timezone);
+      setLanguages(profile.languages);
+      setOriginPlace(profile.originPlace);
+      setResidencePlace(profile.residencePlace);
+    } catch (err) {
+      setError(formatApiError(err, t));
+    }
   }, [t]);
 
   function toggleLanguage(code: string) {
@@ -91,7 +92,7 @@ export function ProfilePage() {
   if (initialLoading) {
     return (
       <AppPage title={t('profile.title')}>
-        <p className="text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+        <AppLoading />
       </AppPage>
     );
   }

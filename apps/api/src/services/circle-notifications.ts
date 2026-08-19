@@ -1,7 +1,8 @@
 import type { ensureDatabaseReady } from '@ember/db';
-import { formatSlotLocal } from '@ember/domain';
+import { formatSlotLocal, type StoredRoundSlot } from '@ember/domain';
 import {
   buildCircleIcs,
+  formatRoundSlotOfficialLabels,
   getCircleForMember,
   getUserEmailById,
   listCircleMemberDetails,
@@ -26,17 +27,18 @@ export async function sendRoundOpenNotifications(
     roundId: string;
     theme: string;
     questions: string[];
-    slots: string[];
+    slots: Array<string | StoredRoundSlot>;
   },
 ): Promise<void> {
   const pepper = requireEmailPepper();
   const appUrl = resolveAppUrl();
   const presenceUrl = `${appUrl}/presence`;
   const members = listCommunityMemberEmails(db, input.communityId, pepper);
+  const slotLabels = formatRoundSlotOfficialLabels(db, input.communityId, input.slots, 'pt');
   const content = buildRoundOpenEmailContent({
     theme: input.theme,
     questions: input.questions,
-    slots: input.slots,
+    slotLabels,
     presenceUrl,
   });
   const delivery = createEmailDeliveryContext({
@@ -106,7 +108,7 @@ export async function sendCircleFormedNotifications(
         text: content.text,
         html: content.html,
         files: ics
-          ? [{ filename: 'ember-roda.ics', content: ics, contentType: 'text/calendar' }]
+          ? [{ filename: 'ember-encontro.ics', content: ics, contentType: 'text/calendar' }]
           : undefined,
         delivery,
         meta: { user_id: member.userId },

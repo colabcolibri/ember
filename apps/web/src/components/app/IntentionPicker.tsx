@@ -12,16 +12,16 @@ type IntentionPickerProps = {
 
 export function IntentionPicker({ value, onChange, options, label, hint }: IntentionPickerProps) {
   return (
-    <div className="grid gap-3">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3" role="radiogroup">
       {options.map((option) => {
         const active = value === option;
         return (
           <label
             key={option}
             className={cn(
-              'flex min-h-11 cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors',
+              'flex min-h-[5.5rem] cursor-pointer flex-col justify-center rounded-xl border px-3 py-3 text-center transition-colors sm:min-h-[6.5rem] sm:px-4',
               active
-                ? 'border-2 border-primary bg-primary/10'
+                ? 'border-2 border-primary bg-primary/10 shadow-sm'
                 : 'border border-outline-variant/60 bg-background/50 hover:border-primary/40',
             )}
           >
@@ -31,28 +31,26 @@ export function IntentionPicker({ value, onChange, options, label, hint }: Inten
               value={option}
               checked={active}
               onChange={() => onChange(option)}
-              className="mt-1 h-4 w-4 border-outline-variant text-primary focus:ring-primary"
+              className="sr-only"
             />
-            <div className="min-w-0 flex-1">
+            <span
+              className={cn(
+                'block text-sm font-semibold sm:text-base',
+                active ? 'text-primary' : 'text-foreground',
+              )}
+            >
+              {label(option)}
+            </span>
+            {hint ? (
               <span
                 className={cn(
-                  'block text-base font-medium',
-                  active ? 'text-primary' : 'text-foreground',
+                  'mt-1 block text-xs leading-snug',
+                  active ? 'text-primary/80' : 'text-muted-foreground',
                 )}
               >
-                {label(option)}
+                {hint(option)}
               </span>
-              {hint ? (
-                <span
-                  className={cn(
-                    'mt-1 block text-sm',
-                    active ? 'text-primary/80' : 'text-muted-foreground',
-                  )}
-                >
-                  {hint(option)}
-                </span>
-              ) : null}
-            </div>
+            ) : null}
           </label>
         );
       })}

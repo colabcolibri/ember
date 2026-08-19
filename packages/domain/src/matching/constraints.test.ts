@@ -31,13 +31,10 @@ describe('matching constraints', () => {
     expect(isValidTrio(trio)).toBe(false);
   });
 
-  it('accepts viable trio with mapped facilitator slot', () => {
-    const trio = [
-      m('a', ['mon-evening'], ['pt', 'en']),
-      m('b', ['mon-evening'], ['pt', 'en']),
-      m('c', ['wed-evening', 'mon-evening'], ['pt']),
-    ];
+  it('accepts viable trio with regional slot refs', () => {
+    const ref = 'cal-americas:slot-mon-1900';
+    const trio = [m('a', [ref], ['pt']), m('b', [ref], ['pt']), m('c', [ref], ['pt', 'en'])];
     expect(isValidTrio(trio)).toBe(true);
-    expect(resolveCommonFacilitatorSlot(trio)).toBe('mon-19h');
+    expect(resolveCommonFacilitatorSlot(trio)).toBe(ref);
   });
 });

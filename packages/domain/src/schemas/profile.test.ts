@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { profileInputSchema } from './profile.js';
 
 const samplePlace = {
-  provider: 'geoapify' as const,
-  placeId: 'place-lisbon',
+  provider: 'photon' as const,
+  placeId: 'R12345',
   city: 'Lisbon',
   country: 'Portugal',
   countryCode: 'PT',
@@ -20,7 +20,7 @@ describe('profileInputSchema', () => {
       timezone: 'Europe/Lisbon',
       languages: ['pt', 'en'],
       originPlace: samplePlace,
-      residencePlace: { ...samplePlace, placeId: 'place-porto', city: 'Porto', label: 'Porto · Portugal' },
+      residencePlace: { ...samplePlace, placeId: 'R111', city: 'Porto', label: 'Porto · Portugal' },
     });
     expect(parsed.success).toBe(true);
   });

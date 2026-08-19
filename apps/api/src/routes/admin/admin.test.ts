@@ -22,8 +22,8 @@ const roundBody = {
 };
 
 const samplePlace = {
-  provider: 'geoapify' as const,
-  placeId: 'place-sp',
+  provider: 'photon' as const,
+  placeId: 'R298019',
   city: 'São Paulo',
   country: 'Brazil',
   countryCode: 'BR',
@@ -89,6 +89,94 @@ describe('admin routes', () => {
     expect(res.status).toBe(201);
     const body = (await res.json()) as { round: { id: string; status: string } };
     expect(body.round.status).toBe('open');
+  });
+
+  it('lists meeting templates', async () => {
+    const res = await app.request('/admin/templates', {
+      headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { templates: Array<{ id: string; name: string }> };
+    expect(body.templates.some((t) => t.id === 'tpl-gsa-fogo')).toBe(true);
+  });
+
+  it('creates meeting template', async () => {
+    const res = await app.request('/admin/templates', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `${SESSION_COOKIE}=${facilitatorSession}`,
+      },
+      body: JSON.stringify({
+        name: 'Café com intenção',
+        circleSize: 4,
+        durationMinutes: 45,
+      }),
+    });
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { template: { name: string; circleSize: number } };
+    expect(body.template.name).toBe('Café com intenção');
+    expect(body.template.circleSize).toBe(4);
+  });
+
+  it('returns 403 for member listing templates', async () => {
+    const res = await app.request('/admin/templates', {
+      headers: { Cookie: `${SESSION_COOKIE}=${memberSession}` },
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it('lists regional slot calendars', async () => {
+    const res = await app.request('/admin/slot-calendars', {
+      headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { calendars: Array<{ label: string; entries: unknown[] }> };
+    expect(body.calendars.some((c) => c.label === 'Americas')).toBe(true);
+    expect(body.calendars.some((c) => c.label === 'Europe')).toBe(true);
+  });
+
+  it('creates round with regional slot refs', async () => {
+    const res = await app.request('/admin/matching-rounds', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `${SESSION_COOKIE}=${facilitatorSession}`,
+      },
+      body: JSON.stringify({
+        theme: 'Rede global',
+        questions: ['Como nos encontramos?'],
+        slots: ['cal-americas:slot-mon-1900', 'cal-europe:slot-sun-1300'],
+        templateId: 'tpl-gsa-fogo',
+      }),
+    });
+    expect(res.status).toBe(201);
+  });
+
+  it('creates round with datetime slots', async () => {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 14);
+    const localDate = futureDate.toISOString().slice(0, 10);
+
+    const res = await app.request('/admin/matching-rounds', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `${SESSION_COOKIE}=${facilitatorSession}`,
+      },
+      body: JSON.stringify({
+        theme: 'Encontro agendado',
+        questions: ['Como estamos?'],
+        slots: [{ timezone: 'America/Sao_Paulo', localDate, localTime: '19:00' }],
+        templateId: 'tpl-gsa-fogo',
+      }),
+    });
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as {
+      round: { slots: Array<{ ref: string; timezone: string; startsAt: string }> };
+    };
+    expect(body.round.slots[0]?.ref).toMatch(/^dt:/);
+    expect(body.round.slots[0]?.timezone).toBe('America/Sao_Paulo');
   });
 
   it('publishes circles with invited members', async () => {

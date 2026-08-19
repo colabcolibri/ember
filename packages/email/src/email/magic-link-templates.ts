@@ -1,5 +1,4 @@
-import { EMAIL_BRAND } from './email-brand.js';
-import { ctaButton, emailPlainLink, escapeHtml, wrapEmailDocument } from './email-layout.js';
+import { ctaButton, emailLead, emailMuted, emailPlainLink, wrapEmailDocument } from './email-layout.js';
 import type { EmailLocale } from './email-locale.js';
 import { resolveAppUrl } from './email-env.js';
 
@@ -32,12 +31,12 @@ export function buildMagicLinkEmailContent(input: {
 
   const text = [intro, '', url, '', expiry, '', footer].join('\n');
 
-  const { text: textColor, textSoft } = EMAIL_BRAND.colors;
   const panelHtml = `
-    <p style="margin:0 0 20px;font-size:17px;line-height:1.55;color:${textColor};">${escapeHtml(intro)}</p>
+    ${emailLead(locale === 'pt' ? 'Seu link de acesso' : 'Your sign-in link')}
+    ${emailMuted(intro)}
     ${ctaButton(ctaLabel, url)}
     ${emailPlainLink(url, locale === 'pt' ? 'Ou copie o link' : 'Or copy the link')}
-    <p style="margin:20px 0 0;font-size:14px;line-height:1.5;color:${textSoft};">${escapeHtml(expiry)}</p>`;
+    ${emailMuted(expiry)}`;
 
   const html = wrapEmailDocument(locale, panelHtml, footer);
   const subject =

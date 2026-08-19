@@ -13,8 +13,8 @@ import { createProfileRoutes } from './profile.js';
 import { SESSION_COOKIE } from '../lib/session.js';
 
 const samplePlace = {
-  provider: 'geoapify' as const,
-  placeId: 'place-lisbon',
+  provider: 'photon' as const,
+  placeId: 'R12345',
   city: 'Lisbon',
   country: 'Portugal',
   countryCode: 'PT',
@@ -56,9 +56,16 @@ describe('profile routes', () => {
       headers: { Cookie: `${SESSION_COOKIE}=${sessionId}` },
     });
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { displayName: string; editionYear: number | null };
+    const body = (await res.json()) as {
+      displayName: string;
+      editionYear: number | null;
+      role: string;
+      isFacilitator: boolean;
+    };
     expect(body.displayName).toBe('');
     expect(body.editionYear).toBeNull();
+    expect(body.role).toBe('member');
+    expect(body.isFacilitator).toBe(false);
   });
 
   it('persists display name and edition year', async () => {
@@ -74,7 +81,7 @@ describe('profile routes', () => {
         timezone: 'Europe/Lisbon',
         languages: ['pt', 'en'],
         originPlace: samplePlace,
-        residencePlace: { ...samplePlace, placeId: 'place-porto', city: 'Porto', label: 'Porto · Portugal' },
+        residencePlace: { ...samplePlace, placeId: 'R111', city: 'Porto', label: 'Porto · Portugal' },
       }),
     });
     expect(put.status).toBe(200);

@@ -18,10 +18,12 @@ export const EMAIL_BRAND = {
     text: '#20211f',
     textSoft: '#68645d',
     muted: '#68645d',
+    onInk: '#fbf8f3',
+    onInkMuted: '#c9c4bc',
     accent: '#aa4f36',
     accentSoft: '#f4efe7',
     onAccent: '#fbf8f3',
-    rule: 'rgba(32,33,31,.14)',
+    rule: 'rgba(251,248,243,.18)',
   },
 } as const;
 

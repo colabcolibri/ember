@@ -3,10 +3,11 @@ import type Database from 'better-sqlite3';
 import {
   buildIcsEvent,
   buildJitsiRoomUrl,
-  resolveNextSlotDateTime,
   type TrioProposal,
 } from '@ember/domain';
 import { decryptRecipientEmail } from '../crypto/recipient-email-vault.js';
+import { resolveScheduledAtForSlot } from './slot-calendars.js';
+import { findRoundById } from './rounds.js';
 
 export type CircleDetailRow = {
   id: string;
@@ -205,7 +206,7 @@ export function enrichPublishedCircle(
   slot: string,
   jitsiBaseUrl?: string,
 ): void {
-  const scheduledAt = resolveNextSlotDateTime(slot).toISOString();
+  const scheduledAt = resolveScheduledAtForSlot(db, slot, new Date());
   const jitsiUrl = buildJitsiRoomUrl(circleId, jitsiBaseUrl);
   db.prepare('UPDATE circles SET jitsi_url = ?, scheduled_at = ? WHERE id = ?').run(
     jitsiUrl,
@@ -253,6 +254,8 @@ export function publishTriosWithDelivery(
 ): PublishCircleRow[] {
   const now = new Date().toISOString();
   const created: PublishCircleRow[] = [];
+  const round = findRoundById(db, roundId);
+  const slotsJson = round?.slots_json ?? null;
 
   const tx = db.transaction(() => {
     db.prepare(
@@ -262,7 +265,7 @@ export function publishTriosWithDelivery(
 
     for (const trio of trios) {
       const circleId = randomUUID();
-      const scheduledAt = resolveNextSlotDateTime(trio.slot).toISOString();
+      const scheduledAt = resolveScheduledAtForSlot(db, trio.slot, new Date(), slotsJson);
       const jitsiUrl = buildJitsiRoomUrl(circleId, jitsiBaseUrl);
       db.prepare(
         `INSERT INTO circles (id, round_id, status, scheduled_slot, scheduled_at, jitsi_url, created_at)

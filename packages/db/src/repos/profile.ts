@@ -102,3 +102,15 @@ export function upsertMemberProfile(
   }
   return getMemberProfile(db, communityId, userId)!;
 }
+
+export function updateMemberTimezone(
+  db: Database.Database,
+  communityId: string,
+  userId: string,
+  timezone: string,
+): void {
+  const now = new Date().toISOString();
+  db.prepare(
+    `UPDATE member_profiles SET timezone = ?, updated_at = ? WHERE community_id = ? AND user_id = ?`,
+  ).run(timezone, now, communityId, userId);
+}

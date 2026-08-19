@@ -7,3 +7,4 @@ export * from './repos/rounds.js';
 export * from './repos/templates.js';
 export * from './repos/matching.js';
 export * from './repos/circles.js';
+export * from './repos/slot-calendars.js';

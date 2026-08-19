@@ -3,6 +3,7 @@ import { AppPageHeader } from './AppPageHeader.js';
 import { cn } from '@/lib/utils';
 
 type AppPageProps = {
+  eyebrow?: ReactNode;
   title?: ReactNode;
   lead?: ReactNode;
   centered?: boolean;
@@ -16,6 +17,7 @@ type AppPageProps = {
  * Usado dentro de AppLayout → AppShell; não define max-w (isso é do shell).
  */
 export function AppPage({
+  eyebrow,
   title,
   lead,
   centered,
@@ -26,7 +28,13 @@ export function AppPage({
   return (
     <div className={cn('grid w-full gap-8', className)}>
       {title ? (
-        <AppPageHeader title={title} lead={lead} centered={centered} actions={actions} />
+        <AppPageHeader
+          eyebrow={eyebrow}
+          title={title}
+          lead={lead}
+          centered={centered}
+          actions={actions}
+        />
       ) : null}
       <div className="grid w-full gap-6">{children}</div>
     </div>

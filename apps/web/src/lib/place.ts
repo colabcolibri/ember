@@ -1,5 +1,5 @@
 export type PlaceRef = {
-  provider: 'geoapify';
+  provider: 'geoapify' | 'photon';
   placeId: string;
   city: string;
   adminArea?: string;

@@ -5,6 +5,8 @@ import {
   findDefaultTemplateForCommunity,
   findRoundById,
   findTemplateById,
+  createMeetingTemplate,
+  listMeetingTemplates,
   listCircleMembers,
   listCirclesForRound,
   listRoundDeclarations,
@@ -16,8 +18,10 @@ import {
 import {
   createRoundSchema,
   meetingTemplateSchema,
+  normalizeCreateRoundSlots,
   proposeTrios,
   publishTriosSchema,
+  type CreateRoundInput,
   type TrioProposal,
 } from '@ember/domain';
 import { createRequireFacilitator, type FacilitatorVariables } from '../../lib/facilitator.js';
@@ -26,6 +30,7 @@ import {
   sendCircleFormedNotifications,
   sendRoundOpenNotifications,
 } from '../../services/circle-notifications.js';
+import { createAdminSlotCalendarRoutes, validateRoundSlotRefs } from './slot-calendars.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -47,7 +52,7 @@ export function createAdminRoundRoutes(db: Db) {
     const parsed = createRoundSchema.safeParse(body);
     if (!parsed.success) {
       return c.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Rodada inválida', details: parsed.error.issues } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Convite inválido', details: parsed.error.issues } },
         400,
       );
     }
@@ -70,13 +75,40 @@ export function createAdminRoundRoutes(db: Db) {
       );
     }
 
-    const round = createMatchingRound(db, communityId, parsed.data, templateId);
+    if (!validateRoundSlotRefs(db, communityId, parsed.data.slots)) {
+      return c.json(
+        { error: { code: 'VALIDATION_ERROR', message: 'Horários inválidos para o encontro' } },
+        400,
+      );
+    }
+
+    let normalizedSlots;
+    try {
+      normalizedSlots = normalizeCreateRoundSlots(parsed.data.slots);
+    } catch (err) {
+      return c.json(
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: err instanceof Error ? err.message : 'Horários inválidos para o encontro',
+          },
+        },
+        400,
+      );
+    }
+
+    const round = createMatchingRound(
+      db,
+      communityId,
+      { ...parsed.data, slots: normalizedSlots as CreateRoundInput['slots'] },
+      templateId,
+    );
     await sendRoundOpenNotifications(db, {
       communityId,
       roundId: round.id,
       theme: parsed.data.theme,
       questions: parsed.data.questions,
-      slots: parsed.data.slots,
+      slots: normalizedSlots,
     });
     return c.json(
       {
@@ -98,11 +130,11 @@ export function createAdminRoundRoutes(db: Db) {
     const communityId = c.get('communityId');
     const roundId = c.req.param('id');
     if (!requireRoundId(roundId)) {
-      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Rodada inválida' } }, 400);
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Convite inválido' } }, 400);
     }
     const round = findRoundById(db, roundId);
     if (!round || round.community_id !== communityId) {
-      return c.json({ error: { code: 'NOT_FOUND', message: 'Rodada não encontrada' } }, 404);
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Convite não encontrado' } }, 404);
     }
 
     const circles = listCirclesForRound(db, roundId).map((circle) => ({
@@ -130,11 +162,11 @@ export function createAdminRoundRoutes(db: Db) {
     const communityId = c.get('communityId');
     const roundId = c.req.param('id');
     if (!requireRoundId(roundId)) {
-      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Rodada inválida' } }, 400);
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Convite inválido' } }, 400);
     }
     const round = findRoundById(db, roundId);
     if (!round || round.community_id !== communityId) {
-      return c.json({ error: { code: 'NOT_FOUND', message: 'Rodada não encontrada' } }, 404);
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Convite não encontrado' } }, 404);
     }
 
     const page = Math.max(1, Number(c.req.query('page') ?? 1));
@@ -152,14 +184,14 @@ export function createAdminRoundRoutes(db: Db) {
     const communityId = c.get('communityId');
     const roundId = c.req.param('id');
     if (!requireRoundId(roundId)) {
-      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Rodada inválida' } }, 400);
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Convite inválido' } }, 400);
     }
     const round = findRoundById(db, roundId);
     if (!round || round.community_id !== communityId) {
-      return c.json({ error: { code: 'NOT_FOUND', message: 'Rodada não encontrada' } }, 404);
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Convite não encontrado' } }, 404);
     }
     if (round.status !== 'open') {
-      return c.json({ error: { code: 'ROUND_NOT_OPEN', message: 'Rodada não está aberta' } }, 400);
+      return c.json({ error: { code: 'ROUND_NOT_OPEN', message: 'Inscrições não estão abertas' } }, 400);
     }
 
     const members = loadMatchingMembers(db, communityId, roundId);
@@ -181,14 +213,14 @@ export function createAdminRoundRoutes(db: Db) {
     const communityId = c.get('communityId');
     const roundId = c.req.param('id');
     if (!requireRoundId(roundId)) {
-      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Rodada inválida' } }, 400);
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Convite inválido' } }, 400);
     }
     const round = findRoundById(db, roundId);
     if (!round || round.community_id !== communityId) {
-      return c.json({ error: { code: 'NOT_FOUND', message: 'Rodada não encontrada' } }, 404);
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Convite não encontrado' } }, 404);
     }
     if (round.status === 'published') {
-      return c.json({ error: { code: 'ALREADY_PUBLISHED', message: 'Rodada já publicada' } }, 400);
+      return c.json({ error: { code: 'ALREADY_PUBLISHED', message: 'Círculos já publicados' } }, 400);
     }
 
     const body = await c.req.json().catch(() => null);
@@ -232,6 +264,35 @@ export function createAdminTemplateRoutes(db: Db) {
   const routes = new Hono<{ Variables: FacilitatorVariables }>();
   const requireFacilitator = createRequireFacilitator(db);
 
+  function mapTemplate(template: NonNullable<ReturnType<typeof findTemplateById>>) {
+    return {
+      id: template.id,
+      name: template.name,
+      circleSize: template.circle_size,
+      durationMinutes: template.duration_minutes,
+    };
+  }
+
+  routes.get('/templates', requireFacilitator, (c) => {
+    const communityId = c.get('communityId');
+    const templates = listMeetingTemplates(db, communityId).map(mapTemplate);
+    return c.json({ templates });
+  });
+
+  routes.post('/templates', requireFacilitator, async (c) => {
+    const communityId = c.get('communityId');
+    const body = await c.req.json().catch(() => null);
+    const parsed = meetingTemplateSchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json(
+        { error: { code: 'VALIDATION_ERROR', message: 'Template inválido', details: parsed.error.issues } },
+        400,
+      );
+    }
+    const created = createMeetingTemplate(db, communityId, parsed.data);
+    return c.json({ template: mapTemplate(created) }, 201);
+  });
+
   routes.get('/templates/:id', requireFacilitator, (c) => {
     const communityId = c.get('communityId');
     const templateId = c.req.param('id');
@@ -243,12 +304,7 @@ export function createAdminTemplateRoutes(db: Db) {
       return c.json({ error: { code: 'NOT_FOUND', message: 'Template não encontrado' } }, 404);
     }
     return c.json({
-      template: {
-        id: template.id,
-        name: template.name,
-        circleSize: template.circle_size,
-        durationMinutes: template.duration_minutes,
-      },
+      template: mapTemplate(template),
     });
   });
 
@@ -274,12 +330,7 @@ export function createAdminTemplateRoutes(db: Db) {
 
     const updated = updateMeetingTemplate(db, templateId, parsed.data)!;
     return c.json({
-      template: {
-        id: updated.id,
-        name: updated.name,
-        circleSize: updated.circle_size,
-        durationMinutes: updated.duration_minutes,
-      },
+      template: mapTemplate(updated),
     });
   });
 
@@ -290,5 +341,6 @@ export function createAdminRoutes(db: Db) {
   const admin = new Hono();
   admin.route('/', createAdminRoundRoutes(db));
   admin.route('/', createAdminTemplateRoutes(db));
+  admin.route('/', createAdminSlotCalendarRoutes(db));
   return admin;
 }

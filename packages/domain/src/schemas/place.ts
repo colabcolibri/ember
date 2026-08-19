@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const placeRefSchema = z.object({
-  provider: z.literal('geoapify'),
+  provider: z.enum(['geoapify', 'photon']),
   placeId: z.string().min(1).max(120),
   city: z.string().min(1).max(120),
   adminArea: z.string().max(120).optional(),

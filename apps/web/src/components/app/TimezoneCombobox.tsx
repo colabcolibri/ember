@@ -48,7 +48,7 @@ export function TimezoneCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('h-11 w-full justify-between rounded-xl font-normal', className)}
+          className={cn('h-11 w-full min-w-0 max-w-full justify-between rounded-xl font-normal', className)}
         >
           <span className="truncate text-left">{selectedLabel}</span>
           <ChevronsUpDownIcon className="ml-2 size-4 shrink-0 opacity-50" />

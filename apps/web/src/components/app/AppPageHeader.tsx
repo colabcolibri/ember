@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 type AppPageHeaderProps = {
-  eyebrow?: string;
+  eyebrow?: ReactNode;
   title: ReactNode;
   lead?: ReactNode;
   actions?: ReactNode;

@@ -1,6 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { AppShell, type AppShellMode } from '@/components/app/AppShell.js';
+import { AppLoading, AppShell, type AppShellMode } from '@/components/app/index.js';
 
 export type AppOutletContext = {
   onAuthenticated: () => void;
@@ -8,6 +7,7 @@ export type AppOutletContext = {
 
 type AppLayoutProps = {
   authed: boolean | null;
+  isFacilitator?: boolean;
   onLoggedOut: () => void;
   onAuthenticated: () => void;
   mode: AppShellMode;
@@ -16,16 +16,16 @@ type AppLayoutProps = {
 };
 
 function AuthLoading({ mode, authed }: { mode: AppShellMode; authed: boolean | null }) {
-  const { t } = useTranslation();
   return (
     <AppShell mode={mode} authed={authed}>
-      <p className="text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+      <AppLoading />
     </AppShell>
   );
 }
 
 export function AppLayout({
   authed,
+  isFacilitator = false,
   onLoggedOut,
   onAuthenticated,
   mode,
@@ -44,7 +44,7 @@ export function AppLayout({
   }
 
   return (
-    <AppShell mode={mode} authed={authed} onLoggedOut={onLoggedOut}>
+    <AppShell mode={mode} authed={authed} isFacilitator={isFacilitator} onLoggedOut={onLoggedOut}>
       <Outlet context={{ onAuthenticated } satisfies AppOutletContext} />
     </AppShell>
   );

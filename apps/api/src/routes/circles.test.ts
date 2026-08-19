@@ -17,8 +17,8 @@ import { createCircleRoutes } from './circles.js';
 import { SESSION_COOKIE } from '../lib/session.js';
 
 const samplePlace = {
-  provider: 'geoapify' as const,
-  placeId: 'place-sp',
+  provider: 'photon' as const,
+  placeId: 'R298019',
   city: 'São Paulo',
   adminArea: 'SP',
   country: 'Brazil',

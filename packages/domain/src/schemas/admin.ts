@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { regionalSlotRefSchema } from './slot-calendar.js';
+import { roundDateTimeSlotInputSchema } from '../meeting/round-slots.js';
 
 export const FACILITATOR_ROUND_SLOTS = [
   'mon-19h',
@@ -10,10 +12,17 @@ export const FACILITATOR_ROUND_SLOTS = [
 
 export type FacilitatorRoundSlot = (typeof FACILITATOR_ROUND_SLOTS)[number];
 
+const legacySlotSchema = z.enum(FACILITATOR_ROUND_SLOTS);
+const roundSlotSelectionSchema = z.union([
+  legacySlotSchema,
+  regionalSlotRefSchema,
+  roundDateTimeSlotInputSchema,
+]);
+
 export const createRoundSchema = z.object({
   theme: z.string().trim().min(3).max(200),
   questions: z.array(z.string().trim().min(3).max(500)).min(1).max(8),
-  slots: z.array(z.enum(FACILITATOR_ROUND_SLOTS)).length(5),
+  slots: z.array(roundSlotSelectionSchema).min(1).max(20),
   templateId: z.string().optional(),
 });
 

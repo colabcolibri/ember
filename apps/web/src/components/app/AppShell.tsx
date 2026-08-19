@@ -11,6 +11,7 @@ export type AppShellMode = 'auth' | 'member' | 'catalog';
 type AppShellProps = {
   mode?: AppShellMode;
   authed?: boolean | null;
+  isFacilitator?: boolean;
   onLoggedOut?: () => void;
   children: ReactNode;
 };
@@ -18,6 +19,7 @@ type AppShellProps = {
 export function AppShell({
   mode = 'member',
   authed,
+  isFacilitator = false,
   onLoggedOut,
   children,
 }: AppShellProps) {
@@ -32,7 +34,7 @@ export function AppShell({
           { to: '/presence', label: t('nav.presence') },
           { to: '/circles', label: t('nav.circles') },
           { to: '/profile', label: t('nav.profile') },
-          { to: '/facilitator', label: t('nav.facilitator') },
+          ...(isFacilitator ? [{ to: '/facilitator', label: t('nav.facilitator') }] : []),
         ]
       : [];
 

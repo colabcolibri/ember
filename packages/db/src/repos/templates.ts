@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type Database from 'better-sqlite3';
 import type { MeetingTemplateInput } from '@ember/domain';
 
@@ -8,6 +9,34 @@ export type MeetingTemplateRow = {
   circle_size: number;
   duration_minutes: number;
 };
+
+export function listMeetingTemplates(
+  db: Database.Database,
+  communityId: string,
+): MeetingTemplateRow[] {
+  return db
+    .prepare(
+      `SELECT id, community_id, name, circle_size, duration_minutes
+       FROM meeting_templates
+       WHERE community_id = ?
+       ORDER BY created_at ASC`,
+    )
+    .all(communityId) as MeetingTemplateRow[];
+}
+
+export function createMeetingTemplate(
+  db: Database.Database,
+  communityId: string,
+  input: MeetingTemplateInput,
+): MeetingTemplateRow {
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO meeting_templates (id, community_id, name, circle_size, duration_minutes, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  ).run(id, communityId, input.name, input.circleSize, input.durationMinutes, now);
+  return findTemplateById(db, id)!;
+}
 
 export function findTemplateById(
   db: Database.Database,

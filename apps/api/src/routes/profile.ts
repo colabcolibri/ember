@@ -1,15 +1,22 @@
 import { Hono } from 'hono';
 import type { ensureDatabaseReady } from '@ember/db';
 import { profileInputSchema } from '@ember/domain';
-import { getMemberProfile, parseMemberProfilePlaces, upsertMemberProfile } from '@ember/db';
+import { getMemberProfile, getMemberRole, parseMemberProfilePlaces, upsertMemberProfile } from '@ember/db';
 import { createRequireAuth, resolveCommunityId, type AppVariables } from '../lib/session.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
+
+const FACILITATOR_ROLES = new Set(['facilitador', 'org_admin']);
+
+function isFacilitatorRole(role: string | null): boolean {
+  return Boolean(role && FACILITATOR_ROLES.has(role));
+}
 
 function serializeProfile(
   communityId: string,
   userId: string,
   row: ReturnType<typeof getMemberProfile>,
+  role: string | null,
 ) {
   const { originPlace, residencePlace } = parseMemberProfilePlaces(row);
 
@@ -24,6 +31,8 @@ function serializeProfile(
       originPlace: null,
       residencePlace: null,
       updatedAt: null as string | null,
+      role: role ?? 'member',
+      isFacilitator: isFacilitatorRole(role),
     };
   }
 
@@ -37,6 +46,8 @@ function serializeProfile(
     originPlace,
     residencePlace,
     updatedAt: row.updated_at,
+    role: role ?? 'member',
+    isFacilitator: isFacilitatorRole(role),
   };
 }
 
@@ -52,7 +63,8 @@ export function createProfileRoutes(db: Db) {
     }
 
     const row = getMemberProfile(db, communityId, userId);
-    return c.json(serializeProfile(communityId, userId, row));
+    const role = getMemberRole(db, communityId, userId);
+    return c.json(serializeProfile(communityId, userId, row, role));
   });
 
   profile.put('/profile', requireAuth, async (c) => {
@@ -72,7 +84,8 @@ export function createProfileRoutes(db: Db) {
     }
 
     const row = upsertMemberProfile(db, communityId, userId, parsed.data);
-    return c.json(serializeProfile(communityId, userId, row));
+    const role = getMemberRole(db, communityId, userId);
+    return c.json(serializeProfile(communityId, userId, row, role));
   });
 
   return profile;

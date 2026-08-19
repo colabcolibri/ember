@@ -15,18 +15,18 @@ export function DesignPatternsPage() {
 
       <AppCard title="List pattern">
         <div className="grid gap-3">
-          <CircleListRow id="1" communityName="GSA" question="Pergunta da rodada" status="open" />
-          <CircleListRow id="2" communityName="GSA" question="Outra roda" />
+          <CircleListRow id="1" communityName="GSA" question="Pergunta do encontro" status="open" />
+          <CircleListRow id="2" communityName="GSA" question="Outro círculo" />
         </div>
       </AppCard>
 
       <AppCard title="Detail pattern">
-        Convite da roda com ações primárias empilhadas no mobile.
+        Convite do círculo com ações primárias empilhadas no mobile.
       </AppCard>
 
       <AppEmptyState
-        title="Nenhuma rodada aberta"
-        description="Volte quando o facilitador abrir uma nova rodada."
+        title="Nenhuma inscrição aberta"
+        description="Volte quando o facilitador abrir um novo convite."
       />
     </AppPage>
   );

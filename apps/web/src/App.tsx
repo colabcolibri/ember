@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { AppShell } from './components/app/AppShell.js';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { AppLoading, AppShell } from './components/app/index.js';
 import { AppLayout } from './layouts/AppLayout.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { PresencePage } from './pages/PresencePage.js';
@@ -13,15 +11,13 @@ import { DesignIndexPage } from './pages/design/DesignIndexPage.js';
 import { DesignTokensPage } from './pages/design/DesignTokensPage.js';
 import { DesignComponentsPage } from './pages/design/DesignComponentsPage.js';
 import { DesignPatternsPage } from './pages/design/DesignPatternsPage.js';
-import { apiFetch } from './lib/api.js';
+import { useSession } from './lib/useSession.js';
 
 function HomeRedirect({ authed }: { authed: boolean | null }) {
-  const { t } = useTranslation();
-
   if (authed === null) {
     return (
       <AppShell mode="member" authed={null}>
-        <p className="text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+        <AppLoading />
       </AppShell>
     );
   }
@@ -29,29 +25,32 @@ function HomeRedirect({ authed }: { authed: boolean | null }) {
   return <Navigate to={authed ? '/presence' : '/login'} replace />;
 }
 
+function FacilitatorRoute({
+  authed,
+  isFacilitator,
+}: {
+  authed: boolean | null;
+  isFacilitator: boolean;
+}) {
+  if (authed === null) {
+    return <AppLoading />;
+  }
+
+  if (!isFacilitator) {
+    return <Navigate to="/presence" replace />;
+  }
+
+  return <FacilitatorPage />;
+}
+
 export function App() {
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    apiFetch('/me/profile')
-      .then(() => setAuthed(true))
-      .catch(() => setAuthed(false));
-  }, []);
-
-  function handleLoggedOut() {
-    setAuthed(false);
-    navigate('/login', { replace: true });
-  }
-
-  function handleAuthenticated() {
-    setAuthed(true);
-  }
+  const { authed, isFacilitator, onAuthenticated, onLoggedOut } = useSession();
 
   const layoutProps = {
     authed,
-    onLoggedOut: handleLoggedOut,
-    onAuthenticated: handleAuthenticated,
+    isFacilitator,
+    onLoggedOut,
+    onAuthenticated,
   };
 
   return (
@@ -65,7 +64,10 @@ export function App() {
         <Route path="/circles" element={<CirclesPage />} />
         <Route path="/circles/:id" element={<CircleDetailPage />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/facilitator" element={<FacilitatorPage />} />
+        <Route
+          path="/facilitator"
+          element={<FacilitatorRoute authed={authed} isFacilitator={isFacilitator} />}
+        />
       </Route>
 
       {import.meta.env.DEV ? (

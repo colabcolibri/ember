@@ -1,6 +1,15 @@
 import type { EmailLocale } from './email-locale.js';
-import { EMAIL_BRAND } from './email-brand.js';
-import { ctaButton, emailPlainLink, escapeHtml, wrapEmailDocument } from './email-layout.js';
+import {
+  ctaButton,
+  emailBulletList,
+  emailLead,
+  emailMuted,
+  emailNumberedList,
+  emailParagraph,
+  emailPlainLink,
+  emailSectionLabel,
+  wrapEmailDocument,
+} from './email-layout.js';
 
 export type RoundOpenEmailContent = {
   subject: string;
@@ -8,34 +17,83 @@ export type RoundOpenEmailContent = {
   html: string;
 };
 
-export function buildRoundOpenEmailContent(input: {
+function buildRoundOpenText(input: {
   theme: string;
   questions: string[];
-  slots: string[];
+  slotLabels: string[];
   presenceUrl: string;
-  locale?: EmailLocale;
-}): RoundOpenEmailContent {
-  const locale = input.locale ?? 'pt';
-  const slotsText = input.slots.join(', ');
-  const questionsText = input.questions.map((q, index) => `${index + 1}. ${q}`).join(' ');
-  const intro =
-    locale === 'pt'
-      ? `Nova rodada aberta na Ember. Tema: "${input.theme}". Perguntas: ${questionsText}. Horários: ${slotsText}.`
-      : `A new Ember round is open. Theme: "${input.theme}". Questions: ${questionsText}. Slots: ${slotsText}.`;
+  locale: EmailLocale;
+}): string {
+  const { locale } = input;
+  const title = locale === 'pt' ? 'Inscrições abertas na Ember' : 'New Ember round is open';
+  const themeLabel = locale === 'pt' ? 'Tema' : 'Theme';
+  const questionsLabel = locale === 'pt' ? 'Perguntas' : 'Questions';
+  const slotsLabel = locale === 'pt' ? 'Horários disponíveis' : 'Available slots';
   const cta = locale === 'pt' ? 'Declarar presença' : 'Declare presence';
   const footer =
     locale === 'pt'
       ? 'Você recebe este email por ser membro da comunidade piloto.'
       : 'You receive this email as a pilot community member.';
 
-  const text = [intro, '', input.presenceUrl, '', footer].join('\n');
+  const questionsBlock = input.questions.map((q, index) => `${index + 1}. ${q}`).join('\n');
+  const slotsBlock = input.slotLabels.map((slot) => `• ${slot}`).join('\n');
+
+  return [
+    title,
+    '',
+    `${themeLabel}: "${input.theme}"`,
+    '',
+    `${questionsLabel}:`,
+    questionsBlock,
+    '',
+    `${slotsLabel}:`,
+    slotsBlock,
+    '',
+    `${cta}: ${input.presenceUrl}`,
+    '',
+    footer,
+  ].join('\n');
+}
+
+export function buildRoundOpenEmailContent(input: {
+  theme: string;
+  questions: string[];
+  slotLabels: string[];
+  presenceUrl: string;
+  locale?: EmailLocale;
+}): RoundOpenEmailContent {
+  const locale = input.locale ?? 'pt';
+  const title = locale === 'pt' ? 'Inscrições abertas' : 'New round open';
+  const themeLabel = locale === 'pt' ? 'Tema' : 'Theme';
+  const questionsLabel = locale === 'pt' ? 'Perguntas' : 'Questions';
+  const slotsLabel = locale === 'pt' ? 'Horários disponíveis' : 'Available slots';
+  const intro =
+    locale === 'pt'
+      ? 'As inscrições estão abertas. Escolha um horário e declare sua presença.'
+      : 'A new round is open. Pick a slot and declare your presence.';
+  const cta = locale === 'pt' ? 'Declarar presença' : 'Declare presence';
+  const footer =
+    locale === 'pt'
+      ? 'Você recebe este email por ser membro da comunidade piloto.'
+      : 'You receive this email as a pilot community member.';
+
+  const text = buildRoundOpenText({ ...input, locale });
+
   const panel = `
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.55;color:${EMAIL_BRAND.colors.text};">${escapeHtml(intro)}</p>
+    ${emailLead(title)}
+    ${emailMuted(intro)}
+    ${emailSectionLabel(themeLabel)}
+    ${emailParagraph(input.theme)}
+    ${emailSectionLabel(questionsLabel)}
+    ${emailNumberedList(input.questions)}
+    ${emailSectionLabel(slotsLabel)}
+    ${emailBulletList(input.slotLabels)}
     ${ctaButton(cta, input.presenceUrl)}
     ${emailPlainLink(input.presenceUrl, locale === 'pt' ? 'Ou copie o link' : 'Or copy the link')}`;
+
   const html = wrapEmailDocument(locale, panel, footer);
   const subject =
-    locale === 'pt' ? 'Nova rodada aberta — Ember' : 'New round open — Ember';
+    locale === 'pt' ? 'Inscrições abertas — Ember' : 'New round open — Ember';
   return { subject, text, html };
 }
 
@@ -53,11 +111,14 @@ export function buildCircleFormedEmailContent(input: {
   locale?: EmailLocale;
 }): CircleFormedEmailContent {
   const locale = input.locale ?? 'pt';
+  const title = locale === 'pt' ? 'Seu círculo está pronto' : 'Your circle is ready';
   const intro =
     locale === 'pt'
-      ? `Sua roda foi formada. Pergunta: "${input.question}". Horário: ${input.whenLabel}.`
-      : `Your circle is ready. Question: "${input.question}". Time: ${input.whenLabel}.`;
-  const ctaCircle = locale === 'pt' ? 'Ver convite da roda' : 'View circle invite';
+      ? 'Seu trio está confirmado. Veja os detalhes abaixo e entre no encontro no horário marcado.'
+      : 'Your trio is confirmed. See the details below and join at the scheduled time.';
+  const questionLabel = locale === 'pt' ? 'Pergunta do encontro' : 'Circle question';
+  const whenLabel = locale === 'pt' ? 'Horário do encontro' : 'Time';
+  const ctaCircle = locale === 'pt' ? 'Ver convite do círculo' : 'View circle invite';
   const ctaJitsi = locale === 'pt' ? 'Entrar no Jitsi' : 'Join Jitsi';
   const footer =
     locale === 'pt'
@@ -65,7 +126,12 @@ export function buildCircleFormedEmailContent(input: {
       : 'Attachment: .ics file to add to your calendar.';
 
   const text = [
+    title,
+    '',
     intro,
+    '',
+    `${questionLabel}: "${input.question}"`,
+    `${whenLabel}: ${input.whenLabel}`,
     '',
     input.circleUrl,
     input.jitsiUrl,
@@ -74,14 +140,19 @@ export function buildCircleFormedEmailContent(input: {
   ].join('\n');
 
   const panel = `
-    <p style="margin:0 0 16px;font-size:16px;line-height:1.55;color:${EMAIL_BRAND.colors.text};">${escapeHtml(intro)}</p>
+    ${emailLead(title)}
+    ${emailMuted(intro)}
+    ${emailSectionLabel(questionLabel)}
+    ${emailParagraph(input.question)}
+    ${emailSectionLabel(whenLabel)}
+    ${emailParagraph(input.whenLabel)}
     ${ctaButton(ctaCircle, input.circleUrl)}
     ${ctaButton(ctaJitsi, input.jitsiUrl)}
-    ${emailPlainLink(input.circleUrl, locale === 'pt' ? 'Detalhes da roda' : 'Circle details')}`;
+    ${emailPlainLink(input.circleUrl, locale === 'pt' ? 'Detalhes do círculo' : 'Circle details')}`;
 
   const html = wrapEmailDocument(locale, panel, footer);
   const subject =
-    locale === 'pt' ? 'Sua roda Ember está pronta' : 'Your Ember circle is ready';
+    locale === 'pt' ? 'Seu círculo Ember está pronto' : 'Your Ember circle is ready';
 
   return { subject, text, html };
 }

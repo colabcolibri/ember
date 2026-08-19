@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
   AppAlert,
   AppButton,
   AppCard,
+  AppLoading,
   AppPage,
   AttendancePrompt,
   CircleInviteCard,
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { useInitialLoad } from '../lib/useInitialLoad.js';
 
 type CircleDetail = {
   id: string;
@@ -49,8 +51,12 @@ export function CircleDetailPage() {
     setMembers(res.members);
   };
 
-  useEffect(() => {
-    load().catch((e) => setError(formatApiError(e, t)));
+  const { initialLoading } = useInitialLoad(async () => {
+    try {
+      await load();
+    } catch (e) {
+      setError(formatApiError(e, t));
+    }
   }, [id, t]);
 
   const confirm = async () => {
@@ -84,10 +90,18 @@ export function CircleDetailPage() {
     }
   };
 
+  if (initialLoading) {
+    return (
+      <AppPage>
+        <AppLoading />
+      </AppPage>
+    );
+  }
+
   if (!circle) {
     return (
       <AppPage>
-        <p className="text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+        {error ? <AppAlert variant="error">{error}</AppAlert> : null}
       </AppPage>
     );
   }

@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppAlert, AppEmptyState, AppPage, CircleListRow } from '../components/app/index.js';
+import { AppAlert, AppEmptyState, AppLoading, AppPage, CircleListRow } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { useInitialLoad } from '../lib/useInitialLoad.js';
 
 type CircleSummary = {
   id: string;
@@ -18,19 +19,20 @@ export function CirclesPage() {
   const { t } = useTranslation();
   const [circles, setCircles] = useState<CircleSummary[]>([]);
   const [error, setError] = useState('');
-  const [initialLoading, setInitialLoading] = useState(true);
 
-  useEffect(() => {
-    apiFetch<{ circles: CircleSummary[] }>('/circles')
-      .then((res) => setCircles(res.circles))
-      .catch((e) => setError(formatApiError(e, t)))
-      .finally(() => setInitialLoading(false));
+  const { initialLoading } = useInitialLoad(async () => {
+    try {
+      const res = await apiFetch<{ circles: CircleSummary[] }>('/circles');
+      setCircles(res.circles);
+    } catch (e) {
+      setError(formatApiError(e, t));
+    }
   }, [t]);
 
   if (initialLoading) {
     return (
       <AppPage title={t('circles.title')} lead={t('circles.subtitle')}>
-        <p className="text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+        <AppLoading />
       </AppPage>
     );
   }
