@@ -75,7 +75,7 @@ export function GatheringListRow({ gathering, statusLabel, className }: Gatherin
             </div>
             <div className="space-y-1">
               <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-                {t('facilitator.roundTheme')}
+                {t('facilitator.theme')}
               </p>
               <p className="font-serif text-xl leading-snug font-medium text-foreground group-hover:text-primary sm:text-2xl">
                 {title}

@@ -161,12 +161,12 @@ export function DesignComponentsPage() {
       <section id="invite" className="space-y-3">
         <h2 className="font-serif text-2xl">Circle invite</h2>
         <CircleInviteCard
-          communityName="GSA"
+          communityName="Ember Community / Comunidade Ember"
           question="O que você precisa ouvir hoje?"
           when="Quarta, 19h"
           status="invited"
         />
-        <CircleListRow id="demo" communityName="GSA" question="Encontro de abril" status="open" />
+        <CircleListRow id="demo" communityName="Ember Community / Comunidade Ember" question="Encontro de abril / April gathering" status="open" />
       </section>
 
       <section id="attendance" className="space-y-3">

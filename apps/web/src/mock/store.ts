@@ -1,15 +1,19 @@
 import type { PlaceRef } from '../lib/place.js';
 import { isFacilitatorDemoEmail } from '../lib/mock-mode.js';
 import {
+  MOCK_COMMUNITY_NAME,
   MOCK_DECLARATIONS,
   MOCK_PLACES,
+  MOCK_QUESTIONS,
   MOCK_REGIONAL_SLOTS,
   MOCK_ROUND_ID,
   MOCK_TEMPLATES,
+  MOCK_THEMES,
   MOCK_TRIOS,
+  MOCK_UNMATCHED_COUNT,
 } from './data.js';
 
-const STORAGE_KEY = 'ember-mock-v2';
+const STORAGE_KEY = 'ember-mock-v3';
 
 type MockSession = {
   email: string;
@@ -123,36 +127,52 @@ function seedRounds(): MockRound[] {
     {
       id: MOCK_ROUND_ID,
       status: 'open',
-      theme: 'Pontes entre gerações',
-      questions: [
-        'O que você herdou — e o que escolheu deixar para trás?',
-        'Quem te ensinou a escutar de verdade?',
-        'Que ponte você gostaria de construir nesta rodada?',
-      ],
+      theme: MOCK_THEMES.open,
+      questions: [...MOCK_QUESTIONS.open],
       createdAt: '2026-08-19T18:00:00.000Z',
-      templateId: 'tpl-fogo',
+      templateId: 'tpl-council',
       circleCount: 0,
       declarations: seedDeclarations(),
     },
     {
       id: 'mock-round-published',
       status: 'published',
-      theme: 'Escuta e pertencimento',
-      questions: ['Quando foi a última vez que você se sentiu verdadeiramente ouvido?'],
+      theme: MOCK_THEMES.published,
+      questions: [...MOCK_QUESTIONS.published],
       createdAt: '2026-08-05T18:00:00.000Z',
-      templateId: 'tpl-fogo',
-      circleCount: 2,
-      declarations: MOCK_DECLARATIONS.slice(0, 3).map((item) => ({ ...item })),
+      templateId: 'tpl-council',
+      circleCount: 3,
+      declarations: MOCK_DECLARATIONS.slice(0, 7).map((item) => ({ ...item })),
     },
     {
       id: 'mock-round-closed',
       status: 'closed',
-      theme: 'Pontes entre culturas',
-      questions: ['O que te surpreendeu em alguém de outra geração?'],
+      theme: MOCK_THEMES.closedCulture,
+      questions: [...MOCK_QUESTIONS.closedCulture],
       createdAt: '2026-07-20T18:00:00.000Z',
       templateId: 'tpl-cafe',
       circleCount: 0,
-      declarations: MOCK_DECLARATIONS.slice(0, 2).map((item) => ({ ...item })),
+      declarations: MOCK_DECLARATIONS.slice(2, 8).map((item) => ({ ...item })),
+    },
+    {
+      id: 'mock-round-closed-2',
+      status: 'closed',
+      theme: MOCK_THEMES.closedRoots,
+      questions: [...MOCK_QUESTIONS.closedRoots],
+      createdAt: '2026-06-28T18:00:00.000Z',
+      templateId: 'tpl-walk',
+      circleCount: 1,
+      declarations: MOCK_DECLARATIONS.slice(0, 5).map((item) => ({ ...item })),
+    },
+    {
+      id: 'mock-round-archived',
+      status: 'published',
+      theme: MOCK_THEMES.archived,
+      questions: [...MOCK_QUESTIONS.archived],
+      createdAt: '2026-05-15T18:00:00.000Z',
+      templateId: 'tpl-council',
+      circleCount: 2,
+      declarations: MOCK_DECLARATIONS.slice(4, 10).map((item) => ({ ...item })),
     },
   ];
 }
@@ -177,12 +197,12 @@ function maskEmail(email: string): string {
 }
 
 function defaultProfile(email?: string): MockProfile {
-  const localPart = email?.split('@')[0]?.replace(/[._-]/g, ' ') ?? 'Ana Demo';
+  const localPart = email?.split('@')[0]?.replace(/[._-]/g, ' ') ?? 'Alex Demo';
   const displayName = localPart.charAt(0).toUpperCase() + localPart.slice(1);
 
   return {
     displayName,
-    editionYear: 2019,
+    editionYear: 2024,
     timezone: 'America/Sao_Paulo',
     languages: ['pt', 'en'],
     originPlace: MOCK_PLACES[0] ?? null,
@@ -192,41 +212,81 @@ function defaultProfile(email?: string): MockProfile {
 }
 
 function defaultCircles(): MockCircle[] {
+  const q1 = MOCK_QUESTIONS.open[0]!;
+  const q2 = MOCK_QUESTIONS.published[0]!;
+  const q3 = MOCK_QUESTIONS.closedRoots[0]!;
+
   return [
     {
       id: 'circle-invited',
       status: 'scheduled',
-      question: 'O que você herdou — e o que escolheu deixar para trás?',
-      communityName: 'GSA · Edição 2019',
+      question: q1,
+      communityName: MOCK_COMMUNITY_NAME,
       scheduledSlot: 'Qua 19:00 (BRT)',
-      scheduledAt: 'Quarta, 28 de ago · 19:00',
-      jitsiUrl: 'https://meet.jit.si/ember-demo-trio-1',
+      scheduledAt: 'Quarta, 28 de ago · 19:00 / Wed, Aug 28 · 7:00 PM',
+      jitsiUrl: 'https://meet.jit.si/ember-demo-circle-1',
       durationMinutes: 60,
       canRecordAttendance: false,
       myStatus: 'invited',
       myAttendance: null,
       members: [
-        { userId: 'm1', label: 'Você', status: 'invited', attendance: null },
-        { userId: 'm2', label: 'Marina S.', status: 'confirmed', attendance: null },
-        { userId: 'm3', label: 'Jonas K.', status: 'confirmed', attendance: null },
+        { userId: 'm-you', label: 'Você · You', status: 'invited', attendance: null },
+        { userId: 'u-marina', label: 'Marina Silva · Marina S.', status: 'confirmed', attendance: null },
+        { userId: 'u-jonas', label: 'Jonas Keller · Jonas K.', status: 'confirmed', attendance: null },
+      ],
+    },
+    {
+      id: 'circle-upcoming',
+      status: 'scheduled',
+      question: q2,
+      communityName: MOCK_COMMUNITY_NAME,
+      scheduledSlot: 'Dom 13:00 (CET)',
+      scheduledAt: 'Domingo, 31 de ago · 13:00 / Sun, Aug 31 · 1:00 PM',
+      jitsiUrl: 'https://meet.jit.si/ember-demo-circle-2',
+      durationMinutes: 60,
+      canRecordAttendance: false,
+      myStatus: 'confirmed',
+      myAttendance: null,
+      members: [
+        { userId: 'm-you', label: 'Você · You', status: 'confirmed', attendance: null },
+        { userId: 'u-sofia', label: 'Sofia Martins · Sofia M.', status: 'confirmed', attendance: null },
+        { userId: 'u-alex', label: 'Alex Chen · Alex C.', status: 'confirmed', attendance: null },
       ],
     },
     {
       id: 'circle-attendance',
       status: 'completed',
-      question: 'Quando foi a última vez que você se sentiu verdadeiramente ouvido?',
-      communityName: 'GSA · Edição 2019',
+      question: q2,
+      communityName: MOCK_COMMUNITY_NAME,
       scheduledSlot: 'Seg 19:00 (BRT)',
-      scheduledAt: 'Segunda, 12 de ago · 19:00',
+      scheduledAt: 'Segunda, 12 de ago · 19:00 / Mon, Aug 12 · 7:00 PM',
       jitsiUrl: null,
       durationMinutes: 60,
       canRecordAttendance: true,
       myStatus: 'confirmed',
       myAttendance: null,
       members: [
-        { userId: 'm1', label: 'Você', status: 'confirmed', attendance: null },
-        { userId: 'm4', label: 'Priya M.', status: 'confirmed', attendance: null },
-        { userId: 'm5', label: 'Lucas A.', status: 'confirmed', attendance: null },
+        { userId: 'm-you', label: 'Você · You', status: 'confirmed', attendance: null },
+        { userId: 'u-priya', label: 'Priya Mehta · Priya M.', status: 'confirmed', attendance: null },
+        { userId: 'u-lucas', label: 'Lucas Almeida · Lucas A.', status: 'confirmed', attendance: null },
+      ],
+    },
+    {
+      id: 'circle-past',
+      status: 'completed',
+      question: q3,
+      communityName: MOCK_COMMUNITY_NAME,
+      scheduledSlot: 'Ter 20:00 (CET)',
+      scheduledAt: 'Terça, 5 de ago · 20:00 / Tue, Aug 5 · 8:00 PM',
+      jitsiUrl: null,
+      durationMinutes: 45,
+      canRecordAttendance: false,
+      myStatus: 'confirmed',
+      myAttendance: 'yes',
+      members: [
+        { userId: 'm-you', label: 'Você · You', status: 'confirmed', attendance: 'yes' },
+        { userId: 'u-elena', label: 'Elena Rossi · Elena R.', status: 'confirmed', attendance: 'yes' },
+        { userId: 'u-noah', label: 'Noah Williams · Noah W.', status: 'confirmed', attendance: 'yes' },
       ],
     },
   ];
@@ -456,7 +516,7 @@ export const mockStore = {
     if (!circle) throw new Error('circle not found');
     circle.myStatus = 'confirmed';
     circle.members = circle.members.map((member) =>
-      member.label === 'Você' ? { ...member, status: 'confirmed' } : member,
+      member.userId === 'm-you' ? { ...member, status: 'confirmed' } : member,
     );
     persist();
   },
@@ -467,7 +527,7 @@ export const mockStore = {
     if (!circle) throw new Error('circle not found');
     circle.myAttendance = happened ? 'yes' : 'no';
     circle.members = circle.members.map((member) =>
-      member.label === 'Você'
+      member.userId === 'm-you'
         ? { ...member, attendance: happened ? 'yes' : 'no' }
         : member,
     );
@@ -563,7 +623,7 @@ export const mockStore = {
     if (!round || round.status !== 'open') throw new Error('round not found');
     return {
       trios: MOCK_TRIOS.map((trio) => ({ ...trio, memberIds: [...trio.memberIds] as [string, string, string] })),
-      unmatched: 1,
+      unmatched: MOCK_UNMATCHED_COUNT,
     };
   },
 
@@ -573,7 +633,7 @@ export const mockStore = {
     const round = findRound(state, roundId);
     if (!round || round.status !== 'open') throw new Error('round not found');
     round.status = 'published';
-    round.circleCount = 2;
+    round.circleCount = 3;
     persist();
     return { published: true };
   },

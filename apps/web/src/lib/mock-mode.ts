@@ -14,11 +14,11 @@ export const MOCK_DEMO_PRESENCE = {
 };
 
 export const MOCK_DEMO_ROUND_DRAFT = {
-  templateId: 'tpl-fogo',
-  theme: 'Pontes entre gerações',
+  templateId: 'tpl-council',
+  theme: 'Pontes entre gerações / Bridges across generations',
   questions: [
-    'O que você herdou — e o que escolheu deixar para trás?',
-    'Quem te ensinou a escutar de verdade?',
+    'O que você herdou — e o que escolheu deixar para trás? / What did you inherit — and what did you choose to leave behind?',
+    'Quem te ensinou a escutar de verdade? / Who taught you to listen for real?',
   ],
   slots: [
     {

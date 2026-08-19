@@ -29,7 +29,7 @@ The first pilot runs with a specific community (GSA) using a ritual called *Fogo
 1. **Sign in** via magic link—no passwords to manage.
 2. **Declare presence** for an open round: availability slots, languages, and intention (*surprise me*, *cross a frontier*, or *ease*).
 3. **Receive an invitation** when a compatible circle is published.
-4. **Join the gathering** via Jitsi link and calendar attachment (`.ics`) in email.
+4. **Join the gathering** via Jitsi link and calendar attachment (`.ics`) — full stack only; see [demo limitations](#github-pages-demo-pnpm-devmock) below.
 
 ### Facilitator flow
 
@@ -44,12 +44,40 @@ After gatherings, members can confirm whether the circle happened—memory that 
 
 ## MVP features
 
-- Magic-link authentication
-- Presence declaration (availability, languages, intention)
-- Assisted matching with memory across rounds
-- Jitsi meeting links and `.ics` calendar attachments in email
-- Facilitator panel (rounds, matching review, publish)
-- Gatherings list for facilitators
+### Implemented (full stack — `pnpm dev`)
+
+| Area | Status |
+| ---- | ------ |
+| Magic-link authentication | ✅ Real emails in dev (Mailpit); demo uses code `123456` |
+| Member profile | ✅ Name, cohort year, timezone (IANA), languages, origin/residence |
+| Presence declaration | ✅ Regional slot calendars, intention, ritual questions |
+| Facilitator panel | ✅ Templates, open rounds, assisted matching, publish circles |
+| Gatherings list | ✅ Open/closed rounds, presence list, round metadata |
+| Jitsi meeting links | ✅ Generated on publish; **Join Jitsi** on circle detail |
+| Calendar `.ics` | ✅ Download from API; attached to circle-formed emails |
+| Transactional email | ✅ `round_open` + `circle_formed` (Mailpit dev / Resend prod) |
+| Post-gathering attendance | ✅ “Did the circle happen?” for matching memory |
+
+### Not yet
+
+| Area | Notes |
+| ---- | ----- |
+| **Edit gathering** | UI placeholder only — cannot change theme, questions, or slots after opening |
+| **Community admin** | No tenant/config UI (`org_admin` role exists in API only) |
+| **Automated matching** | MVP 1 — today the facilitator runs match and publishes manually |
+| **Reminders** | MVP 1 — no 24h / 15min emails yet |
+| **WhatsApp / Meet** | MVP 2+ |
+| **Real pilot** | No production round with a live community yet |
+
+### GitHub Pages demo (`pnpm dev:mock`)
+
+The [live demo](https://colabcolibri.github.io/ember/) is a **frontend-only mock** — useful for UI walkthroughs, not for end-to-end flows:
+
+- ✅ Login, profile, presence, facilitator panel, gatherings list
+- ❌ No real email delivery
+- ❌ No `.ics` download (no API on static hosting)
+- ❌ Jitsi link only on **seeded** circle data (`Meus encontros` → open the invited circle); publishing in the mock does not create new circles with video links
+- ❌ Nothing persists beyond your browser (`localStorage`)
 
 ---
 

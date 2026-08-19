@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
-const MARK_SRC = '/brand/ember-mark.svg';
-const LOGO_SRC = '/brand/ember-logo.svg';
+const MARK_SRC = `${import.meta.env.BASE_URL}brand/ember-mark.svg`;
+const LOGO_SRC = `${import.meta.env.BASE_URL}brand/ember-logo.svg`;
 
 type AppBrandProps = {
   className?: string;

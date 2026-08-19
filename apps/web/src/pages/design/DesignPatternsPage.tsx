@@ -15,8 +15,8 @@ export function DesignPatternsPage() {
 
       <AppCard title="List pattern">
         <div className="grid gap-3">
-          <CircleListRow id="1" communityName="GSA" question="Pergunta do encontro" status="open" />
-          <CircleListRow id="2" communityName="GSA" question="Outro encontro" />
+          <CircleListRow id="1" communityName="Ember Community" question="Pergunta / Question" status="open" />
+          <CircleListRow id="2" communityName="Ember Community" question="Outro encontro / Another gathering" />
         </div>
       </AppCard>
 

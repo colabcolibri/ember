@@ -65,7 +65,7 @@ export function GatheringOverviewCard({ gathering, statusLabel }: GatheringOverv
 
         <div className="space-y-2">
           <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-            {t('facilitator.roundTheme')}
+            {t('facilitator.theme')}
           </p>
           <h2 className="font-serif text-[clamp(1.75rem,4vw,2.5rem)] leading-tight font-bold text-foreground">
             {title}
