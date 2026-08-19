@@ -6,6 +6,34 @@ import { createRequireAuth, resolveCommunityId, type AppVariables } from '../lib
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
+function serializeProfile(
+  communityId: string,
+  userId: string,
+  row: ReturnType<typeof getMemberProfile>,
+) {
+  if (!row) {
+    return {
+      communityId,
+      userId,
+      displayName: '',
+      editionYear: null as number | null,
+      timezone: 'America/Sao_Paulo',
+      languages: ['pt'] as string[],
+      updatedAt: null as string | null,
+    };
+  }
+
+  return {
+    communityId: row.community_id,
+    userId: row.user_id,
+    displayName: row.display_name ?? '',
+    editionYear: row.edition_year,
+    timezone: row.timezone ?? 'America/Sao_Paulo',
+    languages: row.languages_json ? (JSON.parse(row.languages_json) as string[]) : ['pt'],
+    updatedAt: row.updated_at,
+  };
+}
+
 export function createProfileRoutes(db: Db) {
   const profile = new Hono<{ Variables: AppVariables }>();
   const requireAuth = createRequireAuth(db);
@@ -18,23 +46,7 @@ export function createProfileRoutes(db: Db) {
     }
 
     const row = getMemberProfile(db, communityId, userId);
-    if (!row) {
-      return c.json({
-        communityId,
-        userId,
-        timezone: 'America/Sao_Paulo',
-        languages: ['pt'],
-        updatedAt: null,
-      });
-    }
-
-    return c.json({
-      communityId: row.community_id,
-      userId: row.user_id,
-      timezone: row.timezone ?? 'America/Sao_Paulo',
-      languages: row.languages_json ? (JSON.parse(row.languages_json) as string[]) : ['pt'],
-      updatedAt: row.updated_at,
-    });
+    return c.json(serializeProfile(communityId, userId, row));
   });
 
   profile.put('/profile', requireAuth, async (c) => {
@@ -54,13 +66,7 @@ export function createProfileRoutes(db: Db) {
     }
 
     const row = upsertMemberProfile(db, communityId, userId, parsed.data);
-    return c.json({
-      communityId: row.community_id,
-      userId: row.user_id,
-      timezone: row.timezone,
-      languages: JSON.parse(row.languages_json ?? '["pt"]'),
-      updatedAt: row.updated_at,
-    });
+    return c.json(serializeProfile(communityId, userId, row));
   });
 
   return profile;

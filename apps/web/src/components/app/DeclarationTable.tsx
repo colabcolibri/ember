@@ -9,6 +9,7 @@ import {
 
 export type DeclarationRow = {
   userId: string;
+  memberLabel: string;
   emailMasked: string;
   slots: string[];
   intention: string;
@@ -40,7 +41,7 @@ export function DeclarationTable({ items, emptyMessage }: DeclarationTableProps)
         <TableBody>
           {items.map((row) => (
             <TableRow key={row.userId}>
-              <TableCell className="font-medium">{row.emailMasked}</TableCell>
+              <TableCell className="font-medium">{row.memberLabel}</TableCell>
               <TableCell>{row.slots.join(', ')}</TableCell>
               <TableCell>{row.intention}</TableCell>
               <TableCell>{row.languages.join(', ')}</TableCell>

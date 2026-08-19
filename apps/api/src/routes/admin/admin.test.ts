@@ -92,6 +92,8 @@ describe('admin routes', () => {
     for (const id of ids) {
       ensureCommunityMember(db, communityId, id);
       upsertMemberProfile(db, communityId, id, {
+        displayName: 'Pilot',
+        editionYear: 2021,
         timezone: 'America/Sao_Paulo',
         languages: ['pt'],
       });

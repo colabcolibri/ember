@@ -13,6 +13,7 @@ import {
   TrioPreview,
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
+import { formatApiError } from '../lib/api-errors.js';
 import { cn } from '@/lib/utils';
 
 const FACILITATOR_SLOTS = ['mon-19h', 'tue-19h', 'wed-19h', 'thu-19h', 'sat-10h'] as const;
@@ -26,6 +27,7 @@ type Template = {
 
 type Declaration = {
   userId: string;
+  memberLabel: string;
   emailMasked: string;
   slots: string[];
   intention: string;
@@ -56,7 +58,7 @@ export function FacilitatorPage() {
   useEffect(() => {
     apiFetch<{ template: Template }>('/admin/templates/tpl-gsa-fogo')
       .then((res) => setTemplate(res.template))
-      .catch(() => setError(t('common.apiOffline')));
+      .catch((err) => setError(formatApiError(err, t)));
   }, [t]);
 
   const toggleSlot = (slot: string) => {
@@ -84,7 +86,7 @@ export function FacilitatorPage() {
       setMessage(t('facilitator.roundCreated'));
       await loadDeclarations(res.round.id);
     } catch (e) {
-      setError(e instanceof Error ? e.message : t('facilitator.error'));
+      setError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -108,7 +110,7 @@ export function FacilitatorPage() {
       setUnmatched(res.unmatched);
       setMessage(t('facilitator.matchReady'));
     } catch (e) {
-      setError(e instanceof Error ? e.message : t('facilitator.error'));
+      setError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -126,7 +128,7 @@ export function FacilitatorPage() {
       setPublishOpen(false);
       setMessage(t('facilitator.published'));
     } catch (e) {
-      setError(e instanceof Error ? e.message : t('facilitator.error'));
+      setError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -148,7 +150,7 @@ export function FacilitatorPage() {
       setTemplate(res.template);
       setMessage(t('facilitator.templateSaved'));
     } catch (e) {
-      setError(e instanceof Error ? e.message : t('facilitator.error'));
+      setError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }

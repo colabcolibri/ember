@@ -10,6 +10,7 @@ import {
   IntentionPicker,
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
+import { formatApiError } from '../lib/api-errors.js';
 
 type RoundResponse = {
   round: { id: string; status: string } | null;
@@ -34,7 +35,7 @@ export function PresencePage() {
         setRoundId(data.round?.id ?? null);
         setSlots(data.slots);
       })
-      .catch(() => setError(t('common.apiOffline')));
+      .catch((err) => setError(formatApiError(err, t)));
   }, [t]);
 
   function toggleSlot(slot: string) {
@@ -54,8 +55,8 @@ export function PresencePage() {
         body: JSON.stringify({ slots: selectedSlots, intention }),
       });
       setMessage(t('presence.saved'));
-    } catch {
-      setError(t('common.apiOffline'));
+    } catch (err) {
+      setError(formatApiError(err, t));
     } finally {
       setLoading(false);
     }

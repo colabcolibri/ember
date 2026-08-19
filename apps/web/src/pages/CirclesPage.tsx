@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppAlert, AppEmptyState, AppPage, CircleListRow } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
+import { formatApiError } from '../lib/api-errors.js';
 
 type CircleSummary = {
   id: string;
@@ -21,7 +22,7 @@ export function CirclesPage() {
   useEffect(() => {
     apiFetch<{ circles: CircleSummary[] }>('/circles')
       .then((res) => setCircles(res.circles))
-      .catch((e) => setError(e instanceof Error ? e.message : t('common.apiOffline')));
+      .catch((e) => setError(formatApiError(e, t)));
   }, [t]);
 
   return (

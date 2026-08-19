@@ -17,12 +17,14 @@ import {
   CircleListRow,
   IntentionPicker,
   LanguageChipPicker,
+  TimezoneCombobox,
   TrioPreview,
 } from '@/components/app';
 
 export function DesignComponentsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
+  const [timezone, setTimezone] = useState('America/Sao_Paulo');
 
   return (
     <AppPage title="Components" lead="Templates App* com variantes e estados.">
@@ -57,6 +59,13 @@ export function DesignComponentsPage() {
         <h2 className="font-serif text-2xl">Form field</h2>
         <AppFormField label="Email" htmlFor="demo-email">
           <AppInput id="demo-email" type="email" placeholder="voce@exemplo.com" />
+        </AppFormField>
+      </section>
+
+      <section id="timezone" className="max-w-md space-y-3">
+        <h2 className="font-serif text-2xl">Timezone combobox</h2>
+        <AppFormField label="Fuso horário" htmlFor="demo-timezone">
+          <TimezoneCombobox id="demo-timezone" value={timezone} onChange={setTimezone} />
         </AppFormField>
       </section>
 

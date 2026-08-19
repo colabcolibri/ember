@@ -10,6 +10,7 @@ import {
   CircleInviteCard,
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
+import { formatApiError } from '../lib/api-errors.js';
 
 type CircleDetail = {
   id: string;
@@ -49,7 +50,7 @@ export function CircleDetailPage() {
   };
 
   useEffect(() => {
-    load().catch((e) => setError(e instanceof Error ? e.message : t('common.apiOffline')));
+    load().catch((e) => setError(formatApiError(e, t)));
   }, [id, t]);
 
   const confirm = async () => {
@@ -60,7 +61,7 @@ export function CircleDetailPage() {
       setMessage(t('circles.confirmed'));
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : t('common.apiOffline'));
+      setError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }
@@ -77,7 +78,7 @@ export function CircleDetailPage() {
       setMessage(happened ? t('circles.attendanceYes') : t('circles.attendanceNo'));
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : t('common.apiOffline'));
+      setError(formatApiError(e, t));
     } finally {
       setLoading(false);
     }

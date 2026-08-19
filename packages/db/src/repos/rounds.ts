@@ -60,6 +60,7 @@ export function createMatchingRound(
 
 export type DeclarationListItem = {
   userId: string;
+  memberLabel: string;
   emailMasked: string;
   slots: string[];
   intention: string;
@@ -80,7 +81,7 @@ export function listRoundDeclarations(
   const offset = (page - 1) * limit;
   const rows = db
     .prepare(
-      `SELECT rd.user_id, rd.slots_json, rd.intention, mp.languages_json, mp.timezone, u.email_vault
+      `SELECT rd.user_id, rd.slots_json, rd.intention, mp.display_name, mp.languages_json, mp.timezone, u.email_vault
        FROM round_declarations rd
        JOIN users u ON u.id = rd.user_id
        LEFT JOIN member_profiles mp ON mp.user_id = rd.user_id
@@ -92,6 +93,7 @@ export function listRoundDeclarations(
     user_id: string;
     slots_json: string;
     intention: string;
+    display_name: string | null;
     languages_json: string | null;
     timezone: string | null;
     email_vault: string | null;
@@ -99,9 +101,12 @@ export function listRoundDeclarations(
 
   const items = rows.map((row) => {
     const email = row.email_vault ? decryptRecipientEmail(row.email_vault, pepper) : null;
+    const emailMasked = maskEmail(email ?? 'unknown');
+    const displayName = row.display_name?.trim();
     return {
       userId: row.user_id,
-      emailMasked: maskEmail(email ?? 'unknown'),
+      memberLabel: displayName || emailMasked,
+      emailMasked,
       slots: JSON.parse(row.slots_json) as string[],
       intention: row.intention,
       languages: row.languages_json ? (JSON.parse(row.languages_json) as string[]) : [],

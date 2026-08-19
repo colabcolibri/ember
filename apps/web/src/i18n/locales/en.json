@@ -33,7 +33,13 @@
   },
   "profile": {
     "title": "Your profile",
+    "displayName": "Name",
+    "editionYear": "Cohort year",
     "timezone": "Timezone",
+    "timezonePlaceholder": "Select time zone",
+    "timezoneSearch": "Search city or region…",
+    "timezoneEmpty": "No time zone found.",
+    "timezoneBrowseHint": "Showing the first results. Search to browse all time zones.",
     "languages": "Languages",
     "save": "Save profile",
     "saved": "Profile saved."
@@ -65,7 +71,11 @@
   },
   "common": {
     "loading": "Loading…",
-    "apiOffline": "API offline"
+    "apiNetworkError": "Cannot reach the server. Check your connection and try again.",
+    "apiSessionExpired": "Your session expired. Please sign in again.",
+    "apiServerError": "Server error. Please try again shortly.",
+    "apiClientError": "Could not complete the action.",
+    "apiGenericError": "Something went wrong. Please try again."
   },
   "facilitator": {
     "title": "Facilitator panel",

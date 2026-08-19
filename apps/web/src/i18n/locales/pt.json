@@ -33,7 +33,13 @@
   },
   "profile": {
     "title": "Seu perfil",
+    "displayName": "Nome",
+    "editionYear": "Ano da edição",
     "timezone": "Fuso horário",
+    "timezonePlaceholder": "Selecione o fuso",
+    "timezoneSearch": "Buscar cidade ou região…",
+    "timezoneEmpty": "Nenhum fuso encontrado.",
+    "timezoneBrowseHint": "Mostrando os primeiros resultados. Busque para ver todos os fusos.",
     "languages": "Idiomas",
     "save": "Salvar perfil",
     "saved": "Perfil salvo."
@@ -65,7 +71,11 @@
   },
   "common": {
     "loading": "Carregando…",
-    "apiOffline": "API offline"
+    "apiNetworkError": "Sem conexão com o servidor. Verifique sua internet e tente de novo.",
+    "apiSessionExpired": "Sua sessão expirou. Faça login novamente.",
+    "apiServerError": "Erro no servidor. Tente de novo em instantes.",
+    "apiClientError": "Não foi possível concluir a ação.",
+    "apiGenericError": "Algo deu errado. Tente novamente."
   },
   "facilitator": {
     "title": "Painel do facilitador",

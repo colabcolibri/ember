@@ -39,6 +39,8 @@ describe('circle routes', () => {
     userId = upsertUserByEmail(db, 'member@example.com', pepper);
     ensureCommunityMember(db, communityId, userId);
     upsertMemberProfile(db, communityId, userId, {
+      displayName: 'Member',
+      editionYear: 2020,
       timezone: 'America/Sao_Paulo',
       languages: ['pt'],
     });
@@ -47,7 +49,12 @@ describe('circle routes', () => {
     const peers = ['a@example.com', 'b@example.com'].map((email) => {
       const id = upsertUserByEmail(db, email, pepper);
       ensureCommunityMember(db, communityId, id);
-      upsertMemberProfile(db, communityId, id, { timezone: 'America/Sao_Paulo', languages: ['pt'] });
+      upsertMemberProfile(db, communityId, id, {
+        displayName: 'Peer',
+        editionYear: 2019,
+        timezone: 'America/Sao_Paulo',
+        languages: ['pt'],
+      });
       return id;
     });
 
