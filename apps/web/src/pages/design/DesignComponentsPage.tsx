@@ -115,7 +115,7 @@ export function DesignComponentsPage() {
         <AppAlertDialog
           open={alertDialogOpen}
           onOpenChange={setAlertDialogOpen}
-          title="Publicar círculos?"
+          title="Publicar encontros?"
           description="Esta ação envia convites para todos os trios."
           body="Revise o preview antes de continuar."
           cancelLabel="Cancelar"
@@ -128,7 +128,7 @@ export function DesignComponentsPage() {
       <section id="empty" className="space-y-3">
         <h2 className="font-serif text-2xl">Empty state</h2>
         <AppEmptyState
-          title="Nenhum círculo no momento"
+          title="Nenhum encontro no momento"
           description="Quando um convite for publicado, seu encontro aparecerá aqui."
         />
       </section>
@@ -166,7 +166,7 @@ export function DesignComponentsPage() {
           when="Quarta, 19h"
           status="invited"
         />
-        <CircleListRow id="demo" communityName="GSA" question="Círculo de abril" status="open" />
+        <CircleListRow id="demo" communityName="GSA" question="Encontro de abril" status="open" />
       </section>
 
       <section id="attendance" className="space-y-3">

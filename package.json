@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @ember/config build && pnpm -r --parallel dev",
+    "dev:mock": "pnpm --filter @ember/config build && pnpm --filter @ember/web dev:mock",
     "build": "pnpm -r build",
+    "build:mock": "pnpm --filter @ember/config build && pnpm --filter @ember/web build:mock",
     "test": "pnpm -r test",
     "db:migrate": "pnpm --filter @ember/db migrate"
   },

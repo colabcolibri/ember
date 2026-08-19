@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   AppAlert,
@@ -39,6 +40,7 @@ export function FacilitatorPage() {
   const { t } = useTranslation();
   const [templates, setTemplates] = useState<MeetingTemplate[]>([]);
   const [roundId, setRoundId] = useState<string | null>(null);
+  const [slotLabels, setSlotLabels] = useState<Record<string, string>>({});
   const [declarations, setDeclarations] = useState<Declaration[]>([]);
   const [trios, setTrios] = useState<Trio[]>([]);
   const [unmatched, setUnmatched] = useState(0);
@@ -55,9 +57,20 @@ export function FacilitatorPage() {
     return res.templates;
   };
 
+  const loadCurrentRound = async () => {
+    const current = await apiFetch<{
+      round: { id: string; slotLabels?: Record<string, string> } | null;
+    }>('/admin/matching-rounds/current');
+    if (!current.round) return;
+    setRoundId(current.round.id);
+    setSlotLabels(current.round.slotLabels ?? {});
+    await loadDeclarations(current.round.id);
+  };
+
   const { initialLoading } = useInitialLoad(async () => {
     try {
       await loadTemplates();
+      await loadCurrentRound();
     } catch (err) {
       if (err instanceof ApiError && err.status === 403) {
         setAccessDenied(true);
@@ -83,6 +96,7 @@ export function FacilitatorPage() {
       setRoundId(res.round.id);
       setActiveTab('round');
       setMessage(t('facilitator.roundCreated'));
+      setSlotLabels({});
       await loadDeclarations(res.round.id);
     } catch (e) {
       setError(formatApiError(e, t));
@@ -210,6 +224,15 @@ export function FacilitatorPage() {
               <FacilitatorRoundPanel templates={templates} loading={loading} onCreateRound={createRound} />
 
               {roundId ? (
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-muted-foreground">{t('facilitator.viewGatheringsHint')}</p>
+                  <AppButton asChild variant="outline" className="w-full sm:w-auto">
+                    <Link to="/facilitator/gatherings">{t('nav.gatherings')}</Link>
+                  </AppButton>
+                </div>
+              ) : null}
+
+              {roundId ? (
                 <div className="grid w-full gap-8 lg:grid-cols-12">
                   <AppCard
                     title={t('facilitator.declarations')}
@@ -218,6 +241,7 @@ export function FacilitatorPage() {
                     <DeclarationTable
                       items={declarations}
                       emptyMessage={t('facilitator.noDeclarations')}
+                      slotLabels={slotLabels}
                     />
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                       <AppButton

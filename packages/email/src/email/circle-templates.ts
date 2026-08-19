@@ -111,14 +111,14 @@ export function buildCircleFormedEmailContent(input: {
   locale?: EmailLocale;
 }): CircleFormedEmailContent {
   const locale = input.locale ?? 'pt';
-  const title = locale === 'pt' ? 'Seu círculo está pronto' : 'Your circle is ready';
+  const title = locale === 'pt' ? 'Seu encontro está pronto' : 'Your circle is ready';
   const intro =
     locale === 'pt'
       ? 'Seu trio está confirmado. Veja os detalhes abaixo e entre no encontro no horário marcado.'
       : 'Your trio is confirmed. See the details below and join at the scheduled time.';
   const questionLabel = locale === 'pt' ? 'Pergunta do encontro' : 'Circle question';
   const whenLabel = locale === 'pt' ? 'Horário do encontro' : 'Time';
-  const ctaCircle = locale === 'pt' ? 'Ver convite do círculo' : 'View circle invite';
+  const ctaCircle = locale === 'pt' ? 'Ver convite do encontro' : 'View circle invite';
   const ctaJitsi = locale === 'pt' ? 'Entrar no Jitsi' : 'Join Jitsi';
   const footer =
     locale === 'pt'
@@ -148,11 +148,11 @@ export function buildCircleFormedEmailContent(input: {
     ${emailParagraph(input.whenLabel)}
     ${ctaButton(ctaCircle, input.circleUrl)}
     ${ctaButton(ctaJitsi, input.jitsiUrl)}
-    ${emailPlainLink(input.circleUrl, locale === 'pt' ? 'Detalhes do círculo' : 'Circle details')}`;
+    ${emailPlainLink(input.circleUrl, locale === 'pt' ? 'Detalhes do encontro' : 'Circle details')}`;
 
   const html = wrapEmailDocument(locale, panel, footer);
   const subject =
-    locale === 'pt' ? 'Seu círculo Ember está pronto' : 'Your Ember circle is ready';
+    locale === 'pt' ? 'Seu encontro Ember está pronto' : 'Your Ember circle is ready';
 
   return { subject, text, html };
 }

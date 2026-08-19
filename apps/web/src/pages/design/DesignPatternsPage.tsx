@@ -16,12 +16,12 @@ export function DesignPatternsPage() {
       <AppCard title="List pattern">
         <div className="grid gap-3">
           <CircleListRow id="1" communityName="GSA" question="Pergunta do encontro" status="open" />
-          <CircleListRow id="2" communityName="GSA" question="Outro círculo" />
+          <CircleListRow id="2" communityName="GSA" question="Outro encontro" />
         </div>
       </AppCard>
 
       <AppCard title="Detail pattern">
-        Convite do círculo com ações primárias empilhadas no mobile.
+        Convite do encontro com ações primárias empilhadas no mobile.
       </AppCard>
 
       <AppEmptyState

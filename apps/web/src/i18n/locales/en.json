@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "Ember",
-    "tagline": "Small gatherings, with intention"
+    "tagline": "Small gatherings, with intention",
+    "demoBanner": "Demo mockup — fictional data, no real backend."
   },
   "nav": {
     "login": "Sign in",
@@ -9,6 +10,7 @@
     "presence": "Presence",
     "circles": "My circles",
     "facilitator": "Facilitator",
+    "gatherings": "Gatherings",
     "logout": "Sign out"
   },
   "login": {
@@ -29,7 +31,16 @@
     "changeEmail": "Use another email",
     "success": "If the email is registered, you will receive a code shortly.",
     "error": "Could not send the code. Please try again.",
-    "codeError": "Invalid or expired code. Please try again."
+    "codeError": "Invalid or expired code. Please try again.",
+    "demoTitle": "Demo mode",
+    "demoSubtitle": "Everything is pre-filled — just tap sign in.",
+    "demoPrefilledHint": "Email and code are ready ({{code}}). Tap sign in to demo, or pick member/facilitator below.",
+    "demoSubmit": "Sign in to demo",
+    "demoMember": "Member",
+    "demoFacilitator": "Facilitator",
+    "demoHint": "Use any email. The verification code is {{code}}.",
+    "demoCodeHint": "Enter {{code}} to sign in.",
+    "demoFacilitatorHint": "To open the facilitator panel, use an email containing \"facilitator\"."
   },
   "profile": {
     "title": "Your profile",
@@ -149,8 +160,42 @@
     "officialTime": "Official time",
     "createRound": "Open round",
     "roundCreated": "Round opened.",
-    "declarations": "Sign-ups",
-    "noDeclarations": "No sign-ups yet.",
+    "declarations": "Confirmed presence",
+    "noDeclarations": "No presence declared yet.",
+    "gatheringsTitle": "Gatherings",
+    "gatheringsSubtitle": "Open and closed invitations in your community. Tap a gathering to see who declared presence.",
+    "gatheringsOpenSection": "Open",
+    "gatheringsClosedSection": "Closed",
+    "gatheringDetailTitle": "Gathering presence",
+    "gatheringDetailSubtitle": "Members who declared presence for this invitation.",
+    "backToGatherings": "Back to gatherings",
+    "noGatherings": "No gatherings yet",
+    "noGatheringsHint": "Open sign-ups from the facilitator panel to create the first gathering.",
+    "untitledGathering": "Ember gathering",
+    "viewGatheringsHint": "See all gatherings and presence on the gatherings list.",
+    "gatheringMoreQuestions": "+{{count}} more question(s)",
+    "gatheringTemplateMeta": "{{name}} · {{size}} people · {{minutes}} min",
+    "gatheringQuestionsMeta": "{{count}} question(s)",
+    "gatheringSlotsMeta": "{{count}} time slot(s)",
+    "gatheringSlotsTitle": "Offered time slots",
+    "gatheringCirclesMeta": "{{count}} circle(s) formed",
+    "gatheringOpenedOn": "Opened on {{date}}",
+    "editGathering": "Edit gathering",
+    "editGatheringSoon": "Editing gathering content is coming soon.",
+    "gatheringStatus": {
+      "open": "Sign-ups open",
+      "closed": "Closed",
+      "published": "Published"
+    },
+    "confirmedCount": "{{count}} confirmed",
+    "goToPanel": "Go to facilitator panel",
+    "table": {
+      "member": "Member",
+      "slots": "Times",
+      "intention": "Intention",
+      "languages": "Languages",
+      "timezone": "Time zone"
+    },
     "refresh": "Refresh list",
     "runMatch": "Run matching",
     "matchReady": "Preview ready — review before publishing.",

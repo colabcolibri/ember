@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 type NavItem = {
   to: string;
   label: ReactNode;
+  end?: boolean;
 };
 
 type AppNavProps = {
@@ -14,10 +15,11 @@ type AppNavProps = {
   utilities: ReactNode;
 };
 
-function NavLinkItem({ to, children }: { to: string; children: ReactNode }) {
+function NavLinkItem({ to, end, children }: { to: string; end?: boolean; children: ReactNode }) {
   return (
     <NavLink
       to={to}
+      end={end}
       className={({ isActive }) =>
         cn(
           'rounded-lg px-2.5 py-1 text-xs font-semibold tracking-wide transition-colors sm:px-3 sm:py-1.5 sm:text-sm',
@@ -46,7 +48,7 @@ export function AppNav({ homeTo, items, utilities }: AppNavProps) {
         {items.length > 0 ? (
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5 sm:gap-1">
             {items.map((item) => (
-              <NavLinkItem key={item.to} to={item.to}>
+              <NavLinkItem key={item.to} to={item.to} end={item.end}>
                 {item.label}
               </NavLinkItem>
             ))}

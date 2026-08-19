@@ -15,13 +15,78 @@ export type RoundDetailRow = RoundRow & {
   questions_json: string | null;
   slots_json: string | null;
   template_id: string | null;
+  created_at: string;
 };
+
+export type MatchingRoundListItem = {
+  id: string;
+  status: string;
+  theme: string | null;
+  question: string | null;
+  questionsJson: string | null;
+  slotsJson: string | null;
+  templateId: string | null;
+  templateName: string | null;
+  circleSize: number | null;
+  durationMinutes: number | null;
+  createdAt: string;
+  declarationCount: number;
+  circleCount: number;
+};
+
+export function listMatchingRounds(
+  db: Database.Database,
+  communityId: string,
+): MatchingRoundListItem[] {
+  const rows = db
+    .prepare(
+      `SELECT r.id, r.status, r.theme, r.question, r.questions_json, r.slots_json, r.template_id, r.created_at,
+              mt.name AS template_name, mt.circle_size, mt.duration_minutes,
+              (SELECT COUNT(*) FROM round_declarations rd WHERE rd.round_id = r.id) AS declaration_count,
+              (SELECT COUNT(*) FROM circles c WHERE c.round_id = r.id) AS circle_count
+       FROM rounds r
+       LEFT JOIN meeting_templates mt ON mt.id = r.template_id
+       WHERE r.community_id = ?
+       ORDER BY r.created_at DESC`,
+    )
+    .all(communityId) as {
+    id: string;
+    status: string;
+    theme: string | null;
+    question: string | null;
+    questions_json: string | null;
+    slots_json: string | null;
+    template_id: string | null;
+    template_name: string | null;
+    circle_size: number | null;
+    duration_minutes: number | null;
+    created_at: string;
+    declaration_count: number;
+    circle_count: number;
+  }[];
+
+  return rows.map((row) => ({
+    id: row.id,
+    status: row.status,
+    theme: row.theme,
+    question: row.question,
+    questionsJson: row.questions_json,
+    slotsJson: row.slots_json,
+    templateId: row.template_id,
+    templateName: row.template_name,
+    circleSize: row.circle_size,
+    durationMinutes: row.duration_minutes,
+    createdAt: row.created_at,
+    declarationCount: row.declaration_count,
+    circleCount: row.circle_count,
+  }));
+}
 
 export function findOpenRound(db: Database.Database, communityId: string): RoundDetailRow | null {
   return (
     (db
       .prepare(
-        `SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id
+        `SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id, created_at
          FROM rounds WHERE community_id = ? AND status = 'open' ORDER BY created_at DESC LIMIT 1`,
       )
       .get(communityId) as RoundDetailRow | undefined) ?? null
@@ -32,7 +97,7 @@ export function findRoundById(db: Database.Database, roundId: string): RoundDeta
   return (
     (db
       .prepare(
-        'SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id FROM rounds WHERE id = ?',
+        'SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id, created_at FROM rounds WHERE id = ?',
       )
       .get(roundId) as RoundDetailRow | undefined) ?? null
   );

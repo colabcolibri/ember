@@ -182,7 +182,7 @@ describe('circle formed template', () => {
     });
 
     expect(content.text).toContain('Pergunta do encontro');
-    expect(content.html).toContain('Seu círculo está pronto');
+    expect(content.html).toContain('Seu encontro está pronto');
     expect(content.html).toContain('Entrar no Jitsi');
   });
 });

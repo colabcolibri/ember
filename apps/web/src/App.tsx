@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import type { ReactNode } from 'react';
 import { AppLoading, AppShell } from './components/app/index.js';
 import { AppLayout } from './layouts/AppLayout.js';
 import { LoginPage } from './pages/LoginPage.js';
@@ -6,6 +7,8 @@ import { PresencePage } from './pages/PresencePage.js';
 import { CirclesPage } from './pages/CirclesPage.js';
 import { CircleDetailPage } from './pages/CircleDetailPage.js';
 import { FacilitatorPage } from './pages/FacilitatorPage.js';
+import { FacilitatorGatheringsPage } from './pages/FacilitatorGatheringsPage.js';
+import { FacilitatorGatheringDetailPage } from './pages/FacilitatorGatheringDetailPage.js';
 import { ProfilePage } from './pages/ProfilePage.js';
 import { DesignIndexPage } from './pages/design/DesignIndexPage.js';
 import { DesignTokensPage } from './pages/design/DesignTokensPage.js';
@@ -28,9 +31,11 @@ function HomeRedirect({ authed }: { authed: boolean | null }) {
 function FacilitatorRoute({
   authed,
   isFacilitator,
+  children,
 }: {
   authed: boolean | null;
   isFacilitator: boolean;
+  children?: ReactNode;
 }) {
   if (authed === null) {
     return <AppLoading />;
@@ -40,7 +45,7 @@ function FacilitatorRoute({
     return <Navigate to="/presence" replace />;
   }
 
-  return <FacilitatorPage />;
+  return children ?? <FacilitatorPage />;
 }
 
 export function App() {
@@ -67,6 +72,22 @@ export function App() {
         <Route
           path="/facilitator"
           element={<FacilitatorRoute authed={authed} isFacilitator={isFacilitator} />}
+        />
+        <Route
+          path="/facilitator/gatherings"
+          element={
+            <FacilitatorRoute authed={authed} isFacilitator={isFacilitator}>
+              <FacilitatorGatheringsPage />
+            </FacilitatorRoute>
+          }
+        />
+        <Route
+          path="/facilitator/gatherings/:id"
+          element={
+            <FacilitatorRoute authed={authed} isFacilitator={isFacilitator}>
+              <FacilitatorGatheringDetailPage />
+            </FacilitatorRoute>
+          }
         />
       </Route>
 

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Table,
   TableBody,
@@ -6,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { formatTimezoneShort } from '@/lib/slot-label.js';
 
 export type DeclarationRow = {
   userId: string;
@@ -20,9 +22,16 @@ export type DeclarationRow = {
 type DeclarationTableProps = {
   items: DeclarationRow[];
   emptyMessage: string;
+  slotLabels?: Record<string, string>;
 };
 
-export function DeclarationTable({ items, emptyMessage }: DeclarationTableProps) {
+function formatSlotList(slots: string[], labels: Record<string, string>): string {
+  return slots.map((slot) => labels[slot] ?? slot).join(' · ');
+}
+
+export function DeclarationTable({ items, emptyMessage, slotLabels = {} }: DeclarationTableProps) {
+  const { t, i18n } = useTranslation();
+
   if (items.length === 0) {
     return <p className="text-sm text-muted-foreground">{emptyMessage}</p>;
   }
@@ -32,19 +41,30 @@ export function DeclarationTable({ items, emptyMessage }: DeclarationTableProps)
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Membro</TableHead>
-            <TableHead>Horários</TableHead>
-            <TableHead>Intenção</TableHead>
-            <TableHead>Idiomas</TableHead>
+            <TableHead>{t('facilitator.table.member')}</TableHead>
+            <TableHead>{t('facilitator.table.slots')}</TableHead>
+            <TableHead>{t('facilitator.table.intention')}</TableHead>
+            <TableHead>{t('facilitator.table.languages')}</TableHead>
+            <TableHead className="hidden md:table-cell">{t('facilitator.table.timezone')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {items.map((row) => (
             <TableRow key={row.userId}>
-              <TableCell className="font-medium">{row.memberLabel}</TableCell>
-              <TableCell>{row.slots.join(', ')}</TableCell>
-              <TableCell>{row.intention}</TableCell>
+              <TableCell>
+                <div className="font-medium">{row.memberLabel}</div>
+                <div className="text-xs text-muted-foreground">{row.emailMasked}</div>
+              </TableCell>
+              <TableCell className="max-w-[14rem] text-sm leading-relaxed">
+                {formatSlotList(row.slots, slotLabels)}
+              </TableCell>
+              <TableCell>
+                {t(`presence.intentions.${row.intention}`, { defaultValue: row.intention })}
+              </TableCell>
               <TableCell>{row.languages.join(', ')}</TableCell>
+              <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
+                {row.timezone ? formatTimezoneShort(row.timezone, i18n.language) : '—'}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

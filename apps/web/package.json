@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mock": "VITE_MOCK=true vite",
     "build": "tsc -p tsconfig.json && vite build",
+    "build:mock": "tsc -p tsconfig.json && vite build --mode mock.production",
     "preview": "vite preview",
+    "preview:mock": "VITE_MOCK=true vite preview",
     "test": "vitest run"
   },
   "dependencies": {

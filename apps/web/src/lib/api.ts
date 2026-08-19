@@ -1,3 +1,6 @@
+import { isMockMode } from './mock-mode.js';
+import { mockApiFetch } from '../mock/api.js';
+
 const API_BASE = '/api/v1';
 
 export type ApiErrorKind = 'network' | 'unauthorized' | 'client' | 'server';
@@ -15,6 +18,10 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  if (isMockMode) {
+    return mockApiFetch<T>(path, init);
+  }
+
   let res: Response;
   try {
     res = await fetch(`${API_BASE}${path}`, {

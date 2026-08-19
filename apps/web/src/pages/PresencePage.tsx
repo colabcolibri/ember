@@ -17,6 +17,7 @@ import {
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
+import { isMockMode, MOCK_DEMO_PRESENCE } from '../lib/mock-mode.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
 
 type RoundResponse = {
@@ -90,6 +91,13 @@ export function PresencePage() {
           setSelectedSlots(saved.declaration.slots);
           setIntention(saved.declaration.intention);
           setAlreadyDeclared(true);
+        } else if (isMockMode) {
+          const available = isRegionalSlots(data.slots)
+            ? data.slots.map((slot) => slot.ref)
+            : data.slots;
+          const prefilled = MOCK_DEMO_PRESENCE.slots.filter((slot) => available.includes(slot));
+          setSelectedSlots(prefilled.length > 0 ? prefilled : available.slice(0, 2));
+          setIntention(MOCK_DEMO_PRESENCE.intention);
         }
       }
     } catch (err) {

@@ -50,11 +50,11 @@ export function createCircleRoutes(db: Db) {
     const userId = c.get('userId');
     const circleId = c.req.param('id');
     if (!circleId) {
-      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Círculo inválido' } }, 400);
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Encontro inválido' } }, 400);
     }
     const circle = getCircleForMember(db, circleId, userId);
     if (!circle) {
-      return c.json({ error: { code: 'NOT_FOUND', message: 'Círculo não encontrado' } }, 404);
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Encontro não encontrado' } }, 404);
     }
     const pepper = requireEmailPepper();
     const members = listCircleMemberDetails(db, circleId, pepper);
@@ -87,11 +87,11 @@ export function createCircleRoutes(db: Db) {
     const userId = c.get('userId');
     const circleId = c.req.param('id');
     if (!circleId) {
-      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Círculo inválido' } }, 400);
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Encontro inválido' } }, 400);
     }
     const circle = getCircleForMember(db, circleId, userId);
     if (!circle) {
-      return c.json({ error: { code: 'NOT_FOUND', message: 'Círculo não encontrado' } }, 404);
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Encontro não encontrado' } }, 404);
     }
     const ics = buildCircleIcs(circle, circle.duration_minutes || 30);
     if (!ics) {
@@ -107,11 +107,11 @@ export function createCircleRoutes(db: Db) {
     const userId = c.get('userId');
     const circleId = c.req.param('id');
     if (!circleId) {
-      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Círculo inválido' } }, 400);
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Encontro inválido' } }, 400);
     }
     const circle = getCircleForMember(db, circleId, userId);
     if (!circle) {
-      return c.json({ error: { code: 'NOT_FOUND', message: 'Círculo não encontrado' } }, 404);
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Encontro não encontrado' } }, 404);
     }
     updateCircleMemberStatus(db, circleId, userId, 'confirmed');
     return c.json({ ok: true, status: 'confirmed' });
@@ -121,11 +121,11 @@ export function createCircleRoutes(db: Db) {
     const userId = c.get('userId');
     const circleId = c.req.param('id');
     if (!circleId) {
-      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Círculo inválido' } }, 400);
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Encontro inválido' } }, 400);
     }
     const circle = getCircleForMember(db, circleId, userId);
     if (!circle) {
-      return c.json({ error: { code: 'NOT_FOUND', message: 'Círculo não encontrado' } }, 404);
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Encontro não encontrado' } }, 404);
     }
     updateCircleMemberStatus(db, circleId, userId, 'declined');
     return c.json({ ok: true, status: 'declined' });
@@ -135,11 +135,11 @@ export function createCircleRoutes(db: Db) {
     const userId = c.get('userId');
     const circleId = c.req.param('id');
     if (!circleId) {
-      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Círculo inválido' } }, 400);
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Encontro inválido' } }, 400);
     }
     const circle = getCircleForMember(db, circleId, userId);
     if (!circle) {
-      return c.json({ error: { code: 'NOT_FOUND', message: 'Círculo não encontrado' } }, 404);
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Encontro não encontrado' } }, 404);
     }
     const duration = circle.duration_minutes || 30;
     if (!isAttendanceWindowOpen(circle.scheduled_at, duration)) {

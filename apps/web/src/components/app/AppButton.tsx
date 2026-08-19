@@ -15,8 +15,22 @@ export function AppButton({
   disabled,
   children,
   className,
+  asChild,
   ...props
 }: AppButtonProps) {
+  if (asChild) {
+    return (
+      <Button
+        asChild
+        disabled={disabled || loading}
+        className={cn('min-h-11', className)}
+        {...props}
+      >
+        {children}
+      </Button>
+    );
+  }
+
   return (
     <Button disabled={disabled || loading} className={cn('min-h-11', className)} {...props}>
       {loading ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}

@@ -91,6 +91,56 @@ describe('admin routes', () => {
     expect(body.round.status).toBe('open');
   });
 
+  it('lists matching rounds for facilitator', async () => {
+    await app.request('/admin/matching-rounds', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `${SESSION_COOKIE}=${facilitatorSession}`,
+      },
+      body: JSON.stringify({ ...roundBody, templateId: 'tpl-gsa-fogo' }),
+    });
+
+    const res = await app.request('/admin/matching-rounds', {
+      headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      rounds: Array<{ id: string; status: string; declarationCount: number }>;
+    };
+    expect(body.rounds.length).toBeGreaterThan(0);
+    expect(body.rounds.some((round) => round.status === 'open')).toBe(true);
+  });
+
+  it('returns current open round with declaration count', async () => {
+    const create = await app.request('/admin/matching-rounds', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `${SESSION_COOKIE}=${facilitatorSession}`,
+      },
+      body: JSON.stringify({ ...roundBody, templateId: 'tpl-gsa-fogo' }),
+    });
+    const created = (await create.json()) as { round: { id: string } };
+
+    upsertRoundDeclaration(db, created.round.id, upsertUserByEmail(db, 'mem@example.com', 'test-pepper'), {
+      slots: ['mon-19h'],
+      intention: 'ease',
+    });
+
+    const res = await app.request('/admin/matching-rounds/current', {
+      headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      round: { id: string; theme: string | null; slotLabels: Record<string, string> } | null;
+      declarationCount: number;
+    };
+    expect(body.round?.id).toBe(created.round.id);
+    expect(body.declarationCount).toBe(1);
+    expect(body.round?.theme).toBe('Conexão');
+  });
+
   it('lists meeting templates', async () => {
     const res = await app.request('/admin/templates', {
       headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },

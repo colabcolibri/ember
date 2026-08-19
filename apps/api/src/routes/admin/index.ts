@@ -3,6 +3,7 @@ import type { ensureDatabaseReady } from '@ember/db';
 import {
   createMatchingRound,
   findDefaultTemplateForCommunity,
+  findOpenRound,
   findRoundById,
   findTemplateById,
   createMeetingTemplate,
@@ -10,15 +11,19 @@ import {
   listCircleMembers,
   listCirclesForRound,
   listRoundDeclarations,
+  listMatchingRounds,
   loadMatchingMembers,
   loadMetPairs,
   publishTriosWithDelivery,
+  resolveRoundSlotOptionsFromJson,
   updateMeetingTemplate,
+  type MatchingRoundListItem,
 } from '@ember/db';
 import {
   createRoundSchema,
   meetingTemplateSchema,
   normalizeCreateRoundSlots,
+  parseRoundSlotsJson,
   proposeTrios,
   publishTriosSchema,
   type CreateRoundInput,
@@ -40,6 +45,95 @@ function requireRoundId(roundId: string | undefined): roundId is string {
 
 function requireTemplateId(templateId: string | undefined): templateId is string {
   return Boolean(templateId?.trim());
+}
+
+function parseRoundQuestions(round: {
+  questions_json: string | null;
+  question: string | null;
+}): string[] {
+  if (round.questions_json) {
+    return JSON.parse(round.questions_json) as string[];
+  }
+  return round.question ? [round.question] : [];
+}
+
+function buildSlotPreview(
+  db: Db,
+  communityId: string,
+  slotsJson: string | null,
+): { slotCount: number; slotPreview: string[]; slotLabels: Record<string, string> } {
+  if (!slotsJson) {
+    return { slotCount: 0, slotPreview: [], slotLabels: {} };
+  }
+
+  const items = parseRoundSlotsJson(slotsJson);
+  const slotOptions = resolveRoundSlotOptionsFromJson(db, communityId, slotsJson, 'America/Sao_Paulo', 'pt');
+  const labels =
+    slotOptions.length > 0
+      ? slotOptions.map((slot) => slot.officialLabel)
+      : items.map((item) => (typeof item === 'string' ? item : item.ref ?? String(item)));
+
+  return {
+    slotCount: items.length,
+    slotPreview: labels.slice(0, 4),
+    slotLabels: Object.fromEntries(
+      slotOptions.length > 0
+        ? slotOptions.map((slot) => [slot.ref, slot.officialLabel])
+        : labels.map((label, index) => [`slot-${index}`, label]),
+    ),
+  };
+}
+
+function mapGatheringSummary(db: Db, communityId: string, row: MatchingRoundListItem) {
+  const questions = row.questionsJson
+    ? (JSON.parse(row.questionsJson) as string[])
+    : row.question
+      ? [row.question]
+      : [];
+  const slots = buildSlotPreview(db, communityId, row.slotsJson);
+
+  return {
+    id: row.id,
+    status: row.status,
+    theme: row.theme,
+    questions,
+    createdAt: row.createdAt,
+    declarationCount: row.declarationCount,
+    templateName: row.templateName,
+    circleSize: row.circleSize,
+    durationMinutes: row.durationMinutes,
+    slotCount: slots.slotCount,
+    slotPreview: slots.slotPreview,
+    circleCount: row.circleCount,
+  };
+}
+
+function mapGatheringDetail(
+  db: Db,
+  communityId: string,
+  round: NonNullable<ReturnType<typeof findRoundById>>,
+  declarationCount: number,
+  circleCount: number,
+) {
+  const questions = parseRoundQuestions(round);
+  const slots = buildSlotPreview(db, communityId, round.slots_json);
+  const template = round.template_id ? findTemplateById(db, round.template_id) : null;
+
+  return {
+    id: round.id,
+    status: round.status,
+    theme: round.theme,
+    questions,
+    createdAt: round.created_at,
+    declarationCount,
+    templateName: template?.name ?? null,
+    circleSize: template?.circle_size ?? null,
+    durationMinutes: template?.duration_minutes ?? null,
+    slotCount: slots.slotCount,
+    slotPreview: slots.slotPreview,
+    circleCount,
+    slotLabels: slots.slotLabels,
+  };
 }
 
 export function createAdminRoundRoutes(db: Db) {
@@ -126,6 +220,46 @@ export function createAdminRoundRoutes(db: Db) {
     );
   });
 
+  routes.get('/matching-rounds', requireFacilitator, (c) => {
+    const communityId = c.get('communityId');
+    const rounds = listMatchingRounds(db, communityId).map((row) =>
+      mapGatheringSummary(db, communityId, row),
+    );
+    return c.json({ rounds });
+  });
+
+  routes.get('/matching-rounds/current', requireFacilitator, (c) => {
+    const communityId = c.get('communityId');
+    const round = findOpenRound(db, communityId);
+    if (!round) {
+      return c.json({ round: null, declarationCount: 0 });
+    }
+
+    const pepper = requireEmailPepper();
+    const { total } = listRoundDeclarations(db, round.id, 1, 1, pepper);
+    const questions = round.questions_json
+      ? (JSON.parse(round.questions_json) as string[])
+      : round.question
+        ? [round.question]
+        : [];
+
+    const slotOptions = round.slots_json
+      ? resolveRoundSlotOptionsFromJson(db, communityId, round.slots_json, 'America/Sao_Paulo', 'pt')
+      : [];
+    const slotLabels = Object.fromEntries(slotOptions.map((slot) => [slot.ref, slot.officialLabel]));
+
+    return c.json({
+      round: {
+        id: round.id,
+        status: round.status,
+        theme: round.theme,
+        questions,
+        slotLabels,
+      },
+      declarationCount: total,
+    });
+  });
+
   routes.get('/matching-rounds/:id', requireFacilitator, (c) => {
     const communityId = c.get('communityId');
     const roundId = c.req.param('id');
@@ -137,6 +271,8 @@ export function createAdminRoundRoutes(db: Db) {
       return c.json({ error: { code: 'NOT_FOUND', message: 'Convite não encontrado' } }, 404);
     }
 
+    const pepper = requireEmailPepper();
+    const { total } = listRoundDeclarations(db, roundId, 1, 1, pepper);
     const circles = listCirclesForRound(db, roundId).map((circle) => ({
       id: circle.id,
       status: circle.status,
@@ -145,15 +281,7 @@ export function createAdminRoundRoutes(db: Db) {
     }));
 
     return c.json({
-      round: {
-        id: round.id,
-        status: round.status,
-        theme: round.theme,
-        questions: round.questions_json ? JSON.parse(round.questions_json) : [],
-        question: round.question,
-        slots: round.slots_json ? JSON.parse(round.slots_json) : [],
-        templateId: round.template_id,
-      },
+      round: mapGatheringDetail(db, communityId, round, total, circles.length),
       circles,
     });
   });
@@ -220,7 +348,7 @@ export function createAdminRoundRoutes(db: Db) {
       return c.json({ error: { code: 'NOT_FOUND', message: 'Convite não encontrado' } }, 404);
     }
     if (round.status === 'published') {
-      return c.json({ error: { code: 'ALREADY_PUBLISHED', message: 'Círculos já publicados' } }, 400);
+      return c.json({ error: { code: 'ALREADY_PUBLISHED', message: 'Encontros já publicados' } }, 400);
     }
 
     const body = await c.req.json().catch(() => null);

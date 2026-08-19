@@ -4,8 +4,109 @@ import { useNavigate, useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../layouts/AppLayout.js';
 import { AppAlert, AppButton, AppCard, AppFormField, AppInput, AppPage } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
+import {
+  isMockMode,
+  MOCK_DEMO_CODE,
+  MOCK_DEMO_EMAIL,
+  MOCK_FACILITATOR_DEMO_EMAIL,
+} from '../lib/mock-mode.js';
 
 type Step = 'email' | 'code';
+
+function MockLoginForm({
+  onAuthenticated,
+}: {
+  onAuthenticated: AppOutletContext['onAuthenticated'];
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState(MOCK_DEMO_EMAIL);
+  const [code, setCode] = useState(MOCK_DEMO_CODE);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function verifyCode(e: FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      await apiFetch('/auth/code/verify', {
+        method: 'POST',
+        body: JSON.stringify({ email, code }),
+      });
+      onAuthenticated();
+      navigate('/presence', { replace: true });
+    } catch {
+      setError(t('login.codeError'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <AppPage centered title={t('login.title')} lead={t('login.demoSubtitle')}>
+      <AppAlert variant="info" title={t('login.demoTitle')}>
+        {t('login.demoPrefilledHint', { code: MOCK_DEMO_CODE })}
+      </AppAlert>
+      <AppCard>
+        <form className="relative z-10 grid gap-6" onSubmit={verifyCode}>
+          <div className="flex flex-wrap gap-2">
+            <AppButton
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setEmail(MOCK_DEMO_EMAIL)}
+            >
+              {t('login.demoMember')}
+            </AppButton>
+            <AppButton
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setEmail(MOCK_FACILITATOR_DEMO_EMAIL)}
+            >
+              {t('login.demoFacilitator')}
+            </AppButton>
+          </div>
+
+          <AppFormField label={t('login.email')} htmlFor="email">
+            <AppInput
+              id="email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </AppFormField>
+
+          <AppFormField label={t('login.code')} htmlFor="code">
+            <AppInput
+              id="code"
+              type="text"
+              name="code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              pattern="\d{6}"
+              maxLength={6}
+              required
+              otp
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            />
+          </AppFormField>
+
+          <AppButton type="submit" variant="ink" size="lg" loading={loading} className="w-full">
+            {t('login.demoSubmit')}
+            <span className="material-symbols-outlined text-lg">arrow_forward</span>
+          </AppButton>
+        </form>
+      </AppCard>
+      {error ? <AppAlert variant="error">{error}</AppAlert> : null}
+    </AppPage>
+  );
+}
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -17,6 +118,10 @@ export function LoginPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (isMockMode) {
+    return <MockLoginForm onAuthenticated={onAuthenticated} />;
+  }
 
   async function requestCode(e: FormEvent) {
     e.preventDefault();

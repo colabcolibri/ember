@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AppButton,
@@ -9,6 +9,7 @@ import {
   type DraftRoundSlot,
   type MeetingTemplate,
 } from './index.js';
+import { isMockMode, MOCK_DEMO_ROUND_DRAFT } from '@/lib/mock-mode.js';
 
 type FacilitatorRoundPanelProps = {
   templates: MeetingTemplate[];
@@ -27,6 +28,26 @@ export function FacilitatorRoundPanel({ templates, loading, onCreateRound }: Fac
   const [theme, setTheme] = useState('');
   const [questions, setQuestions] = useState(['']);
   const [draftSlots, setDraftSlots] = useState<DraftRoundSlot[]>([]);
+
+  useEffect(() => {
+    if (!isMockMode || templates.length === 0) return;
+
+    const template =
+      templates.find((item) => item.id === MOCK_DEMO_ROUND_DRAFT.templateId) ?? templates[0]!;
+
+    setTemplateId(template.id);
+    setTheme(MOCK_DEMO_ROUND_DRAFT.theme);
+    setQuestions([...MOCK_DEMO_ROUND_DRAFT.questions]);
+    setDraftSlots(
+      MOCK_DEMO_ROUND_DRAFT.slots.map((slot) => ({
+        ref: crypto.randomUUID(),
+        timezone: slot.timezone,
+        localDate: slot.localDate,
+        localTime: slot.localTime,
+        officialLabel: slot.officialLabel,
+      })),
+    );
+  }, [templates]);
 
   const selectedTemplate = templates.find((item) => item.id === templateId) ?? null;
 

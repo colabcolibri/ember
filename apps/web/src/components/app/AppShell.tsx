@@ -4,6 +4,7 @@ import { AppLogoutButton } from './AppLogoutButton.js';
 import { AppNav } from './AppNav.js';
 import { LanguageSwitcher } from '../LanguageSwitcher.js';
 import { shellContainerClass } from '@/lib/layout';
+import { isMockMode } from '@/lib/mock-mode.js';
 import { cn } from '@/lib/utils';
 
 export type AppShellMode = 'auth' | 'member' | 'catalog';
@@ -34,7 +35,12 @@ export function AppShell({
           { to: '/presence', label: t('nav.presence') },
           { to: '/circles', label: t('nav.circles') },
           { to: '/profile', label: t('nav.profile') },
-          ...(isFacilitator ? [{ to: '/facilitator', label: t('nav.facilitator') }] : []),
+          ...(isFacilitator
+            ? [
+                { to: '/facilitator/gatherings', label: t('nav.gatherings') },
+                { to: '/facilitator', label: t('nav.facilitator'), end: true },
+              ]
+            : []),
         ]
       : [];
 
@@ -81,6 +87,11 @@ export function AppShell({
         )}
       >
         <header className="mb-6 sm:mb-8">
+          {isMockMode ? (
+            <div className="mb-4 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-center text-sm text-foreground">
+              {t('app.demoBanner')}
+            </div>
+          ) : null}
           <AppNav homeTo={homeTo} items={navItems} utilities={utilities} />
         </header>
 
