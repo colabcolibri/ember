@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AppAlert,
+  AppAlertDialog,
   AppButton,
   AppCard,
-  AppDialog,
   AppFormField,
   AppInput,
+  AppPage,
   AppPageHeader,
   AvailabilityPicker,
   DeclarationTable,
@@ -154,8 +155,7 @@ export function FacilitatorPage() {
   };
 
   return (
-    <div className="grid gap-8">
-      <AppPageHeader title={t('facilitator.title')} lead={t('facilitator.subtitle')} />
+    <AppPage header={<AppPageHeader title={t('facilitator.title')} lead={t('facilitator.subtitle')} />}>
 
       <div className="grid gap-8 lg:grid-cols-12">
         {template ? (
@@ -263,27 +263,21 @@ export function FacilitatorPage() {
         </div>
       ) : null}
 
-      <AppDialog
+      <AppAlertDialog
         open={publishOpen}
         onOpenChange={setPublishOpen}
         title={t('facilitator.publish')}
         description={t('facilitator.matchReady')}
         variant="destructive"
-        body={<p className="text-sm text-muted-foreground">{t('facilitator.unmatched', { count: unmatched })}</p>}
-        footer={
-          <>
-            <AppButton variant="outline" onClick={() => setPublishOpen(false)}>
-              Cancelar
-            </AppButton>
-            <AppButton variant="destructive" onClick={publish} loading={loading}>
-              {t('facilitator.publish')}
-            </AppButton>
-          </>
-        }
+        body={t('facilitator.unmatched', { count: unmatched })}
+        cancelLabel={t('facilitator.cancel')}
+        confirmLabel={t('facilitator.publish')}
+        onConfirm={publish}
+        loading={loading}
       />
 
       {message ? <AppAlert variant="success">{message}</AppAlert> : null}
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
-    </div>
+    </AppPage>
   );
 }

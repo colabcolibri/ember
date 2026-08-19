@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   AppAlert,
   AppEmptyState,
+  AppPage,
   AppPageHeader,
   CircleListRow,
 } from '../components/app/index.js';
@@ -30,9 +31,7 @@ export function CirclesPage() {
   }, [t]);
 
   return (
-    <div className="grid gap-6">
-      <AppPageHeader title={t('circles.title')} lead={t('circles.subtitle')} />
-
+    <AppPage header={<AppPageHeader title={t('circles.title')} lead={t('circles.subtitle')} />}>
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
 
       {circles.length === 0 ? (
@@ -50,6 +49,6 @@ export function CirclesPage() {
           ))}
         </div>
       )}
-    </div>
+    </AppPage>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AppShell } from './components/app/index.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { PresencePage } from './pages/PresencePage.js';
@@ -17,14 +18,26 @@ import { apiFetch } from './lib/api.js';
 function ProductLayout({
   authed,
   variant,
+  onLoggedOut,
   children,
 }: {
   authed: boolean | null;
   variant: 'auth' | 'app' | 'facilitator';
+  onLoggedOut: () => void;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
+
+  if (authed === null && variant !== 'auth') {
+    return (
+      <AppShell variant={variant} authed={authed}>
+        <p className="text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+      </AppShell>
+    );
+  }
+
   return (
-    <AppShell variant={variant} authed={authed}>
+    <AppShell variant={variant} authed={authed} onLoggedOut={onLoggedOut}>
       {children}
     </AppShell>
   );
@@ -33,12 +46,18 @@ function ProductLayout({
 export function App() {
   const [authed, setAuthed] = useState<boolean | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     apiFetch('/me/profile')
       .then(() => setAuthed(true))
       .catch(() => setAuthed(false));
   }, [location.pathname]);
+
+  function handleLoggedOut() {
+    setAuthed(false);
+    navigate('/login', { replace: true });
+  }
 
   return (
     <Routes>
@@ -54,7 +73,7 @@ export function App() {
       <Route
         path="/login"
         element={
-          <ProductLayout authed={authed} variant="auth">
+          <ProductLayout authed={authed} variant="auth" onLoggedOut={handleLoggedOut}>
             <LoginPage />
           </ProductLayout>
         }
@@ -66,7 +85,7 @@ export function App() {
           authed === false ? (
             <Navigate to="/login" replace />
           ) : (
-            <ProductLayout authed={authed} variant="app">
+            <ProductLayout authed={authed} variant="app" onLoggedOut={handleLoggedOut}>
               <CirclesPage />
             </ProductLayout>
           )
@@ -78,7 +97,7 @@ export function App() {
           authed === false ? (
             <Navigate to="/login" replace />
           ) : (
-            <ProductLayout authed={authed} variant="app">
+            <ProductLayout authed={authed} variant="app" onLoggedOut={handleLoggedOut}>
               <CircleDetailPage />
             </ProductLayout>
           )
@@ -90,7 +109,7 @@ export function App() {
           authed === false ? (
             <Navigate to="/login" replace />
           ) : (
-            <ProductLayout authed={authed} variant="facilitator">
+            <ProductLayout authed={authed} variant="facilitator" onLoggedOut={handleLoggedOut}>
               <FacilitatorPage />
             </ProductLayout>
           )
@@ -102,7 +121,7 @@ export function App() {
           authed === false ? (
             <Navigate to="/login" replace />
           ) : (
-            <ProductLayout authed={authed} variant="app">
+            <ProductLayout authed={authed} variant="app" onLoggedOut={handleLoggedOut}>
               <ProfilePage />
             </ProductLayout>
           )
@@ -114,7 +133,7 @@ export function App() {
           authed === false ? (
             <Navigate to="/login" replace />
           ) : (
-            <ProductLayout authed={authed} variant="app">
+            <ProductLayout authed={authed} variant="app" onLoggedOut={handleLoggedOut}>
               <PresencePage />
             </ProductLayout>
           )

@@ -87,6 +87,10 @@ export function markLoginCodeUsed(db: Database.Database, id: string): void {
   );
 }
 
+export function deleteSession(db: Database.Database, sessionId: string): void {
+  db.prepare('DELETE FROM sessions WHERE id = ?').run(sessionId);
+}
+
 export function createSession(
   db: Database.Database,
   userId: string,

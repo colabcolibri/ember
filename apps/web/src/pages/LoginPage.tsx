@@ -7,6 +7,7 @@ import {
   AppCard,
   AppFormField,
   AppInput,
+  AppPage,
   AppPageHeader,
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
@@ -61,13 +62,11 @@ export function LoginPage() {
 
   if (step === 'email') {
     return (
-      <div className="grid gap-8">
-        <AppPageHeader
-          centered
-          title={t('login.title')}
-          lead={t('login.subtitle')}
-        />
-
+      <AppPage
+        header={
+          <AppPageHeader centered title={t('login.title')} lead={t('login.subtitle')} />
+        }
+      >
         <AppCard>
           <form className="relative z-10 grid gap-6" onSubmit={requestCode}>
             <AppFormField label={t('login.email')} htmlFor="email">
@@ -104,23 +103,25 @@ export function LoginPage() {
 
         {message ? <AppAlert variant="success">{message}</AppAlert> : null}
         {error ? <AppAlert variant="error">{error}</AppAlert> : null}
-      </div>
+      </AppPage>
     );
   }
 
   return (
-    <div className="grid gap-8">
-      <AppPageHeader
-        centered
-        title={t('login.verifyTitle')}
-        lead={
-          <>
-            {t('login.codeHintPrefix')}{' '}
-            <span className="font-medium text-foreground">{email}</span>
-          </>
-        }
-      />
-
+    <AppPage
+      header={
+        <AppPageHeader
+          centered
+          title={t('login.verifyTitle')}
+          lead={
+            <>
+              {t('login.codeHintPrefix')}{' '}
+              <span className="font-medium text-foreground">{email}</span>
+            </>
+          }
+        />
+      }
+    >
       <AppCard>
         <form className="relative z-10 grid gap-8" onSubmit={verifyCode}>
           <AppFormField label={t('login.code')} htmlFor="code">
@@ -172,6 +173,6 @@ export function LoginPage() {
 
       {message ? <AppAlert variant="success">{message}</AppAlert> : null}
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
-    </div>
+    </AppPage>
   );
 }

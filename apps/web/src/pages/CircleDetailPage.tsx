@@ -5,6 +5,7 @@ import {
   AppAlert,
   AppButton,
   AppCard,
+  AppPage,
   AppPageHeader,
   AttendancePrompt,
   CircleInviteCard,
@@ -84,14 +85,17 @@ export function CircleDetailPage() {
   };
 
   if (!circle) {
-    return <p className="text-sm text-muted-foreground">{t('common.loading')}</p>;
+    return (
+      <AppPage>
+        <p className="text-center text-sm text-muted-foreground">{t('common.loading')}</p>
+      </AppPage>
+    );
   }
 
   const when = `${t('circles.when')}: ${circle.scheduledAt ?? circle.scheduledSlot ?? '—'}`;
 
   return (
-    <div className="grid gap-6">
-      <AppPageHeader title={t('circles.inviteTitle')} />
+    <AppPage header={<AppPageHeader title={t('circles.inviteTitle')} />}>
 
       <CircleInviteCard
         communityName={circle.communityName}
@@ -148,6 +152,6 @@ export function CircleDetailPage() {
 
       {message ? <AppAlert variant="success">{message}</AppAlert> : null}
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
-    </div>
+    </AppPage>
   );
 }

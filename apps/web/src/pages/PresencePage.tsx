@@ -5,6 +5,7 @@ import {
   AppButton,
   AppCard,
   AppEmptyState,
+  AppPage,
   AppPageHeader,
   AvailabilityPicker,
   IntentionPicker,
@@ -63,21 +64,23 @@ export function PresencePage() {
 
   if (!roundId) {
     return (
-      <div className="grid gap-6">
-        <AppPageHeader eyebrow={t('presence.eyebrow')} title={t('presence.title')} />
+      <AppPage header={<AppPageHeader eyebrow={t('presence.eyebrow')} title={t('presence.title')} />}>
         <AppEmptyState title={t('presence.noRound')} />
-      </div>
+        {error ? <AppAlert variant="error">{error}</AppAlert> : null}
+      </AppPage>
     );
   }
 
   return (
-    <div className="grid gap-6">
-      <AppPageHeader
-        eyebrow={t('presence.eyebrow')}
-        title={t('presence.title')}
-        lead={t('presence.subtitle')}
-      />
-
+    <AppPage
+      header={
+        <AppPageHeader
+          eyebrow={t('presence.eyebrow')}
+          title={t('presence.title')}
+          lead={t('presence.subtitle')}
+        />
+      }
+    >
       <form className="grid gap-6" onSubmit={onSubmit}>
         <AppCard sectionLabel={t('presence.slotsLabel')}>
           <AvailabilityPicker
@@ -112,6 +115,6 @@ export function PresencePage() {
 
       {message ? <AppAlert variant="success">{message}</AppAlert> : null}
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
-    </div>
+    </AppPage>
   );
 }

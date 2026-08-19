@@ -8,7 +8,8 @@
     "profile": "Perfil",
     "presence": "Presença",
     "circles": "Minhas rodas",
-    "facilitator": "Facilitador"
+    "facilitator": "Facilitador",
+    "logout": "Sair"
   },
   "login": {
     "title": "Entrar com email",
@@ -89,6 +90,8 @@
     "unmatched": "{{count}} membro(s) sem trio",
     "publish": "Publicar círculos",
     "published": "Círculos publicados.",
+    "cancel": "Cancelar",
+    "cancel": "Cancelar",
     "error": "Não foi possível concluir a ação.",
     "slots": {
       "mon-19h": "Seg 19h",

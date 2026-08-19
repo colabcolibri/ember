@@ -8,7 +8,8 @@
     "profile": "Profile",
     "presence": "Presence",
     "circles": "My circles",
-    "facilitator": "Facilitator"
+    "facilitator": "Facilitator",
+    "logout": "Sign out"
   },
   "login": {
     "title": "Sign in with email",
@@ -89,6 +90,7 @@
     "unmatched": "{{count}} member(s) without a trio",
     "publish": "Publish circles",
     "published": "Circles published.",
+    "cancel": "Cancel",
     "error": "Could not complete the action.",
     "slots": {
       "mon-19h": "Mon 7pm",

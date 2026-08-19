@@ -37,6 +37,15 @@
   --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
   --font-serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
   --font-mono: 'Space Mono', ui-monospace, monospace;
+  --spacing-page-x: 1.25rem;
+  --width-member: 30rem;
+  --width-facilitator: 60rem;
+  --width-nav: 42rem;
+  --width-nav-wide: 64rem;
+  --max-width-member: var(--width-member);
+  --max-width-facilitator: var(--width-facilitator);
+  --max-width-nav: var(--width-nav);
+  --max-width-nav-wide: var(--width-nav-wide);
 }
 
 @layer base {

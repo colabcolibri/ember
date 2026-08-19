@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   AppAlert,
+  AppAlertDialog,
   AppBadge,
   AppBrand,
   AppButton,
@@ -21,6 +22,7 @@ import {
 
 export function DesignComponentsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
 
   return (
     <div className="grid gap-8">
@@ -87,6 +89,27 @@ export function DesignComponentsPage() {
               <AppButton onClick={() => setDialogOpen(false)}>Publicar</AppButton>
             </>
           }
+        />
+      </section>
+
+      <section id="alert-dialog" className="space-y-3">
+        <h2 className="font-serif text-2xl">Alert dialog</h2>
+        <p className="text-sm text-muted-foreground">
+          Confirmações destrutivas — não fecha ao clicar fora nem com Escape sem cancelar.
+        </p>
+        <AppButton variant="destructive" onClick={() => setAlertDialogOpen(true)}>
+          Confirmar ação destrutiva
+        </AppButton>
+        <AppAlertDialog
+          open={alertDialogOpen}
+          onOpenChange={setAlertDialogOpen}
+          title="Publicar círculos?"
+          description="Esta ação envia convites para todos os trios."
+          body="Revise o preview antes de continuar."
+          cancelLabel="Cancelar"
+          confirmLabel="Publicar"
+          variant="destructive"
+          onConfirm={() => setAlertDialogOpen(false)}
         />
       </section>
 

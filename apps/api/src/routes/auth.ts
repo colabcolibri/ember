@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { getCookie } from 'hono/cookie';
 import type { ensureDatabaseReady } from '@ember/db';
 import { requireEmailPepper } from '@ember/email';
 import { buildLoginCodeEmailContent, createEmailDeliveryContext, sendTransactionalEmail } from '@ember/email';
@@ -6,6 +7,7 @@ import { loginCodeRequestSchema, loginCodeVerifySchema } from '@ember/domain';
 import {
   createLoginCode,
   createSession,
+  deleteSession,
   ensureCommunityMember,
   findCommunityBySlug,
   findValidLoginCode,
@@ -14,7 +16,7 @@ import {
   upsertUserByEmail,
 } from '@ember/db';
 import { createRateLimit, resetRateLimitsForTests } from '../lib/rate-limit.js';
-import { setSessionCookie } from '../lib/session.js';
+import { setSessionCookie, clearSessionCookie, SESSION_COOKIE } from '../lib/session.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -118,6 +120,15 @@ export function createAuthRoutes(db: Db) {
     const { sessionId, expiresAt } = createSession(db, userId);
     setSessionCookie(c, sessionId, expiresAt);
 
+    return c.json({ ok: true });
+  });
+
+  auth.post('/logout', async (c) => {
+    const sessionId = getCookie(c, SESSION_COOKIE);
+    if (sessionId) {
+      deleteSession(db, sessionId);
+    }
+    clearSessionCookie(c);
     return c.json({ ok: true });
   });
 

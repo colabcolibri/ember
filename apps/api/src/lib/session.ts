@@ -38,6 +38,17 @@ export function setSessionCookie(c: Context, sessionId: string, expiresAt: strin
   });
 }
 
+export function clearSessionCookie(c: Context): void {
+  const isProd = process.env.NODE_ENV === 'production';
+  setCookie(c, SESSION_COOKIE, '', {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: 'Lax',
+    path: '/',
+    maxAge: 0,
+  });
+}
+
 export function resolveCommunityId(c: Context, db: Db): string | null {
   const header = c.req.header('X-Community-Id')?.trim();
   if (header) return header;

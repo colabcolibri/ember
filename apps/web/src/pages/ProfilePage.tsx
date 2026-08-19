@@ -6,6 +6,7 @@ import {
   AppCard,
   AppFormField,
   AppInput,
+  AppPage,
   AppPageHeader,
   LanguageChipPicker,
 } from '../components/app/index.js';
@@ -59,9 +60,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="grid gap-6">
-      <AppPageHeader title={t('profile.title')} />
-
+    <AppPage header={<AppPageHeader title={t('profile.title')} />}>
       <AppCard>
         <form className="relative z-10 grid gap-8" onSubmit={onSubmit}>
           <AppFormField label={t('profile.timezone')} htmlFor="timezone">
@@ -100,6 +99,6 @@ export function ProfilePage() {
 
       {message ? <AppAlert variant="success">{message}</AppAlert> : null}
       {error ? <AppAlert variant="error">{error}</AppAlert> : null}
-    </div>
+    </AppPage>
   );
 }

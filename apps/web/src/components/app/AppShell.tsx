@@ -2,17 +2,15 @@ import type { ReactNode } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AppBrand } from './AppBrand.js';
+import { AppLogoutButton } from './AppLogoutButton.js';
 import { LanguageSwitcher } from '../LanguageSwitcher.js';
+import { contentMaxWidth, navMaxWidth, type AppShellVariant } from '@/lib/layout';
 import { cn } from '@/lib/utils';
-
-export type AppShellVariant = 'auth' | 'app' | 'facilitator' | 'catalog';
 
 type AppShellProps = {
   variant?: AppShellVariant;
   authed?: boolean | null;
-  eyebrow?: string;
-  title?: string;
-  lead?: string;
+  onLoggedOut?: () => void;
   children: ReactNode;
 };
 
@@ -35,7 +33,7 @@ function NavPill({ to, children }: { to: string; children: ReactNode }) {
       to={to}
       className={({ isActive }) =>
         cn(
-          'rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide transition-colors sm:text-sm',
+          'rounded-full px-2.5 py-1.5 text-xs font-semibold tracking-wide whitespace-nowrap transition-colors sm:px-3 sm:text-sm',
           isActive
             ? 'bg-primary/10 font-bold text-primary'
             : 'text-muted-foreground hover:bg-primary/5 hover:text-primary',
@@ -50,16 +48,14 @@ function NavPill({ to, children }: { to: string; children: ReactNode }) {
 export function AppShell({
   variant = 'app',
   authed,
-  eyebrow,
-  title,
-  lead,
+  onLoggedOut,
   children,
 }: AppShellProps) {
   const { t } = useTranslation();
-  const showMemberNav = variant === 'app' && authed !== false;
-  const showFacilitatorNav = variant === 'facilitator' && authed !== false;
+  const showMemberNav = variant === 'app' && authed === true;
+  const showFacilitatorNav = variant === 'facilitator' && authed === true;
   const showCatalogNav = variant === 'catalog';
-  const isWide = variant === 'facilitator' || variant === 'catalog';
+  const showLogout = authed === true && variant !== 'catalog' && onLoggedOut;
 
   const homeTo =
     variant === 'catalog' ? '/design' : authed ? '/presence' : '/login';
@@ -75,20 +71,20 @@ export function AppShell({
       <div className="ember-orbit-dot-rust" aria-hidden="true" />
       <div className="ember-orbit-dot-sage" aria-hidden="true" />
 
-      <header className="fixed top-0 right-0 left-0 z-50 flex justify-center px-4 pt-4 sm:pt-6">
+      <header className="fixed top-0 right-0 left-0 z-50 flex justify-center px-page-x pt-4 sm:pt-6">
         <nav
           className={cn(
-            'flex w-full items-center justify-between gap-3 rounded-full border border-outline-variant/30 bg-paper/90 px-4 py-2.5 shadow-md backdrop-blur-md sm:px-6 sm:py-3',
-            isWide ? 'max-w-5xl' : 'max-w-2xl',
-            variant === 'auth' && 'max-w-fit',
+            'flex w-full items-center justify-between gap-2 rounded-full border border-outline-variant/30 bg-paper/90 py-2.5 shadow-md backdrop-blur-md sm:gap-3 sm:py-3',
+            'px-3 sm:px-6',
+            navMaxWidth(variant),
           )}
           aria-label="Navegação principal"
         >
           <Link to={homeTo} className="min-w-0 shrink-0">
-            <AppBrand compact={variant === 'auth'} />
+            <AppBrand compact={variant === 'auth'} showWordmark={variant !== 'auth'} />
           </Link>
 
-          <div className="flex min-w-0 flex-wrap items-center justify-end gap-0.5 sm:gap-1">
+          <div className="flex min-w-0 items-center justify-end gap-0.5 overflow-x-auto sm:gap-1">
             {showMemberNav
               ? memberLinks.map((link) => (
                   <NavPill key={link.to} to={link.to}>
@@ -109,7 +105,8 @@ export function AppShell({
             {!showCatalogNav && authed === false ? (
               <NavPill to="/login">{t('nav.login')}</NavPill>
             ) : null}
-            <div className="ml-1 border-l border-outline-variant/40 pl-2 sm:ml-2 sm:pl-3">
+            <div className="ml-1 flex shrink-0 items-center gap-1 border-l border-outline-variant/40 pl-2 sm:ml-2 sm:gap-2 sm:pl-3">
+              {showLogout ? <AppLogoutButton onLoggedOut={onLoggedOut} /> : null}
               <LanguageSwitcher />
             </div>
           </div>
@@ -118,32 +115,15 @@ export function AppShell({
 
       <div
         className={cn(
-          'relative z-10 mx-auto w-full px-4 pt-28 pb-12 sm:px-6 sm:pt-32',
+          'relative z-10 mx-auto w-full px-page-x pt-28 pb-12 sm:pt-32',
           variant === 'auth' && 'flex flex-1 flex-col justify-center',
-          isWide ? 'max-w-7xl' : 'max-w-xl',
-          variant === 'auth' && 'max-w-[390px]',
+          contentMaxWidth(variant),
         )}
       >
-        {title ? (
-          <header className="mb-8 max-w-3xl space-y-2 text-center sm:text-left">
-            {eyebrow ? (
-              <p className="mx-auto inline-flex w-fit items-center rounded-full border border-primary bg-primary/5 px-3 py-1 text-[11px] font-bold tracking-[0.12em] text-primary uppercase sm:mx-0">
-                {eyebrow}
-              </p>
-            ) : null}
-            <h1 className="font-serif text-[clamp(2rem,5vw,3rem)] leading-tight font-bold tracking-tight text-foreground">
-              {title}
-            </h1>
-            {lead ? (
-              <p className="mx-auto max-w-prose text-base leading-relaxed text-muted-foreground sm:mx-0">
-                {lead}
-              </p>
-            ) : null}
-          </header>
-        ) : null}
-
-        <main>{children}</main>
+        <main className="w-full">{children}</main>
       </div>
     </div>
   );
 }
+
+export type { AppShellVariant };

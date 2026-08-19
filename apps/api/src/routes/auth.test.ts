@@ -68,6 +68,26 @@ describe('auth routes', () => {
     expect(cookie).toContain(SESSION_COOKIE);
   });
 
+  it('logout clears session cookie', async () => {
+    const pepper = 'test-pepper';
+    const { code } = createLoginCode(db, 'member@example.com', pepper);
+
+    const verifyRes = await app.request('/auth/code/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'member@example.com', code }),
+    });
+    const sessionCookie = verifyRes.headers.get('set-cookie') ?? '';
+
+    const logoutRes = await app.request('/auth/logout', {
+      method: 'POST',
+      headers: { Cookie: sessionCookie.split(';')[0] ?? '' },
+    });
+    expect(logoutRes.status).toBe(200);
+    const cleared = logoutRes.headers.get('set-cookie') ?? '';
+    expect(cleared).toContain(`${SESSION_COOKIE}=`);
+  });
+
   it('rate limits code requests after 5 per hour', async () => {
     for (let i = 0; i < 5; i += 1) {
       const res = await app.request('/auth/code', {

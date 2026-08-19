@@ -7,9 +7,9 @@ export function DesignPatternsPage() {
         <AppPageHeader
           eyebrow="pattern"
           title="App shell"
-          lead="Nav pill fixa, brand mark, lang switcher e conteúdo contido."
+          lead="Nav pill fixa, logo Stitch, lang switcher, logout e conteúdo em max-w-member (480px) ou max-w-facilitator (960px)."
         />
-        <AppCard>Shell aplicado em todas as rotas de produto via App.tsx.</AppCard>
+        <AppCard>Shell + AppPage aplicados em todas as rotas de produto via App.tsx.</AppCard>
       </section>
 
       <section id="form">
