@@ -2,7 +2,10 @@
   "app": {
     "title": "Ember",
     "tagline": "Small gatherings, with intention",
-    "demoBanner": "Demo mockup — fictional data, no real backend."
+    "demoBanner": "Demo mockup — fictional data, no real backend.",
+    "demoReset": "Reset demo data",
+    "demoResetConfirmTitle": "Reset the demo?",
+    "demoResetConfirmDescription": "Restores the initial example — presence, profile, and gatherings. You'll need to sign in again."
   },
   "nav": {
     "login": "Sign in",

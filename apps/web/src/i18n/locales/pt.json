@@ -2,7 +2,10 @@
   "app": {
     "title": "Ember",
     "tagline": "Encontros pequenos, com intenção",
-    "demoBanner": "Mockup de demonstração — dados fictícios, sem backend real."
+    "demoBanner": "Mockup de demonstração — dados fictícios, sem backend real.",
+    "demoReset": "Resetar dados",
+    "demoResetConfirmTitle": "Resetar a demonstração?",
+    "demoResetConfirmDescription": "Volta tudo ao começo: presenças, perfil e encontros de exemplo. Você precisará entrar de novo."
   },
   "nav": {
     "login": "Entrar",

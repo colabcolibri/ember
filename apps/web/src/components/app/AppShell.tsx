@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLogoutButton } from './AppLogoutButton.js';
 import { AppNav } from './AppNav.js';
+import { DemoResetButton } from './DemoResetButton.js';
 import { LanguageSwitcher } from '../LanguageSwitcher.js';
 import { shellContainerClass } from '@/lib/layout';
 import { isMockMode } from '@/lib/mock-mode.js';
@@ -99,10 +100,13 @@ export function AppShell({
           className={cn(
             'w-full',
             mode === 'auth' && 'flex flex-1 flex-col justify-center',
+            isMockMode && 'pb-20',
           )}
         >
           {children}
         </main>
+
+        {isMockMode ? <DemoResetButton /> : null}
       </div>
     </div>
   );
