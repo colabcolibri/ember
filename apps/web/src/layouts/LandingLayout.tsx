@@ -33,14 +33,6 @@ export function LandingLayout() {
         </div>
       </header>
 
-      {isMockMode ? (
-        <div className={cn(shellContainerClass(), 'pt-4')}>
-          <div className="rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-center text-sm text-foreground">
-            {t('app.demoBanner')}
-          </div>
-        </div>
-      ) : null}
-
       <Outlet />
 
       {isMockMode ? <DemoResetButton /> : null}
