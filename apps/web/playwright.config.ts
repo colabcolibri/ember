@@ -17,9 +17,9 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: `pnpm --filter @ember/config build && VITE_MOCK=true pnpm exec vite --port ${port} --host 127.0.0.1`,
+    command: `pnpm --filter @ember/config build && VITE_MOCK=true pnpm exec vite --port ${port} --host 127.0.0.1 --strictPort`,
     url: baseURL,
-    reuseExistingServer: false,
+    reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
   projects: [

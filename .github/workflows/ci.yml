@@ -36,8 +36,8 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
-      # US-0044: reativar quando `pnpm test:e2e` passar local
-      # - name: Install Playwright browser
-      #   run: pnpm --filter @ember/web test:e2e:install
-      # - name: E2E smoke tests
-      #   run: pnpm test:e2e
+      - name: Install Playwright browser
+        run: pnpm --filter @ember/web test:e2e:install
+
+      - name: E2E smoke tests
+        run: pnpm test:e2e
