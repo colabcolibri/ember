@@ -91,8 +91,17 @@ describe('matching automation routes', () => {
     return round.id;
   }
 
+  async function closeRound(roundId: string) {
+    const res = await app.request(`/admin/matching-rounds/${roundId}/close`, {
+      method: 'POST',
+      headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },
+    });
+    expect(res.status).toBe(200);
+  }
+
   it('auto-match persists draft, audit log and unmatched reasons', async () => {
     const roundId = await seedRoundWithMembers(6);
+    await closeRound(roundId);
 
     const res = await app.request(`/admin/matching-rounds/${roundId}/auto-match`, {
       method: 'POST',
@@ -119,8 +128,9 @@ describe('matching automation routes', () => {
     expect(draftBody.draft?.trios.length).toBe(2);
   });
 
-  it('returns unmatched reasons for leftover members', async () => {
-    const roundId = await seedRoundWithMembers(5);
+  it('returns unmatched reasons for impossible members', async () => {
+    const roundId = await seedRoundWithMembers(4);
+    await closeRound(roundId);
     const res = await app.request(`/admin/matching-rounds/${roundId}/auto-match`, {
       method: 'POST',
       headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },
@@ -129,12 +139,13 @@ describe('matching automation routes', () => {
       unmatched: number;
       unmatchedMembers: Array<{ reasons: string[] }>;
     };
-    expect(body.unmatched).toBeGreaterThan(0);
-    expect(body.unmatchedMembers[0]?.reasons.length).toBeGreaterThan(0);
+    expect(body.unmatched).toBe(1);
+    expect(body.unmatchedMembers[0]?.reasons).toContain('INCOMPLETE_PROFILE');
   });
 
   it('undo auto-match clears draft and logs audit', async () => {
     const roundId = await seedRoundWithMembers(3);
+    await closeRound(roundId);
     await app.request(`/admin/matching-rounds/${roundId}/auto-match`, {
       method: 'POST',
       headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },
@@ -157,6 +168,7 @@ describe('matching automation routes', () => {
 
   it('exports unmatched csv for facilitator', async () => {
     const roundId = await seedRoundWithMembers(4);
+    await closeRound(roundId);
     await app.request(`/admin/matching-rounds/${roundId}/auto-match`, {
       method: 'POST',
       headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },

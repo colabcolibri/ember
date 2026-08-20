@@ -9,7 +9,8 @@ import {
   loadMetPairs,
 } from '@ember/db';
 import {
-  publishTriosSchema,
+  publishGroupsSchema,
+  publishMatchSchema,
   runMatchingEngine,
   analyzeUnmatched,
   type UnmatchedReason,
@@ -20,7 +21,7 @@ import {
   executeAutoMatch,
   loadAutoMatchDraft,
   undoAutoMatch,
-  updateAutoMatchDraftTrios,
+  updateAutoMatchDraftGroups,
 } from '../../services/matching-auto.js';
 import { retryCircleFormedEmails } from '../../services/circle-notifications.js';
 
@@ -30,7 +31,7 @@ function requireRoundId(roundId: string | undefined): roundId is string {
   return Boolean(roundId?.trim());
 }
 
-function assertOpenRound(
+function assertClosedForMatchingRound(
   db: Db,
   communityId: string,
   roundId: string,
@@ -39,8 +40,16 @@ function assertOpenRound(
   if (!round || round.community_id !== communityId) {
     return { ok: false, status: 404, code: 'NOT_FOUND', message: 'Convite não encontrado' };
   }
-  if (round.status !== 'open') {
-    return { ok: false, status: 400, code: 'ROUND_NOT_OPEN', message: 'Inscrições não estão abertas' };
+  if (round.status === 'published') {
+    return { ok: false, status: 400, code: 'ALREADY_PUBLISHED', message: 'Encontros já publicados' };
+  }
+  if (round.status !== 'closed') {
+    return {
+      ok: false,
+      status: 400,
+      code: 'ROUND_NOT_CLOSED',
+      message: 'Encerre as inscrições antes de sortear',
+    };
   }
   return { ok: true, round };
 }
@@ -80,7 +89,7 @@ export function createAdminMatchingAutomationRoutes(db: Db) {
       return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Convite inválido' } }, 400);
     }
 
-    const check = assertOpenRound(db, communityId, roundId);
+    const check = assertClosedForMatchingRound(db, communityId, roundId);
     if (!check.ok) {
       return c.json({ error: { code: check.code, message: check.message } }, check.status);
     }
@@ -91,7 +100,7 @@ export function createAdminMatchingAutomationRoutes(db: Db) {
     } catch (error) {
       if (error instanceof Error && error.message === 'NOT_ENOUGH_MEMBERS') {
         return c.json(
-          { error: { code: 'NOT_ENOUGH_MEMBERS', message: 'Pelo menos 3 inscritos são necessários' } },
+          { error: { code: 'NOT_ENOUGH_MEMBERS', message: 'Pelo menos 2 inscritos são necessários' } },
           400,
         );
       }
@@ -118,6 +127,7 @@ export function createAdminMatchingAutomationRoutes(db: Db) {
 
     return c.json({
       draft: {
+        groups: draft.groups,
         trios: draft.trios,
         unmatched: draft.unmatchedMembers.length,
         unmatchedMembers: draft.unmatchedMembers,
@@ -144,7 +154,7 @@ export function createAdminMatchingAutomationRoutes(db: Db) {
     return c.json({ removed });
   });
 
-  routes.put('/matching-rounds/:id/auto-match/trios', async (c) => {
+  routes.put('/matching-rounds/:id/auto-match/groups', async (c) => {
     const communityId = c.get('communityId');
     const userId = c.get('userId');
     const roundId = c.req.param('id');
@@ -152,27 +162,27 @@ export function createAdminMatchingAutomationRoutes(db: Db) {
       return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Convite inválido' } }, 400);
     }
 
-    const check = assertOpenRound(db, communityId, roundId);
+    const check = assertClosedForMatchingRound(db, communityId, roundId);
     if (!check.ok) {
       return c.json({ error: { code: check.code, message: check.message } }, check.status);
     }
 
     const body = await c.req.json().catch(() => null);
-    const parsed = publishTriosSchema.safeParse(body);
+    const parsed = publishGroupsSchema.safeParse(body);
     if (!parsed.success) {
       return c.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Trios inválidos', details: parsed.error.issues } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Grupos inválidos', details: parsed.error.issues } },
         400,
       );
     }
 
     const members = loadMatchingMembers(db, communityId, roundId);
-    const unmatchedMembers = analyzeUnmatched(members, parsed.data.trios);
+    const unmatchedMembers = analyzeUnmatched(members, parsed.data.groups);
 
     try {
-      updateAutoMatchDraftTrios(db, {
+      updateAutoMatchDraftGroups(db, {
         roundId,
-        trios: parsed.data.trios.map((trio) => ({ ...trio, score: trio.score ?? 0 })),
+        groups: parsed.data.groups.map((group) => ({ ...group, score: group.score ?? 0 })),
         unmatchedMembers,
         actorUserId: userId,
       });
@@ -183,7 +193,49 @@ export function createAdminMatchingAutomationRoutes(db: Db) {
       throw error;
     }
 
-    return c.json({ trios: parsed.data.trios, unmatchedMembers });
+    return c.json({ groups: parsed.data.groups, unmatchedMembers });
+  });
+
+  routes.put('/matching-rounds/:id/auto-match/trios', async (c) => {
+    const communityId = c.get('communityId');
+    const userId = c.get('userId');
+    const roundId = c.req.param('id');
+    if (!requireRoundId(roundId)) {
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Convite inválido' } }, 400);
+    }
+
+    const check = assertClosedForMatchingRound(db, communityId, roundId);
+    if (!check.ok) {
+      return c.json({ error: { code: check.code, message: check.message } }, check.status);
+    }
+
+    const body = await c.req.json().catch(() => null);
+    const parsed = publishMatchSchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json(
+        { error: { code: 'VALIDATION_ERROR', message: 'Grupos inválidos', details: parsed.error.issues } },
+        400,
+      );
+    }
+
+    const members = loadMatchingMembers(db, communityId, roundId);
+    const unmatchedMembers = analyzeUnmatched(members, parsed.data.groups);
+
+    try {
+      updateAutoMatchDraftGroups(db, {
+        roundId,
+        groups: parsed.data.groups,
+        unmatchedMembers,
+        actorUserId: userId,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'DRAFT_NOT_FOUND') {
+        return c.json({ error: { code: 'DRAFT_NOT_FOUND', message: 'Sorteio automático não encontrado' } }, 404);
+      }
+      throw error;
+    }
+
+    return c.json({ groups: parsed.data.groups, trios: parsed.data.groups, unmatchedMembers });
   });
 
   routes.get('/matching-rounds/:id/unmatched/export.csv', (c) => {

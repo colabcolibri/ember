@@ -3,27 +3,21 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   AppAlert,
-  AppAlertDialog,
   AppButton,
   AppCard,
   AppLoading,
   AppPage,
   DeclarationTable,
+  FacilitatorMatchingPanel,
   FacilitatorRoundPanel,
   FacilitatorTemplatesPanel,
-  TrioPreview,
-  UnmatchedPanel,
-  buildUnmatchedRows,
   type MeetingTemplate,
-  type UnmatchedMemberRow,
-  type UnmatchedReason,
 } from '../components/app/index.js';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiFetch, ApiError } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
 import { showError, showSuccess } from '../lib/app-toast.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
-import { cn } from '@/lib/utils';
 
 type Declaration = {
   userId: string;
@@ -35,47 +29,17 @@ type Declaration = {
   timezone: string | null;
 };
 
-type Trio = {
-  memberIds: [string, string, string];
-  slot: string;
-  score: number;
-};
-
-type EmailFailure = {
-  circleId: string;
-  userId: string;
-  email: string;
-  error: string;
-};
-
 export function FacilitatorPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [templates, setTemplates] = useState<MeetingTemplate[]>([]);
   const [roundId, setRoundId] = useState<string | null>(null);
+  const [roundStatus, setRoundStatus] = useState<string>('open');
   const [slotLabels, setSlotLabels] = useState<Record<string, string>>({});
   const [declarations, setDeclarations] = useState<Declaration[]>([]);
-  const [trios, setTrios] = useState<Trio[]>([]);
-  const [unmatched, setUnmatched] = useState(0);
-  const [unmatchedMembers, setUnmatchedMembers] = useState<UnmatchedMemberRow[]>([]);
-  const [emailFailures, setEmailFailures] = useState<EmailFailure[]>([]);
-  const [hasAutoDraft, setHasAutoDraft] = useState(false);
   const [accessDeniedMessage, setAccessDeniedMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [publishOpen, setPublishOpen] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [activeTab, setActiveTab] = useState('templates');
-
-  const applyMatchResult = (result: {
-    trios: Trio[];
-    unmatched: number;
-    unmatchedMembers?: Array<{ userId: string; reasons: UnmatchedReason[] }>;
-  }) => {
-    setTrios(result.trios);
-    setUnmatched(result.unmatched);
-    setUnmatchedMembers(
-      buildUnmatchedRows(result.unmatchedMembers ?? [], declarations),
-    );
-  };
 
   const loadTemplates = async () => {
     const res = await apiFetch<{ templates: MeetingTemplate[] }>('/admin/templates');
@@ -83,34 +47,15 @@ export function FacilitatorPage() {
     return res.templates;
   };
 
-  const loadAutoDraft = async (id: string, declarationItems?: Declaration[]) => {
-    const res = await apiFetch<{
-      draft: {
-        trios: Trio[];
-        unmatched: number;
-        unmatchedMembers: Array<{ userId: string; reasons: UnmatchedReason[] }>;
-      } | null;
-    }>(`/admin/matching-rounds/${id}/auto-match`);
-    if (!res.draft) {
-      setHasAutoDraft(false);
-      return;
-    }
-    setHasAutoDraft(true);
-    const labels = declarationItems ?? declarations;
-    setTrios(res.draft.trios);
-    setUnmatched(res.draft.unmatched);
-    setUnmatchedMembers(buildUnmatchedRows(res.draft.unmatchedMembers, labels));
-  };
-
   const loadCurrentRound = async () => {
     const current = await apiFetch<{
-      round: { id: string; slotLabels?: Record<string, string> } | null;
+      round: { id: string; status?: string; slotLabels?: Record<string, string> } | null;
     }>('/admin/matching-rounds/current');
     if (!current.round) return;
     setRoundId(current.round.id);
+    setRoundStatus(current.round.status ?? 'open');
     setSlotLabels(current.round.slotLabels ?? {});
-    const items = await loadDeclarations(current.round.id);
-    await loadAutoDraft(current.round.id, items);
+    await loadDeclarations(current.round.id);
   };
 
   const { initialLoading } = useInitialLoad(async () => {
@@ -135,17 +80,13 @@ export function FacilitatorPage() {
   }) => {
     setLoading(true);
     try {
-      const res = await apiFetch<{ round: { id: string } }>('/admin/matching-rounds', {
+      const res = await apiFetch<{ round: { id: string; status: string } }>('/admin/matching-rounds', {
         method: 'POST',
         body: JSON.stringify(input),
       });
       setRoundId(res.round.id);
+      setRoundStatus(res.round.status);
       setActiveTab('round');
-      setTrios([]);
-      setUnmatched(0);
-      setUnmatchedMembers([]);
-      setHasAutoDraft(false);
-      setEmailFailures([]);
       showSuccess(t('facilitator.roundCreated'));
       setSlotLabels({});
       await loadDeclarations(res.round.id);
@@ -194,134 +135,6 @@ export function FacilitatorPage() {
     return res.items;
   };
 
-  const runAutoMatch = async () => {
-    if (!roundId) return;
-    setLoading(true);
-    try {
-      const items = declarations.length ? declarations : await loadDeclarations(roundId);
-      const res = await apiFetch<{
-        trios: Trio[];
-        unmatched: number;
-        unmatchedMembers: Array<{ userId: string; reasons: UnmatchedReason[] }>;
-      }>(`/admin/matching-rounds/${roundId}/auto-match`, { method: 'POST', body: '{}' });
-      setHasAutoDraft(true);
-      setTrios(res.trios);
-      setUnmatched(res.unmatched);
-      setUnmatchedMembers(buildUnmatchedRows(res.unmatchedMembers, items));
-      showSuccess(t('facilitator.autoMatchReady'));
-    } catch (e) {
-      showError(formatApiError(e, t));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const undoAutoMatch = async () => {
-    if (!roundId) return;
-    setLoading(true);
-    try {
-      await apiFetch(`/admin/matching-rounds/${roundId}/auto-match`, { method: 'DELETE' });
-      setTrios([]);
-      setUnmatched(0);
-      setUnmatchedMembers([]);
-      setHasAutoDraft(false);
-      showSuccess(t('facilitator.autoMatchUndone'));
-    } catch (e) {
-      showError(formatApiError(e, t));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const runMatch = async () => {
-    if (!roundId) return;
-    setLoading(true);
-    try {
-      const items = declarations.length ? declarations : await loadDeclarations(roundId);
-      const res = await apiFetch<{
-        trios: Trio[];
-        unmatched: number;
-        unmatchedMembers: Array<{ userId: string; reasons: UnmatchedReason[] }>;
-      }>(`/admin/matching-rounds/${roundId}/match`, { method: 'POST', body: '{}' });
-      applyMatchResult(res);
-      setUnmatchedMembers(buildUnmatchedRows(res.unmatchedMembers ?? [], items));
-      showSuccess(t('facilitator.matchReady'));
-    } catch (e) {
-      showError(formatApiError(e, t));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const publish = async () => {
-    if (!roundId || trios.length === 0) return;
-    setLoading(true);
-    try {
-      const res = await apiFetch<{
-        emails?: { sent: number; failed: EmailFailure[] };
-      }>(`/admin/matching-rounds/${roundId}/publish`, {
-        method: 'POST',
-        body: JSON.stringify({ trios }),
-      });
-      setPublishOpen(false);
-      setHasAutoDraft(false);
-      setEmailFailures(res.emails?.failed ?? []);
-      showSuccess(t('facilitator.published'));
-    } catch (e) {
-      showError(formatApiError(e, t));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const retryFailedEmails = async () => {
-    if (!roundId || emailFailures.length === 0) return;
-    setLoading(true);
-    try {
-      const res = await apiFetch<{ sent: number; failed: EmailFailure[] }>(
-        `/admin/matching-rounds/${roundId}/publish/retry-emails`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            targets: emailFailures.map((item) => ({
-              circleId: item.circleId,
-              userId: item.userId,
-            })),
-          }),
-        },
-      );
-      setEmailFailures(res.failed);
-      showSuccess(t('facilitator.emailsRetried'));
-    } catch (e) {
-      showError(formatApiError(e, t));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const exportUnmatchedCsv = async () => {
-    if (!roundId) return;
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `/api/v1/admin/matching-rounds/${roundId}/unmatched/export.csv?locale=${i18n.language.startsWith('en') ? 'en' : 'pt'}`,
-        { credentials: 'include' },
-      );
-      if (!res.ok) throw new Error('export_failed');
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = `unmatched-${roundId}.csv`;
-      anchor.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      showError(formatApiError(e, t));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (initialLoading) {
     return (
       <AppPage title={t('facilitator.title')} lead={t('facilitator.subtitle')}>
@@ -336,22 +149,6 @@ export function FacilitatorPage() {
         <AppAlert variant="error" title={t('facilitator.accessDeniedTitle')}>
           {accessDeniedMessage}
           <span className="mt-1 block text-sm opacity-90">{t('facilitator.accessDeniedHint')}</span>
-        </AppAlert>
-      ) : null}
-
-      {emailFailures.length > 0 ? (
-        <AppAlert variant="error" title={t('facilitator.emailFailuresTitle')} className="mb-6">
-          {t('facilitator.emailFailuresHint')}
-          <ul className="mt-2 list-inside list-disc text-sm">
-            {emailFailures.map((item) => (
-              <li key={`${item.circleId}-${item.userId}`}>
-                {item.email}: {item.error}
-              </li>
-            ))}
-          </ul>
-          <AppButton className="mt-3 w-full sm:w-auto" variant="outline" loading={loading} onClick={retryFailedEmails}>
-            {t('facilitator.retryFailedEmails')}
-          </AppButton>
         </AppAlert>
       ) : null}
 
@@ -379,23 +176,20 @@ export function FacilitatorPage() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-muted-foreground">{t('facilitator.viewGatheringsHint')}</p>
                   <AppButton asChild variant="outline" className="w-full sm:w-auto">
-                    <Link to="/facilitator/gatherings">{t('nav.gatherings')}</Link>
+                    <Link to={`/facilitator/gatherings/${roundId}`}>{t('facilitator.openGatheringDetail')}</Link>
                   </AppButton>
                 </div>
               ) : null}
 
               {roundId ? (
-                <div className="grid w-full gap-8 lg:grid-cols-12">
-                  <AppCard
-                    title={t('facilitator.declarations')}
-                    className={cn(trios.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12')}
-                  >
+                <>
+                  <AppCard title={t('facilitator.declarations')}>
                     <DeclarationTable
                       items={declarations}
                       emptyMessage={t('facilitator.noDeclarations')}
                       slotLabels={slotLabels}
                     />
-                    <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    <div className="mt-4">
                       <AppButton
                         variant="outline"
                         onClick={() => loadDeclarations(roundId)}
@@ -403,62 +197,33 @@ export function FacilitatorPage() {
                       >
                         {t('facilitator.refresh')}
                       </AppButton>
-                      <AppButton onClick={runAutoMatch} loading={loading} disabled={declarations.length < 3}>
-                        {t('facilitator.autoMatch')}
-                      </AppButton>
-                      <AppButton variant="outline" onClick={runMatch} loading={loading} disabled={declarations.length < 3}>
-                        {t('facilitator.runMatch')}
-                      </AppButton>
-                      {hasAutoDraft ? (
-                        <AppButton variant="ghost" onClick={undoAutoMatch} loading={loading}>
-                          {t('facilitator.undoAutoMatch')}
-                        </AppButton>
-                      ) : null}
                     </div>
                   </AppCard>
 
-                  {trios.length > 0 ? (
-                    <AppCard title={t('facilitator.preview')} className="lg:col-span-5">
-                      <TrioPreview
-                        trios={trios}
-                        unmatched={unmatched}
-                        unmatchedLabel={t('facilitator.unmatched', { count: unmatched })}
-                      />
-                      <AppButton
-                        className="mt-4 w-full sm:w-auto"
-                        onClick={() => setPublishOpen(true)}
-                        loading={loading}
-                      >
-                        {t('facilitator.publish')}
-                      </AppButton>
-                    </AppCard>
-                  ) : null}
+              {roundId && roundStatus === 'open' ? (
+                <AppCard title={t('facilitator.cycle.nextStepTitle')}>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {t('facilitator.cycle.waitCloseHint')}
+                  </p>
+                  <AppButton asChild variant="outline" className="mt-4 w-full sm:w-auto">
+                    <Link to={`/facilitator/gatherings/${roundId}`}>{t('facilitator.openGatheringDetail')}</Link>
+                  </AppButton>
+                </AppCard>
+              ) : null}
 
-                  {unmatchedMembers.length > 0 ? (
-                    <UnmatchedPanel
-                      items={unmatchedMembers}
-                      roundId={roundId}
-                      loading={loading}
-                      onExport={exportUnmatchedCsv}
-                    />
-                  ) : null}
-                </div>
+              {roundId && roundStatus === 'closed' ? (
+                <FacilitatorMatchingPanel
+                  roundId={roundId}
+                  roundStatus={roundStatus}
+                  slotLabels={slotLabels}
+                  declarations={declarations}
+                  onReloadDeclarations={() => loadDeclarations(roundId)}
+                />
+              ) : null}
+                </>
               ) : null}
             </TabsContent>
           </Tabs>
-
-          <AppAlertDialog
-            open={publishOpen}
-            onOpenChange={setPublishOpen}
-            title={t('facilitator.publish')}
-            description={t('facilitator.matchReady')}
-            variant="destructive"
-            body={t('facilitator.unmatched', { count: unmatched })}
-            cancelLabel={t('facilitator.cancel')}
-            confirmLabel={t('facilitator.publish')}
-            onConfirm={publish}
-            loading={loading}
-          />
         </>
       )}
     </AppPage>

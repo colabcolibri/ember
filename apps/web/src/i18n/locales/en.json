@@ -268,10 +268,55 @@
     "gatheringCirclesMeta": "{{count}} gathering(s) formed",
     "gatheringOpenedOn": "Opened on {{date}}",
     "editGathering": "Edit gathering",
-    "editGatheringSoon": "Editing gathering content is coming soon.",
+    "editGatheringHint": "Adjust theme, questions, and time slots while sign-ups are open.",
+    "saveGathering": "Save changes",
+    "gatheringSaved": "Gathering updated.",
+    "closeRegistrations": "Close sign-ups",
+    "closeRegistrationsConfirm": "Stop new presence declarations?",
+    "closeRegistrationsBody": "There are {{count}} confirmed presence declaration(s). After closing, matching will unlock.",
+    "closeRegistrationsConfirmAction": "Yes, close sign-ups",
+    "registrationsClosed": "Sign-ups closed.",
+    "reopenRegistrations": "Reopen sign-ups",
+    "reopenRegistrationsConfirm": "Allow new presence declarations again?",
+    "reopenRegistrationsBody": "Any saved match draft will be discarded. Members can declare presence again.",
+    "reopenRegistrationsConfirmAction": "Yes, reopen sign-ups",
+    "registrationsReopened": "Sign-ups reopened.",
+    "cycle": {
+      "title": "Gathering steps",
+      "subtitle": "Track the invitation cycle through group publishing.",
+      "done": "Done",
+      "nextStepTitle": "Next step",
+      "waitCloseHint": "When you're done collecting presence, close sign-ups to unlock matching.",
+      "steps": {
+        "registrations": "Sign-ups open",
+        "closed": "Sign-ups closed",
+        "matching": "Matching",
+        "published": "Publish"
+      },
+      "hints": {
+        "registrations": "Members can declare presence. Edit the invite if needed.",
+        "closed": "Close sign-ups when the list is ready.",
+        "matching": "Form groups and review who was left out.",
+        "published": "Send email invites to the formed groups."
+      }
+    },
+    "addQuestion": "Add question",
+    "removeQuestion": "Remove",
+    "openGatheringDetail": "Open gathering detail",
+    "matchingTitle": "Matching and publish",
+    "matchingHint": "Form groups of 2 to 4 people and publish invites when you're ready.",
+    "refreshMatch": "Reload match",
+    "publishConfirm": "This sends email invites and closes the round.",
+    "declarationsCount": "{{count}} presence declaration(s)",
+    "groupLabel": "Group {{index}}",
+    "groupSize": {
+      "pair": "Pair",
+      "trio": "Trio",
+      "quartet": "Quartet"
+    },
     "gatheringStatus": {
       "open": "Sign-ups open",
-      "closed": "Closed",
+      "closed": "Sign-ups closed",
       "published": "Published"
     },
     "confirmedCount": "{{count}} confirmed",

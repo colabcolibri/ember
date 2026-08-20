@@ -259,6 +259,11 @@ describe('admin routes', () => {
       });
     }
 
+    await app.request(`/admin/matching-rounds/${round.id}/close`, {
+      method: 'POST',
+      headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },
+    });
+
     const match = await app.request(`/admin/matching-rounds/${round.id}/match`, {
       method: 'POST',
       headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },

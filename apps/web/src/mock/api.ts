@@ -213,6 +213,39 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
       }
     }
 
+    const roundPut = pathname.match(/^\/admin\/matching-rounds\/([^/]+)$/);
+    if (roundPut && method === 'PUT' && roundPut[1] !== 'current') {
+      try {
+        return mockStore.updateGathering(roundPut[1]!, body as never) as T;
+      } catch (err) {
+        if (err instanceof Error && err.message === 'round not found') notFound('Encontro não encontrado');
+        forbidden();
+      }
+    }
+
+    const roundClose = pathname.match(/^\/admin\/matching-rounds\/([^/]+)\/close$/);
+    if (roundClose && method === 'POST') {
+      try {
+        return mockStore.closeGathering(roundClose[1]!) as T;
+      } catch (err) {
+        if (err instanceof Error && err.message === 'round not found') notFound('Encontro não encontrado');
+        forbidden();
+      }
+    }
+
+    const roundReopen = pathname.match(/^\/admin\/matching-rounds\/([^/]+)\/reopen$/);
+    if (roundReopen && method === 'POST') {
+      try {
+        return mockStore.reopenGathering(roundReopen[1]!) as T;
+      } catch (err) {
+        if (err instanceof Error && err.message === 'round not found') notFound('Encontro não encontrado');
+        if (err instanceof Error && err.message === 'other open') {
+          throw new ApiError('client', 'Já existe outro convite com inscrições abertas', 409);
+        }
+        forbidden();
+      }
+    }
+
     const roundGet = pathname.match(/^\/admin\/matching-rounds\/([^/]+)$/);
     if (roundGet && method === 'GET' && roundGet[1] !== 'current') {
       try {

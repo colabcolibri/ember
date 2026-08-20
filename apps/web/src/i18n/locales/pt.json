@@ -267,11 +267,56 @@
     "gatheringCirclesMeta": "{{count}} encontro(s) formado(s)",
     "gatheringOpenedOn": "Aberto em {{date}}",
     "editGathering": "Editar encontro",
-    "editGatheringSoon": "Edição do conteúdo do encontro chega em breve.",
+    "editGatheringHint": "Ajuste tema, perguntas e horários enquanto as inscrições estiverem abertas.",
+    "saveGathering": "Salvar alterações",
+    "gatheringSaved": "Encontro atualizado.",
+    "closeRegistrations": "Fechar inscrições",
+    "closeRegistrationsConfirm": "Encerrar novas declarações de presença?",
+    "closeRegistrationsBody": "Há {{count}} presença(s) confirmada(s). Depois de fechar, o sorteio será liberado.",
+    "closeRegistrationsConfirmAction": "Sim, fechar inscrições",
+    "registrationsClosed": "Inscrições encerradas.",
+    "reopenRegistrations": "Reabrir inscrições",
+    "reopenRegistrationsConfirm": "Permitir novas declarações de presença?",
+    "reopenRegistrationsBody": "O sorteio salvo será descartado. Membros poderão declarar presença novamente.",
+    "reopenRegistrationsConfirmAction": "Sim, reabrir inscrições",
+    "registrationsReopened": "Inscrições reabertas.",
+    "cycle": {
+      "title": "Etapas do encontro",
+      "subtitle": "Acompanhe o ciclo do convite até a publicação dos grupos.",
+      "done": "Concluída",
+      "nextStepTitle": "Próxima etapa",
+      "waitCloseHint": "Quando terminar de receber presenças, feche as inscrições para liberar o sorteio.",
+      "steps": {
+        "registrations": "Inscrições abertas",
+        "closed": "Inscrições encerradas",
+        "matching": "Sorteio",
+        "published": "Publicação"
+      },
+      "hints": {
+        "registrations": "Membros podem declarar presença. Edite o convite se precisar.",
+        "closed": "Feche as inscrições quando a lista estiver pronta.",
+        "matching": "Forme grupos e revise quem ficou de fora.",
+        "published": "Envie convites por e-mail para os grupos formados."
+      }
+    },
+    "addQuestion": "Adicionar pergunta",
+    "removeQuestion": "Remover",
+    "openGatheringDetail": "Abrir detalhe do encontro",
+    "matchingTitle": "Sorteio e publicação",
+    "matchingHint": "Forme grupos de 2 a 4 pessoas e publique os convites quando estiver satisfeito.",
+    "refreshMatch": "Recarregar sorteio",
+    "publishConfirm": "Isso envia convites por e-mail e fecha a rodada.",
+    "declarationsCount": "{{count}} presença(s) declarada(s)",
+    "groupLabel": "Grupo {{index}}",
+    "groupSize": {
+      "pair": "Dupla",
+      "trio": "Trio",
+      "quartet": "Quarteto"
+    },
     "viewGatheringsHint": "Veja todos os encontros e presenças na lista de encontros.",
     "gatheringStatus": {
       "open": "Inscrições abertas",
-      "closed": "Fechado",
+      "closed": "Inscrições encerradas",
       "published": "Publicado"
     },
     "confirmedCount": "{{count}} confirmado(s)",

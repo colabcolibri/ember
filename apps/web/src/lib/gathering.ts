@@ -15,6 +15,8 @@ export type GatheringSummary = {
 
 export type GatheringDetail = GatheringSummary & {
   slotLabels: Record<string, string>;
+  slots?: unknown[];
+  templateId?: string | null;
 };
 
 export function formatGatheringDate(iso: string, locale: string): string {

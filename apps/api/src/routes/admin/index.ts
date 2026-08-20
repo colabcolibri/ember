@@ -2,6 +2,10 @@ import { Hono } from 'hono';
 import type { ensureDatabaseReady } from '@ember/db';
 import {
   createMatchingRound,
+  closeMatchingRound,
+  reopenMatchingRound,
+  updateMatchingRound,
+  deleteMatchingRoundDraft,
   findDefaultTemplateForCommunity,
   findOpenRound,
   findRoundById,
@@ -14,7 +18,7 @@ import {
   listMatchingRounds,
   loadMatchingMembers,
   loadMetPairs,
-  publishTriosWithDelivery,
+  publishGroupsWithDelivery,
   resolveRoundSlotOptionsFromJson,
   scheduleCircleReminderJobs,
   updateMeetingTemplate,
@@ -22,13 +26,15 @@ import {
 } from '@ember/db';
 import {
   createRoundSchema,
+  updateRoundSchema,
   meetingTemplateSchema,
   normalizeCreateRoundSlots,
   parseRoundSlotsJson,
-  publishTriosSchema,
+  publishMatchSchema,
+  publishGroupsSchema,
   runMatchingEngine,
   type CreateRoundInput,
-  type TrioProposal,
+  type GroupProposal,
 } from '@ember/domain';
 import { createRequireFacilitator, type FacilitatorVariables } from '../../lib/facilitator.js';
 import { requireEmailPepper } from '@ember/email';
@@ -132,6 +138,8 @@ function mapGatheringDetail(
     status: round.status,
     theme: round.theme,
     questions,
+    slots: round.slots_json ? parseRoundSlotsJson(round.slots_json) : [],
+    templateId: round.template_id,
     createdAt: round.created_at,
     declarationCount,
     templateName: template?.name ?? null,
@@ -268,6 +276,152 @@ export function createAdminRoundRoutes(db: Db) {
     });
   });
 
+  routes.put('/matching-rounds/:id', requireFacilitator, async (c) => {
+    const communityId = c.get('communityId');
+    const roundId = c.req.param('id');
+    if (!requireRoundId(roundId)) {
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Convite inválido' } }, 400);
+    }
+
+    const existing = findRoundById(db, roundId);
+    if (!existing || existing.community_id !== communityId) {
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Convite não encontrado' } }, 404);
+    }
+    if (existing.status !== 'open') {
+      return c.json(
+        { error: { code: 'ROUND_NOT_OPEN', message: 'Só é possível editar convites com inscrições abertas' } },
+        400,
+      );
+    }
+
+    const body = await c.req.json().catch(() => null);
+    const parsed = updateRoundSchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json(
+        { error: { code: 'VALIDATION_ERROR', message: 'Convite inválido', details: parsed.error.issues } },
+        400,
+      );
+    }
+
+    if (!validateRoundSlotRefs(db, communityId, parsed.data.slots)) {
+      return c.json(
+        { error: { code: 'VALIDATION_ERROR', message: 'Horários inválidos para o encontro' } },
+        400,
+      );
+    }
+
+    let normalizedSlots;
+    try {
+      normalizedSlots = normalizeCreateRoundSlots(parsed.data.slots);
+    } catch (err) {
+      return c.json(
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: err instanceof Error ? err.message : 'Horários inválidos para o encontro',
+          },
+        },
+        400,
+      );
+    }
+
+    const updated = updateMatchingRound(db, roundId, {
+      ...parsed.data,
+      slots: normalizedSlots as CreateRoundInput['slots'],
+    });
+    if (!updated) {
+      return c.json(
+        { error: { code: 'ROUND_NOT_OPEN', message: 'Só é possível editar convites com inscrições abertas' } },
+        400,
+      );
+    }
+
+    const pepper = requireEmailPepper();
+    const { total } = listRoundDeclarations(db, roundId, 1, 1, pepper);
+    const circles = listCirclesForRound(db, roundId);
+
+    return c.json({
+      round: mapGatheringDetail(db, communityId, updated, total, circles.length),
+    });
+  });
+
+  routes.post('/matching-rounds/:id/close', requireFacilitator, (c) => {
+    const communityId = c.get('communityId');
+    const roundId = c.req.param('id');
+    if (!requireRoundId(roundId)) {
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Convite inválido' } }, 400);
+    }
+
+    const existing = findRoundById(db, roundId);
+    if (!existing || existing.community_id !== communityId) {
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Convite não encontrado' } }, 404);
+    }
+    if (existing.status !== 'open') {
+      return c.json(
+        { error: { code: 'ROUND_NOT_OPEN', message: 'Inscrições já estão encerradas' } },
+        400,
+      );
+    }
+
+    const closed = closeMatchingRound(db, roundId);
+    if (!closed) {
+      return c.json(
+        { error: { code: 'ROUND_NOT_OPEN', message: 'Inscrições já estão encerradas' } },
+        400,
+      );
+    }
+
+    const pepper = requireEmailPepper();
+    const { total } = listRoundDeclarations(db, roundId, 1, 1, pepper);
+    const circles = listCirclesForRound(db, roundId);
+
+    return c.json({
+      round: mapGatheringDetail(db, communityId, closed, total, circles.length),
+    });
+  });
+
+  routes.post('/matching-rounds/:id/reopen', requireFacilitator, (c) => {
+    const communityId = c.get('communityId');
+    const roundId = c.req.param('id');
+    if (!requireRoundId(roundId)) {
+      return c.json({ error: { code: 'VALIDATION_ERROR', message: 'Convite inválido' } }, 400);
+    }
+
+    const existing = findRoundById(db, roundId);
+    if (!existing || existing.community_id !== communityId) {
+      return c.json({ error: { code: 'NOT_FOUND', message: 'Convite não encontrado' } }, 404);
+    }
+
+    const result = reopenMatchingRound(db, communityId, roundId);
+    if (!result.ok) {
+      if (result.code === 'OTHER_ROUND_OPEN') {
+        return c.json(
+          {
+            error: {
+              code: 'OTHER_ROUND_OPEN',
+              message: 'Já existe outro convite com inscrições abertas nesta comunidade',
+            },
+          },
+          409,
+        );
+      }
+      return c.json(
+        { error: { code: 'ROUND_NOT_CLOSED', message: 'Só é possível reabrir inscrições encerradas' } },
+        400,
+      );
+    }
+
+    deleteMatchingRoundDraft(db, roundId);
+
+    const pepper = requireEmailPepper();
+    const { total } = listRoundDeclarations(db, roundId, 1, 1, pepper);
+    const circles = listCirclesForRound(db, roundId);
+
+    return c.json({
+      round: mapGatheringDetail(db, communityId, result.round, total, circles.length),
+    });
+  });
+
   routes.get('/matching-rounds/:id', requireFacilitator, (c) => {
     const communityId = c.get('communityId');
     const roundId = c.req.param('id');
@@ -326,14 +480,17 @@ export function createAdminRoundRoutes(db: Db) {
     if (!round || round.community_id !== communityId) {
       return c.json({ error: { code: 'NOT_FOUND', message: 'Convite não encontrado' } }, 404);
     }
-    if (round.status !== 'open') {
-      return c.json({ error: { code: 'ROUND_NOT_OPEN', message: 'Inscrições não estão abertas' } }, 400);
+    if (round.status !== 'closed') {
+      return c.json(
+        { error: { code: 'ROUND_NOT_CLOSED', message: 'Encerre as inscrições antes de sortear' } },
+        400,
+      );
     }
 
     const members = loadMatchingMembers(db, communityId, roundId);
-    if (members.length < 3) {
+    if (members.length < 2) {
       return c.json(
-        { error: { code: 'NOT_ENOUGH_MEMBERS', message: 'Pelo menos 3 inscritos são necessários' } },
+        { error: { code: 'NOT_ENOUGH_MEMBERS', message: 'Pelo menos 2 inscritos são necessários' } },
         400,
       );
     }
@@ -342,6 +499,7 @@ export function createAdminRoundRoutes(db: Db) {
     const result = runMatchingEngine(members, metPairs);
 
     return c.json({
+      groups: result.groups,
       trios: result.trios,
       unmatched: result.unmatched,
       unmatchedMembers: result.unmatchedMembers,
@@ -363,18 +521,18 @@ export function createAdminRoundRoutes(db: Db) {
     }
 
     const body = await c.req.json().catch(() => null);
-    const parsed = publishTriosSchema.safeParse(body);
+    const parsed = publishMatchSchema.safeParse(body);
     if (!parsed.success) {
       return c.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Trios inválidos', details: parsed.error.issues } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Grupos inválidos', details: parsed.error.issues } },
         400,
       );
     }
 
-    const circles = publishTriosWithDelivery(
+    const circles = publishGroupsWithDelivery(
       db,
       roundId,
-      parsed.data.trios.map((trio) => ({ ...trio, score: trio.score ?? 0 })),
+      parsed.data.groups as GroupProposal[],
       process.env.EMBER_JITSI_BASE_URL,
     );
     const emails = await sendCircleFormedNotifications(db, {

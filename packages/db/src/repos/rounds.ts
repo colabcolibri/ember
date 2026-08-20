@@ -109,6 +109,63 @@ export function closeOpenRoundsInCommunity(db: Database.Database, communityId: s
   );
 }
 
+export function closeMatchingRound(db: Database.Database, roundId: string): RoundDetailRow | null {
+  const round = findRoundById(db, roundId);
+  if (!round || round.status !== 'open') return null;
+  db.prepare("UPDATE rounds SET status = 'closed' WHERE id = ? AND status = 'open'").run(roundId);
+  return findRoundById(db, roundId);
+}
+
+export type ReopenMatchingRoundResult =
+  | { ok: true; round: RoundDetailRow }
+  | { ok: false; code: 'NOT_CLOSED' | 'OTHER_ROUND_OPEN' };
+
+export function reopenMatchingRound(
+  db: Database.Database,
+  communityId: string,
+  roundId: string,
+): ReopenMatchingRoundResult {
+  const round = findRoundById(db, roundId);
+  if (!round || round.community_id !== communityId || round.status !== 'closed') {
+    return { ok: false, code: 'NOT_CLOSED' };
+  }
+
+  const openRound = findOpenRound(db, communityId);
+  if (openRound) {
+    return { ok: false, code: 'OTHER_ROUND_OPEN' };
+  }
+
+  db.prepare("UPDATE rounds SET status = 'open' WHERE id = ? AND status = 'closed'").run(roundId);
+  const reopened = findRoundById(db, roundId);
+  if (!reopened) {
+    return { ok: false, code: 'NOT_CLOSED' };
+  }
+
+  return { ok: true, round: reopened };
+}
+
+export function updateMatchingRound(
+  db: Database.Database,
+  roundId: string,
+  input: CreateRoundInput,
+): RoundDetailRow | null {
+  const round = findRoundById(db, roundId);
+  if (!round || round.status !== 'open') return null;
+  const primaryQuestion = input.questions[0] ?? '';
+  db.prepare(
+    `UPDATE rounds
+     SET theme = ?, question = ?, questions_json = ?, slots_json = ?
+     WHERE id = ? AND status = 'open'`,
+  ).run(
+    input.theme,
+    primaryQuestion,
+    JSON.stringify(input.questions),
+    JSON.stringify(input.slots),
+    roundId,
+  );
+  return findRoundById(db, roundId);
+}
+
 export function createMatchingRound(
   db: Database.Database,
   communityId: string,

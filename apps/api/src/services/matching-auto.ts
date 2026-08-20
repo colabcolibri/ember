@@ -7,12 +7,14 @@ import {
   loadMetPairs,
   upsertMatchingRoundDraft,
 } from '@ember/db';
-import { runMatchingEngine, type TrioProposal, type UnmatchedMember } from '@ember/domain';
+import { runMatchingEngine, type GroupProposal, type UnmatchedMember } from '@ember/domain';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
 export type AutoMatchResult = {
-  trios: TrioProposal[];
+  groups: GroupProposal[];
+  /** @deprecated use groups */
+  trios: GroupProposal[];
   unmatched: number;
   unmatchedMembers: UnmatchedMember[];
   auditEventId: string;
@@ -24,7 +26,7 @@ export function executeAutoMatch(
   input: { communityId: string; roundId: string; actorUserId: string },
 ): AutoMatchResult {
   const members = loadMatchingMembers(db, input.communityId, input.roundId);
-  if (members.length < 3) {
+  if (members.length < 2) {
     throw new Error('NOT_ENOUGH_MEMBERS');
   }
 
@@ -33,7 +35,7 @@ export function executeAutoMatch(
 
   const draft = upsertMatchingRoundDraft(db, {
     roundId: input.roundId,
-    trios: result.trios,
+    groups: result.groups,
     unmatchedMembers: result.unmatchedMembers,
     triggeredBy: input.actorUserId,
   });
@@ -43,13 +45,14 @@ export function executeAutoMatch(
     actorUserId: input.actorUserId,
     action: 'auto_match',
     payload: {
-      circleCount: result.trios.length,
+      circleCount: result.groups.length,
       unmatched: result.unmatched,
     },
   });
 
   return {
-    trios: result.trios,
+    groups: result.groups,
+    trios: result.groups,
     unmatched: result.unmatched,
     unmatchedMembers: result.unmatchedMembers,
     auditEventId: audit.id,
@@ -77,11 +80,11 @@ export function loadAutoMatchDraft(db: Db, roundId: string) {
   return findMatchingRoundDraft(db, roundId);
 }
 
-export function updateAutoMatchDraftTrios(
+export function updateAutoMatchDraftGroups(
   db: Db,
   input: {
     roundId: string;
-    trios: TrioProposal[];
+    groups: GroupProposal[];
     unmatchedMembers: UnmatchedMember[];
     actorUserId: string;
   },
@@ -93,7 +96,7 @@ export function updateAutoMatchDraftTrios(
 
   upsertMatchingRoundDraft(db, {
     roundId: input.roundId,
-    trios: input.trios,
+    groups: input.groups,
     unmatchedMembers: input.unmatchedMembers,
     triggeredBy: existing.triggeredBy,
   });
@@ -102,6 +105,9 @@ export function updateAutoMatchDraftTrios(
     roundId: input.roundId,
     actorUserId: input.actorUserId,
     action: 'auto_match',
-    payload: { manualAdjust: true, circleCount: input.trios.length },
+    payload: { manualAdjust: true, circleCount: input.groups.length },
   });
 }
+
+/** @deprecated use updateAutoMatchDraftGroups */
+export const updateAutoMatchDraftTrios = updateAutoMatchDraftGroups;

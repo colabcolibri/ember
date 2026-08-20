@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MatchingMember } from './constraints.js';
-import { analyzeUnmatched } from './unmatched.js';
-import { proposeTrios } from './engine.js';
+import { analyzeUnmatched, countUnmatched } from './unmatched.js';
+import { proposeGroups } from './engine.js';
 
 const baseMember = (userId: string, overrides: Partial<MatchingMember> = {}): MatchingMember => ({
   userId,
@@ -18,18 +18,21 @@ describe('analyzeUnmatched', () => {
       baseMember('b'),
       baseMember('c', { languages: [] }),
     ];
-    const trios = proposeTrios(members, new Set());
-    const unmatched = analyzeUnmatched(members, trios);
+    const groups = proposeGroups(members, new Set());
+    const unmatched = analyzeUnmatched(members, groups);
     expect(unmatched.some((row) => row.userId === 'c' && row.reasons.includes('INCOMPLETE_PROFILE'))).toBe(
       true,
     );
   });
 
-  it('flags odd pool when count is not divisible by three', () => {
-    const members = [baseMember('a'), baseMember('b'), baseMember('c'), baseMember('d')];
-    const trios = proposeTrios(members, new Set());
-    const unmatched = analyzeUnmatched(members, trios);
-    expect(unmatched).toHaveLength(1);
-    expect(unmatched[0]?.reasons).toContain('ODD_POOL');
+  it('matches four compatible members without leftovers', () => {
+    const members = [
+      baseMember('a'),
+      baseMember('b'),
+      baseMember('c'),
+      baseMember('d'),
+    ];
+    const groups = proposeGroups(members, new Set());
+    expect(countUnmatched(members, groups)).toBe(0);
   });
 });

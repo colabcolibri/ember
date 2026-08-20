@@ -131,6 +131,8 @@ function mapMockGatheringDetail(round: MockRound) {
   return {
     ...mapMockGatheringSummary(round),
     slotLabels: SLOT_LABELS,
+    slots: MOCK_REGIONAL_SLOTS,
+    templateId: round.templateId,
   };
 }
 
@@ -778,9 +780,14 @@ export const mockStore = {
     requireSession();
     if (!state.session?.isFacilitator) throw new Error('forbidden');
     const round = findRound(state, roundId);
-    if (!round || round.status !== 'open') throw new Error('round not found');
+    if (!round || round.status !== 'closed') throw new Error('round not found');
+    const groups = MOCK_TRIOS.map((trio) => ({
+      ...trio,
+      memberIds: [...trio.memberIds],
+    }));
     return {
-      trios: MOCK_TRIOS.map((trio) => ({ ...trio, memberIds: [...trio.memberIds] as [string, string, string] })),
+      groups,
+      trios: groups,
       unmatched: MOCK_UNMATCHED_COUNT,
       unmatchedMembers: MOCK_UNMATCHED_MEMBERS.map((item) => ({
         userId: item.userId,
@@ -789,17 +796,54 @@ export const mockStore = {
     };
   },
 
-  runAutoMatch(roundId: string) {
+  updateGathering(
+    roundId: string,
+    input: { theme: string; questions: string[]; slots: unknown[] },
+  ) {
     requireSession();
     if (!state.session?.isFacilitator) throw new Error('forbidden');
     const round = findRound(state, roundId);
     if (!round || round.status !== 'open') throw new Error('round not found');
-    const trios = MOCK_TRIOS.map((trio) => ({
+    round.theme = input.theme;
+    round.questions = [...input.questions];
+    persist();
+    return { round: mapMockGatheringDetail(round) };
+  },
+
+  closeGathering(roundId: string) {
+    requireSession();
+    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    const round = findRound(state, roundId);
+    if (!round || round.status !== 'open') throw new Error('round not found');
+    round.status = 'closed';
+    persist();
+    return { round: mapMockGatheringDetail(round) };
+  },
+
+  reopenGathering(roundId: string) {
+    requireSession();
+    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    const round = findRound(state, roundId);
+    if (!round || round.status !== 'closed') throw new Error('round not found');
+    const otherOpen = state.rounds.find((item) => item.status === 'open');
+    if (otherOpen) throw new Error('other open');
+    round.status = 'open';
+    round.autoMatchDraft = null;
+    persist();
+    return { round: mapMockGatheringDetail(round) };
+  },
+
+  runAutoMatch(roundId: string) {
+    requireSession();
+    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    const round = findRound(state, roundId);
+    if (!round || round.status !== 'closed') throw new Error('round not found');
+    const groups = MOCK_TRIOS.map((trio) => ({
       ...trio,
-      memberIds: [...trio.memberIds] as [string, string, string],
+      memberIds: [...trio.memberIds],
     }));
     round.autoMatchDraft = {
-      trios,
+      trios: groups as typeof MOCK_TRIOS,
       unmatchedMembers: MOCK_UNMATCHED_MEMBERS.map((item) => ({
         userId: item.userId,
         reasons: [...item.reasons],
@@ -807,7 +851,8 @@ export const mockStore = {
     };
     persist();
     return {
-      trios,
+      groups,
+      trios: groups,
       unmatched: MOCK_UNMATCHED_COUNT,
       unmatchedMembers: round.autoMatchDraft.unmatchedMembers,
       auditEventId: 'mock-audit',
@@ -822,6 +867,7 @@ export const mockStore = {
     if (!round?.autoMatchDraft) return { draft: null };
     return {
       draft: {
+        groups: round.autoMatchDraft.trios,
         trios: round.autoMatchDraft.trios,
         unmatched: round.autoMatchDraft.unmatchedMembers.length,
         unmatchedMembers: round.autoMatchDraft.unmatchedMembers,
@@ -846,7 +892,7 @@ export const mockStore = {
     requireSession();
     if (!state.session?.isFacilitator) throw new Error('forbidden');
     const round = findRound(state, roundId);
-    if (!round || round.status !== 'open') throw new Error('round not found');
+    if (!round || round.status !== 'closed') throw new Error('round not found');
     round.status = 'published';
     round.circleCount = 3;
     round.autoMatchDraft = null;

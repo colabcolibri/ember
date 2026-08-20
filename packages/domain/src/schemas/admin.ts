@@ -36,16 +36,57 @@ export const meetingTemplateSchema = z.object({
 
 export type MeetingTemplateInput = z.infer<typeof meetingTemplateSchema>;
 
-export const publishTriosSchema = z.object({
-  trios: z
-    .array(
-      z.object({
-        memberIds: z.tuple([z.string(), z.string(), z.string()]),
-        slot: z.string().min(1),
-        score: z.number().optional(),
-      }),
-    )
-    .min(1),
+const matchGroupSchema = z.object({
+  memberIds: z.array(z.string()).min(2).max(4),
+  slot: z.string().min(1),
+  score: z.number().optional(),
 });
 
-export type PublishTriosInput = z.infer<typeof publishTriosSchema>;
+export const publishGroupsSchema = z.object({
+  groups: z.array(matchGroupSchema).min(1),
+});
+
+export type PublishGroupsInput = z.infer<typeof publishGroupsSchema>;
+
+export const updateRoundSchema = createRoundSchema;
+
+export type UpdateRoundInput = z.infer<typeof updateRoundSchema>;
+
+/** Accepts groups (preferred) or legacy trios payload. */
+export const publishMatchSchema = z
+  .union([
+    publishGroupsSchema,
+    z.object({
+      trios: z
+        .array(
+          z.object({
+            memberIds: z.tuple([z.string(), z.string(), z.string()]),
+            slot: z.string().min(1),
+            score: z.number().optional(),
+          }),
+        )
+        .min(1),
+    }),
+  ])
+  .transform((payload) => {
+    if ('groups' in payload) {
+      return {
+        groups: payload.groups.map((group) => ({
+          ...group,
+          score: group.score ?? 0,
+        })),
+      };
+    }
+    return {
+      groups: payload.trios.map((trio) => ({
+        memberIds: [...trio.memberIds],
+        slot: trio.slot,
+        score: trio.score ?? 0,
+      })),
+    };
+  });
+
+/** @deprecated use publishGroupsSchema or publishMatchSchema */
+export const publishTriosSchema = publishGroupsSchema;
+
+export type PublishTriosInput = PublishGroupsInput;

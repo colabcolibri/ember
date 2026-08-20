@@ -8,11 +8,27 @@ import { GatheringMetaChips } from './GatheringMetaChips.js';
 type GatheringOverviewCardProps = {
   gathering: GatheringDetail;
   statusLabel: string;
+  canEdit?: boolean;
+  canClose?: boolean;
+  canReopen?: boolean;
+  onEdit?: () => void;
+  onCloseRegistrations?: () => void;
+  onReopenRegistrations?: () => void;
 };
 
-export function GatheringOverviewCard({ gathering, statusLabel }: GatheringOverviewCardProps) {
+export function GatheringOverviewCard({
+  gathering,
+  statusLabel,
+  canEdit = false,
+  canClose = false,
+  canReopen = false,
+  onEdit,
+  onCloseRegistrations,
+  onReopenRegistrations,
+}: GatheringOverviewCardProps) {
   const { t, i18n } = useTranslation();
   const isOpen = gathering.status === 'open';
+  const isClosed = gathering.status === 'closed';
   const title = gatheringTitle(gathering, t('facilitator.untitledGathering'));
   const slotLabels = Object.values(gathering.slotLabels);
 
@@ -54,14 +70,38 @@ export function GatheringOverviewCard({ gathering, statusLabel }: GatheringOverv
       <div className="relative z-10 space-y-5 p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <AppBadge variant={isOpen ? 'rust' : 'muted'}>{statusLabel}</AppBadge>
+            <AppBadge variant={isOpen ? 'rust' : isClosed ? 'muted' : 'muted'}>{statusLabel}</AppBadge>
           </div>
-          <AppButton type="button" variant="outline" size="sm" disabled className="shrink-0">
-            {t('facilitator.editGathering')}
-          </AppButton>
+          <div className="flex flex-wrap gap-2">
+            {canClose ? (
+              <AppButton
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onCloseRegistrations}
+                className="shrink-0"
+              >
+                {t('facilitator.closeRegistrations')}
+              </AppButton>
+            ) : null}
+            {canReopen ? (
+              <AppButton
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onReopenRegistrations}
+                className="shrink-0"
+              >
+                {t('facilitator.reopenRegistrations')}
+              </AppButton>
+            ) : null}
+            {canEdit ? (
+              <AppButton type="button" variant="outline" size="sm" onClick={onEdit} className="shrink-0">
+                {t('facilitator.editGathering')}
+              </AppButton>
+            ) : null}
+          </div>
         </div>
-
-        <p className="text-xs text-muted-foreground">{t('facilitator.editGatheringSoon')}</p>
 
         <div className="space-y-2">
           <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">

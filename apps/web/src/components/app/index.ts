@@ -32,11 +32,14 @@ export { CircleListRow } from './CircleListRow.js';
 export { GatheringListRow } from './GatheringListRow.js';
 export { GatheringMetaChips } from './GatheringMetaChips.js';
 export { GatheringOverviewCard } from './GatheringOverviewCard.js';
+export { GatheringCycleStepper } from './GatheringCycleStepper.js';
 export { CircleInviteCard } from './CircleInviteCard.js';
 export { AttendancePrompt } from './AttendancePrompt.js';
 export { ProfileOnboardingBanner } from './ProfileOnboardingBanner.js';
 export { DeclarationTable } from './DeclarationTable.js';
-export { TrioPreview } from './TrioPreview.js';
+export { GroupPreview, TrioPreview, type MatchGroupRow, type TrioRow } from './GroupPreview.js';
+export { FacilitatorMatchingPanel } from './FacilitatorMatchingPanel.js';
+export { GatheringEditDialog } from './GatheringEditDialog.js';
 export {
   UnmatchedPanel,
   buildUnmatchedRows,

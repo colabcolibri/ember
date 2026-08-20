@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  isValidGroup,
   isValidTrio,
   resolveCommonFacilitatorSlot,
   type MatchingMember,
 } from './constraints.js';
-import { proposeTrios } from './engine.js';
-import { pairKey, scoreTrio } from './scoring.js';
+import { proposeGroups, proposeTrios } from './engine.js';
+import { pairKey, scoreGroup, scoreTrio } from './scoring.js';
 
 const m = (
   userId: string,
@@ -42,14 +43,26 @@ describe('matching constraints', () => {
     expect(isValidTrio(trio)).toBe(true);
     expect(resolveCommonFacilitatorSlot(trio)).toBe('mon-19h');
   });
+
+  it('accepts valid pair', () => {
+    const pair = [m('a', ['mon-evening'], ['pt']), m('b', ['mon-evening'], ['pt'])];
+    expect(isValidGroup(pair)).toBe(true);
+  });
 });
 
 describe('matching engine', () => {
   it('prioritizes pairs without history', () => {
     const met = new Set([pairKey('a', 'b')]);
-    const high = scoreTrio([m('a', ['mon-evening'], ['pt']), m('b', ['mon-evening'], ['pt']), m('c', ['mon-evening'], ['pt'])], met);
-    const low = scoreTrio([m('a', ['mon-evening'], ['pt']), m('d', ['mon-evening'], ['pt']), m('e', ['mon-evening'], ['pt'])], met);
+    const high = scoreGroup(
+      [m('a', ['mon-evening'], ['pt']), m('b', ['mon-evening'], ['pt']), m('c', ['mon-evening'], ['pt'])],
+      met,
+    );
+    const low = scoreGroup(
+      [m('a', ['mon-evening'], ['pt']), m('d', ['mon-evening'], ['pt']), m('e', ['mon-evening'], ['pt'])],
+      met,
+    );
     expect(low).toBeGreaterThan(high);
+    expect(scoreTrio).toBe(scoreGroup);
   });
 
   it('forms trios from six members', () => {
@@ -61,8 +74,36 @@ describe('matching engine', () => {
       m('5', ['wed-evening'], ['pt']),
       m('6', ['wed-evening'], ['pt']),
     ];
-    const trios = proposeTrios(members, new Set());
-    expect(trios).toHaveLength(2);
-    expect(trios[0]?.memberIds).toHaveLength(3);
+    const groups = proposeGroups(members, new Set());
+    expect(groups).toHaveLength(2);
+    expect(groups[0]?.memberIds).toHaveLength(3);
+  });
+
+  it('absorbs leftover member into quartet', () => {
+    const members = [
+      m('1', ['mon-evening'], ['pt']),
+      m('2', ['mon-evening'], ['pt']),
+      m('3', ['mon-evening'], ['pt']),
+      m('4', ['mon-evening'], ['pt']),
+    ];
+    const groups = proposeGroups(members, new Set());
+    expect(groups).toHaveLength(1);
+    expect(groups[0]?.memberIds).toHaveLength(4);
+  });
+
+  it('forms pair when only two members remain', () => {
+    const members = [m('1', ['mon-evening'], ['pt']), m('2', ['mon-evening'], ['pt'])];
+    const groups = proposeGroups(members, new Set());
+    expect(groups).toHaveLength(1);
+    expect(groups[0]?.memberIds).toHaveLength(2);
+  });
+
+  it('keeps proposeTrios alias working', () => {
+    const members = [
+      m('1', ['mon-evening'], ['pt']),
+      m('2', ['mon-evening'], ['pt']),
+      m('3', ['mon-evening'], ['pt']),
+    ];
+    expect(proposeTrios(members, new Set())).toHaveLength(1);
   });
 });

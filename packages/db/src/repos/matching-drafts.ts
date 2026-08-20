@@ -1,10 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import type Database from 'better-sqlite3';
-import type { TrioProposal, UnmatchedMember } from '@ember/domain';
+import type { GroupProposal, UnmatchedMember } from '@ember/domain';
 
 export type MatchingRoundDraft = {
   roundId: string;
-  trios: TrioProposal[];
+  groups: GroupProposal[];
+  /** @deprecated use groups */
+  trios: GroupProposal[];
   unmatchedMembers: UnmatchedMember[];
   triggeredBy: string;
   createdAt: string;
@@ -31,9 +33,12 @@ export function findMatchingRoundDraft(
 
   if (!row) return null;
 
+  const groups = JSON.parse(row.trios_json) as GroupProposal[];
+
   return {
     roundId: row.round_id,
-    trios: JSON.parse(row.trios_json) as TrioProposal[],
+    groups,
+    trios: groups,
     unmatchedMembers: JSON.parse(row.unmatched_json) as UnmatchedMember[],
     triggeredBy: row.triggered_by,
     createdAt: row.created_at,
@@ -44,7 +49,7 @@ export function upsertMatchingRoundDraft(
   db: Database.Database,
   input: {
     roundId: string;
-    trios: TrioProposal[];
+    groups: GroupProposal[];
     unmatchedMembers: UnmatchedMember[];
     triggeredBy: string;
   },
@@ -60,7 +65,7 @@ export function upsertMatchingRoundDraft(
        created_at = excluded.created_at`,
   ).run(
     input.roundId,
-    JSON.stringify(input.trios),
+    JSON.stringify(input.groups),
     JSON.stringify(input.unmatchedMembers),
     input.triggeredBy,
     now,
@@ -68,7 +73,8 @@ export function upsertMatchingRoundDraft(
 
   return {
     roundId: input.roundId,
-    trios: input.trios,
+    groups: input.groups,
+    trios: input.groups,
     unmatchedMembers: input.unmatchedMembers,
     triggeredBy: input.triggeredBy,
     createdAt: now,

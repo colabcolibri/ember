@@ -9,10 +9,15 @@ export type MatchingMember = {
   intention: PresenceIntention;
 };
 
-export type TrioProposal = {
-  memberIds: [string, string, string];
+export type GroupProposal = {
+  memberIds: string[];
   slot: string;
   score: number;
+};
+
+/** @deprecated use GroupProposal with exactly three members */
+export type TrioProposal = GroupProposal & {
+  memberIds: [string, string, string];
 };
 
 export function hasCommonLanguage(a: MemberLanguage[], b: MemberLanguage[]): boolean {
@@ -20,10 +25,14 @@ export function hasCommonLanguage(a: MemberLanguage[], b: MemberLanguage[]): boo
 }
 
 export function trioHasCommonLanguage(members: MatchingMember[]): boolean {
+  return groupHasCommonLanguage(members);
+}
+
+export function groupHasCommonLanguage(members: MatchingMember[]): boolean {
   if (members.length < 2) return false;
   let common = new Set(members[0]!.languages);
-  for (const m of members.slice(1)) {
-    common = new Set(m.languages.filter((l) => common.has(l)));
+  for (const member of members.slice(1)) {
+    common = new Set(member.languages.filter((language) => common.has(language)));
     if (common.size === 0) return false;
   }
   return true;
@@ -41,8 +50,12 @@ export function resolveCommonFacilitatorSlot(members: MatchingMember[]): string 
   return null;
 }
 
-export function isValidTrio(members: MatchingMember[]): boolean {
-  if (members.length !== 3) return false;
-  if (!trioHasCommonLanguage(members)) return false;
+export function isValidGroup(members: MatchingMember[]): boolean {
+  if (members.length < 2 || members.length > 4) return false;
+  if (!groupHasCommonLanguage(members)) return false;
   return resolveCommonFacilitatorSlot(members) !== null;
+}
+
+export function isValidTrio(members: MatchingMember[]): boolean {
+  return members.length === 3 && isValidGroup(members);
 }

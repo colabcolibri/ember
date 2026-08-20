@@ -1,9 +1,11 @@
-import type { MatchingMember, TrioProposal } from './constraints.js';
-import { proposeTrios } from './engine.js';
+import type { GroupProposal, MatchingMember } from './constraints.js';
+import { proposeGroups } from './engine.js';
 import { analyzeUnmatched, countUnmatched, type UnmatchedMember } from './unmatched.js';
 
 export type MatchRunResult = {
-  trios: TrioProposal[];
+  groups: GroupProposal[];
+  /** @deprecated use groups */
+  trios: GroupProposal[];
   unmatched: number;
   unmatchedMembers: UnmatchedMember[];
 };
@@ -12,11 +14,12 @@ export function runMatchingEngine(
   members: MatchingMember[],
   metPairs: Set<string>,
 ): MatchRunResult {
-  const trios = proposeTrios(members, metPairs);
-  const unmatchedMembers = analyzeUnmatched(members, trios);
+  const groups = proposeGroups(members, metPairs);
+  const unmatchedMembers = analyzeUnmatched(members, groups);
   return {
-    trios,
-    unmatched: countUnmatched(members, trios),
+    groups,
+    trios: groups,
+    unmatched: countUnmatched(members, groups),
     unmatchedMembers,
   };
 }

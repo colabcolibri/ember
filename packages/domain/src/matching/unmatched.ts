@@ -1,5 +1,5 @@
-import type { MatchingMember, TrioProposal } from './constraints.js';
-import { isValidTrio, trioHasCommonLanguage } from './constraints.js';
+import type { GroupProposal, MatchingMember } from './constraints.js';
+import { groupHasCommonLanguage, isValidGroup } from './constraints.js';
 
 export type UnmatchedReason =
   | 'INCOMPLETE_PROFILE'
@@ -12,13 +12,30 @@ export type UnmatchedMember = {
   reasons: UnmatchedReason[];
 };
 
+function canMemberJoinAnyGroup(member: MatchingMember, members: MatchingMember[]): boolean {
+  for (let size = 2; size <= 4; size += 1) {
+    if (members.length < size) continue;
+    const others = members.filter((row) => row.userId !== member.userId);
+    const visit = (start: number, picked: MatchingMember[], depth: number): boolean => {
+      if (depth === size - 1) {
+        return isValidGroup([member, ...picked]);
+      }
+      for (let i = start; i <= others.length - (size - 1 - depth); i += 1) {
+        if (visit(i + 1, [...picked, others[i]!], depth + 1)) return true;
+      }
+      return false;
+    };
+    if (visit(0, [], 0)) return true;
+  }
+  return false;
+}
+
 export function analyzeUnmatched(
   members: MatchingMember[],
-  trios: TrioProposal[],
+  groups: GroupProposal[],
 ): UnmatchedMember[] {
-  const matched = new Set(trios.flatMap((trio) => trio.memberIds));
+  const matched = new Set(groups.flatMap((group) => group.memberIds));
   const unmatchedMembers = members.filter((member) => !matched.has(member.userId));
-  const oddPool = members.length % 3 !== 0;
 
   return unmatchedMembers.map((member) => {
     const reasons: UnmatchedReason[] = [];
@@ -27,27 +44,18 @@ export function analyzeUnmatched(
       reasons.push('INCOMPLETE_PROFILE');
     }
 
-    let canFormValidTrio = false;
     let hasLanguageOverlap = false;
-
-    for (let i = 0; i < members.length; i += 1) {
-      for (let j = i + 1; j < members.length; j += 1) {
-        const a = members[i]!;
-        const b = members[j]!;
-        if (a.userId === member.userId || b.userId === member.userId) continue;
-        const trio = [member, a, b];
-        if (trioHasCommonLanguage(trio)) {
-          hasLanguageOverlap = true;
-        }
-        if (isValidTrio(trio)) {
-          canFormValidTrio = true;
-          break;
-        }
+    for (const other of members) {
+      if (other.userId === member.userId) continue;
+      if (groupHasCommonLanguage([member, other])) {
+        hasLanguageOverlap = true;
+        break;
       }
-      if (canFormValidTrio) break;
     }
 
-    if (!canFormValidTrio && member.languages.length > 0) {
+    const canJoin = canMemberJoinAnyGroup(member, members);
+
+    if (!canJoin && member.languages.length > 0) {
       if (!hasLanguageOverlap) {
         reasons.push('NO_COMMON_LANGUAGE');
       } else {
@@ -55,7 +63,7 @@ export function analyzeUnmatched(
       }
     }
 
-    if (oddPool && unmatchedMembers.length <= 2) {
+    if (unmatchedMembers.length === 1 && members.length > 1) {
       reasons.push('ODD_POOL');
     }
 
@@ -67,6 +75,7 @@ export function analyzeUnmatched(
   });
 }
 
-export function countUnmatched(members: MatchingMember[], trios: TrioProposal[]): number {
-  return members.length - trios.length * 3;
+export function countUnmatched(members: MatchingMember[], groups: GroupProposal[]): number {
+  const matched = new Set(groups.flatMap((group) => group.memberIds));
+  return members.length - matched.size;
 }

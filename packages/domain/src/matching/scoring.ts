@@ -4,7 +4,7 @@ export function pairKey(a: string, b: string): string {
   return [a, b].sort().join(':');
 }
 
-export function scoreTrio(members: MatchingMember[], metPairs: Set<string>): number {
+export function scoreGroup(members: MatchingMember[], metPairs: Set<string>): number {
   let score = 0;
   for (let i = 0; i < members.length; i += 1) {
     for (let j = i + 1; j < members.length; j += 1) {
@@ -18,3 +18,6 @@ export function scoreTrio(members: MatchingMember[], metPairs: Set<string>): num
   }
   return score;
 }
+
+/** @deprecated use scoreGroup */
+export const scoreTrio = scoreGroup;

@@ -3,7 +3,7 @@ import type Database from 'better-sqlite3';
 import {
   buildIcsEvent,
   buildJitsiRoomUrl,
-  type TrioProposal,
+  type GroupProposal,
 } from '@ember/domain';
 import { decryptRecipientEmail } from '../crypto/recipient-email-vault.js';
 import { resolveScheduledAtForSlot } from './slot-calendars.js';
@@ -246,10 +246,10 @@ export type PublishCircleRow = {
   jitsi_url: string | null;
 };
 
-export function publishTriosWithDelivery(
+export function publishGroupsWithDelivery(
   db: Database.Database,
   roundId: string,
-  trios: TrioProposal[],
+  groups: GroupProposal[],
   jitsiBaseUrl?: string,
 ): PublishCircleRow[] {
   const now = new Date().toISOString();
@@ -263,16 +263,16 @@ export function publishTriosWithDelivery(
     ).run(roundId);
     db.prepare('DELETE FROM circles WHERE round_id = ?').run(roundId);
 
-    for (const trio of trios) {
+    for (const group of groups) {
       const circleId = randomUUID();
-      const scheduledAt = resolveScheduledAtForSlot(db, trio.slot, new Date(), slotsJson);
+      const scheduledAt = resolveScheduledAtForSlot(db, group.slot, new Date(), slotsJson);
       const jitsiUrl = buildJitsiRoomUrl(circleId, jitsiBaseUrl);
       db.prepare(
         `INSERT INTO circles (id, round_id, status, scheduled_slot, scheduled_at, jitsi_url, created_at)
          VALUES (?, ?, 'invited', ?, ?, ?, ?)`,
-      ).run(circleId, roundId, trio.slot, scheduledAt, jitsiUrl, now);
+      ).run(circleId, roundId, group.slot, scheduledAt, jitsiUrl, now);
 
-      for (const userId of trio.memberIds) {
+      for (const userId of group.memberIds) {
         db.prepare(
           'INSERT INTO circle_members (id, circle_id, user_id, status, created_at) VALUES (?, ?, ?, ?, ?)',
         ).run(randomUUID(), circleId, userId, 'invited', now);
@@ -282,7 +282,7 @@ export function publishTriosWithDelivery(
         id: circleId,
         round_id: roundId,
         status: 'invited',
-        scheduled_slot: trio.slot,
+        scheduled_slot: group.slot,
         scheduled_at: scheduledAt,
         jitsi_url: jitsiUrl,
       });
@@ -293,4 +293,14 @@ export function publishTriosWithDelivery(
 
   tx();
   return created;
+}
+
+/** @deprecated use publishGroupsWithDelivery */
+export function publishTriosWithDelivery(
+  db: Database.Database,
+  roundId: string,
+  trios: GroupProposal[],
+  jitsiBaseUrl?: string,
+): PublishCircleRow[] {
+  return publishGroupsWithDelivery(db, roundId, trios, jitsiBaseUrl);
 }
