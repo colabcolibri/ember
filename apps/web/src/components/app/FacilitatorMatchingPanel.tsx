@@ -12,7 +12,7 @@ import {
   type UnmatchedMemberRow,
   type UnmatchedReason,
 } from './index.js';
-import { apiFetch } from '@/lib/api.js';
+import { apiDownload, apiFetch } from '@/lib/api.js';
 import { formatApiError } from '@/lib/api-errors.js';
 import { showError, showSuccess } from '@/lib/app-toast.js';
 import { cn } from '@/lib/utils';
@@ -216,18 +216,10 @@ export function FacilitatorMatchingPanel({
   const exportUnmatchedCsv = async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/v1/admin/matching-rounds/${roundId}/unmatched/export.csv?locale=${i18n.language.startsWith('en') ? 'en' : 'pt'}`,
-        { credentials: 'include' },
+      await apiDownload(
+        `/admin/matching-rounds/${roundId}/unmatched/export.csv?locale=${i18n.language.startsWith('en') ? 'en' : 'pt'}`,
+        `unmatched-${roundId}.csv`,
       );
-      if (!res.ok) throw new Error('export_failed');
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = `unmatched-${roundId}.csv`;
-      anchor.click();
-      URL.revokeObjectURL(url);
     } catch (error) {
       showError(formatApiError(error, t));
     } finally {

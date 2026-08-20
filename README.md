@@ -73,10 +73,8 @@ After gatherings, members can confirm whether the circle happened—memory that 
 
 The [live demo](https://colabcolibri.github.io/ember/) is a **frontend-only mock** — useful for UI walkthroughs, not for end-to-end flows:
 
-- ✅ Login, profile, presence, facilitator panel, gatherings list
-- ❌ No real email delivery
-- ❌ No `.ics` download (no API on static hosting)
-- ❌ Jitsi link only on **seeded** circle data (`Meus encontros` → open the invited circle); publishing in the mock does not create new circles with video links
+- ✅ Login, profile, presence, facilitator panel, gatherings list, publish → círculos com link Jitsi em **Meus encontros**
+- ❌ No real email delivery, lembretes 24h/15min ou `.ics` — apenas no stack completo (`pnpm dev`)
 - ❌ Nothing persists beyond your browser (`localStorage`)
 
 ---

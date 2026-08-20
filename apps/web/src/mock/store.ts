@@ -4,6 +4,7 @@ import {
   isNewMemberDemoEmail,
   isOrgAdminDemoEmail,
 } from '../lib/mock-mode.js';
+import { buildJitsiRoomUrl } from '@ember/domain';
 import {
   DEFAULT_COMMUNITY_PUBLIC_SETTINGS,
   mergeCommunityPublicSettings,
@@ -29,7 +30,7 @@ import {
   type MockUnmatchedMember,
 } from './population.js';
 
-const STORAGE_KEY = 'ember-mock-v4';
+const STORAGE_KEY = 'ember-mock-v5';
 
 type MockSession = {
   email: string;
@@ -111,6 +112,8 @@ type MockRound = {
     trios: MockTrio[];
     unmatchedMembers: MockUnmatchedMember[];
   } | null;
+  lastUnmatchedMembers: MockUnmatchedMember[];
+  publishedCircleIds: string[];
 };
 
 function mockTemplateFor(round: MockRound) {
@@ -209,9 +212,60 @@ function seedRounds(): MockRound[] {
             unmatchedMembers: autoMatchDraft.unmatchedMembers,
           }
         : null,
+      lastUnmatchedMembers: [],
+      publishedCircleIds: [],
     };
   });
 }
+
+function normalizePublishGroups(groups: MockTrio[]): MockTrio[] {
+  return groups.map((group) => ({
+    slot: group.slot,
+    score: group.score ?? 0,
+    memberIds: [...group.memberIds] as MockTrio['memberIds'],
+  }));
+}
+
+function buildMockCircleFromGroup(
+  round: MockRound,
+  group: MockTrio,
+  index: number,
+  sessionUserId: string | null,
+): MockCircle {
+  const circleId = `${round.id}-circle-${index + 1}`;
+  const template = mockTemplateFor(round);
+  const question = round.questions[0] ?? null;
+  const includesSessionUser = sessionUserId ? group.memberIds.includes(sessionUserId) : false;
+
+  return {
+    id: circleId,
+    status: 'scheduled',
+    question,
+    communityName: MOCK_COMMUNITY_NAME,
+    scheduledSlot: group.slot,
+    scheduledAt: SLOT_LABELS[group.slot] ?? group.slot,
+    jitsiUrl: buildJitsiRoomUrl(circleId),
+    durationMinutes: template.durationMinutes,
+    canRecordAttendance: false,
+    myStatus: includesSessionUser ? 'invited' : 'confirmed',
+    myAttendance: null,
+    members: group.memberIds.map((userId) => ({
+      userId,
+      label: userId === sessionUserId ? 'Você · You' : memberLabel(userId),
+      status: 'invited',
+      attendance: null,
+    })),
+  };
+}
+
+const UNMATCHED_CSV_LABELS: Record<
+  MockUnmatchedMember['reasons'][number],
+  { pt: string; en: string }
+> = {
+  INCOMPLETE_PROFILE: { pt: 'Perfil incompleto', en: 'Incomplete profile' },
+  NO_COMMON_SLOT: { pt: 'Sem horário em comum', en: 'No common slot' },
+  ODD_POOL: { pt: 'Grupo ímpar', en: 'Odd pool size' },
+};
 
 function listOpenRounds(state: PersistedState): MockRound[] {
   return state.rounds.filter((round) => round.status === 'open');
@@ -833,6 +887,8 @@ export const mockStore = {
       circleCount: 0,
       declarations: [],
       autoMatchDraft: null,
+      lastUnmatchedMembers: [],
+      publishedCircleIds: [],
     });
     state.declaration = null;
     persist();
@@ -962,27 +1018,84 @@ export const mockStore = {
     return { removed };
   },
 
-  publish(roundId: string) {
+  publish(roundId: string, input?: { groups?: MockTrio[] }) {
     requireFacilitator();
     const round = findRound(state, roundId);
     if (!round || round.status !== 'closed') throw new Error('round not found');
     const numericSeed = roundId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const draft = round.autoMatchDraft ?? buildMatchDraftFromDeclarations(
+    const fallbackDraft = buildMatchDraftFromDeclarations(
       asPopulationDeclarations(round.declarations),
       round.templateId,
       numericSeed,
     );
+    const groups = input?.groups?.length
+      ? normalizePublishGroups(input.groups)
+      : round.autoMatchDraft?.trios ?? fallbackDraft.trios;
+    const unmatchedMembers =
+      round.autoMatchDraft?.unmatchedMembers ?? fallbackDraft.unmatchedMembers;
+
+    if (round.publishedCircleIds.length > 0) {
+      state.circles = state.circles.filter((circle) => !round.publishedCircleIds.includes(circle.id));
+    }
+
+    const sessionUserId = state.session ? resolveSessionUserId(state.session.email) : null;
+    const createdCircles = groups.map((group, index) =>
+      buildMockCircleFromGroup(round, group, index, sessionUserId),
+    );
+
+    state.circles.push(...createdCircles);
     round.status = 'published';
-    round.circleCount = draft.trios.length;
+    round.circleCount = groups.length;
+    round.publishedCircleIds = createdCircles.map((circle) => circle.id);
+    round.lastUnmatchedMembers = unmatchedMembers.map((item) => ({
+      userId: item.userId,
+      reasons: [...item.reasons],
+    }));
     round.autoMatchDraft = null;
     persist();
+
+    const template = mockTemplateFor(round);
     return {
-      published: true,
+      roundId,
+      status: 'published' as const,
+      circles: createdCircles.map((circle) => ({
+        id: circle.id,
+        status: circle.status,
+        scheduledSlot: circle.scheduledSlot,
+        jitsiUrl: circle.jitsiUrl,
+        scheduledAt: circle.scheduledAt,
+      })),
       emails: {
-        sent: draft.trios.length * mockTemplateFor(round).circleSize,
+        sent: groups.length * template.circleSize,
         failed: [] as Array<{ circleId: string; userId: string; email: string; error: string }>,
       },
     };
+  },
+
+  exportUnmatchedCsv(roundId: string, locale: 'pt' | 'en') {
+    requireFacilitator();
+    const round = findRound(state, roundId);
+    if (!round) throw new Error('round not found');
+
+    const unmatchedMembers =
+      round.autoMatchDraft?.unmatchedMembers ??
+      round.lastUnmatchedMembers ??
+      buildMatchDraftFromDeclarations(
+        asPopulationDeclarations(round.declarations),
+        round.templateId,
+        roundId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0),
+      ).unmatchedMembers;
+
+    const header = locale === 'en' ? 'member_id,name,reasons' : 'membro_id,nome,motivos';
+    const rows = unmatchedMembers.map((row) => {
+      const reasons = row.reasons
+        .map((reason) => UNMATCHED_CSV_LABELS[reason][locale])
+        .join(' | ');
+      const name = memberLabel(row.userId);
+      return `${row.userId},"${name.replace(/"/g, '""')}","${reasons.replace(/"/g, '""')}"`;
+    });
+
+    return [header, ...rows].join('\n');
   },
 
   retryPublishEmails(roundId: string) {
@@ -997,11 +1110,12 @@ export const mockStore = {
     const round = findRound(state, roundId);
     if (!round) throw new Error('not found');
 
-    const matchedCount = round.circleCount * mockTemplateFor(round).circleSize;
-    const invited = round.declarations.length;
-    const responded = round.status === 'published' ? Math.max(matchedCount, invited - 3) : 0;
-    const yes = round.status === 'published' ? Math.max(0, responded - 2) : 0;
-    const no = round.status === 'published' ? Math.min(2, responded - yes) : 0;
+    const matchedCount = round.publishedCircleIds.length * mockTemplateFor(round).circleSize;
+    const invited = attendingDeclarationCount(round);
+    const unmatched = round.lastUnmatchedMembers.length;
+    const responded = round.status === 'published' ? invited : 0;
+    const yes = round.status === 'published' ? Math.max(0, matchedCount) : 0;
+    const no = round.status === 'published' ? Math.max(0, responded - yes - unmatched) : 0;
     const languages = [...new Set(round.declarations.flatMap((item) => item.languages))].slice(0, 6);
     const editionYears = [
       ...new Set(
@@ -1026,7 +1140,7 @@ export const mockStore = {
         countries: ['Brazil', 'Portugal', 'Germany', 'United States', 'Japan'],
       },
       exceptions: {
-        unmatched: round.status === 'published' ? Math.max(0, invited - matchedCount) : 0,
+        unmatched: round.status === 'published' ? unmatched : 0,
       },
     };
 

@@ -1,5 +1,6 @@
 import { ApiError } from '../lib/api.js';
 import { MOCK_DEMO_CODE } from '../lib/mock-mode.js';
+import type { MockTrio } from './population.js';
 import { mockStore } from './store.js';
 
 function parseBody(init?: RequestInit): unknown {
@@ -25,6 +26,39 @@ function notFound(message: string): never {
 
 function delay(ms = 180) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function mockApiDownload(path: string): Promise<{ blob: Blob; filename: string }> {
+  await delay();
+
+  const method = (path.split('?')[0]?.includes('/') ? 'GET' : 'GET');
+  const [pathname, search = ''] = path.split('?');
+  const params = new URLSearchParams(search);
+
+  try {
+    const unmatchedCsvGet = pathname.match(/^\/admin\/matching-rounds\/([^/]+)\/unmatched\/export\.csv$/);
+    if (method === 'GET' && unmatchedCsvGet) {
+      const locale = params.get('locale') === 'en' ? 'en' : 'pt';
+      const csv = mockStore.exportUnmatchedCsv(unmatchedCsvGet[1]!, locale);
+      return {
+        blob: new Blob([csv], { type: 'text/csv;charset=utf-8' }),
+        filename: `unmatched-${unmatchedCsvGet[1]}.csv`,
+      };
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message === 'round not found') {
+      throw new ApiError('client', 'Encontro não encontrado', 404);
+    }
+    if (err instanceof Error && err.message === 'forbidden') {
+      throw new ApiError('client', 'Acesso restrito', 403);
+    }
+    if (err instanceof Error && err.message === 'unauthorized') {
+      throw new ApiError('unauthorized', 'Sessão expirada', 401);
+    }
+    throw err;
+  }
+
+  throw new ApiError('client', `Mock sem rota de download: ${path}`, 404);
 }
 
 export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -364,7 +398,8 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
     const publishPost = pathname.match(/^\/admin\/matching-rounds\/([^/]+)\/publish$/);
     if (publishPost && method === 'POST') {
       try {
-        return mockStore.publish(publishPost[1]!) as T;
+        const parsedBody = body as { groups?: MockTrio[] } | null;
+        return mockStore.publish(publishPost[1]!, parsedBody ?? undefined) as T;
       } catch {
         forbidden();
       }
