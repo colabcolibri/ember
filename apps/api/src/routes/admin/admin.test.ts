@@ -229,6 +229,64 @@ describe('admin routes', () => {
     expect(body.round.slots[0]?.timezone).toBe('America/Sao_Paulo');
   });
 
+  it('updates open round and blocks edit after close', async () => {
+    const create = await app.request('/admin/matching-rounds', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `${SESSION_COOKIE}=${facilitatorSession}`,
+      },
+      body: JSON.stringify({ ...roundBody, templateId: 'tpl-gsa-fogo' }),
+    });
+    const { round } = (await create.json()) as { round: { id: string; theme: string } };
+
+    const update = await app.request(`/admin/matching-rounds/${round.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `${SESSION_COOKIE}=${facilitatorSession}`,
+      },
+      body: JSON.stringify({
+        theme: 'Tema revisado',
+        questions: ['Pergunta revisada'],
+        slots: SLOTS,
+      }),
+    });
+    expect(update.status).toBe(200);
+    const updated = (await update.json()) as { round: { theme: string } };
+    expect(updated.round.theme).toBe('Tema revisado');
+
+    const close = await app.request(`/admin/matching-rounds/${round.id}/close`, {
+      method: 'POST',
+      headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },
+    });
+    expect(close.status).toBe(200);
+    const closed = (await close.json()) as { round: { status: string } };
+    expect(closed.round.status).toBe('closed');
+
+    const blocked = await app.request(`/admin/matching-rounds/${round.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `${SESSION_COOKIE}=${facilitatorSession}`,
+      },
+      body: JSON.stringify({
+        theme: 'Não deve salvar',
+        questions: ['X'],
+        slots: SLOTS,
+      }),
+    });
+    expect(blocked.status).toBe(400);
+
+    const reopen = await app.request(`/admin/matching-rounds/${round.id}/reopen`, {
+      method: 'POST',
+      headers: { Cookie: `${SESSION_COOKIE}=${facilitatorSession}` },
+    });
+    expect(reopen.status).toBe(200);
+    const reopened = (await reopen.json()) as { round: { status: string } };
+    expect(reopened.round.status).toBe('open');
+  });
+
   it('publishes circles with invited members', async () => {
     const create = await app.request('/admin/matching-rounds', {
       method: 'POST',
