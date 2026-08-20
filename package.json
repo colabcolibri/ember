@@ -6,7 +6,7 @@
     "dev": "pnpm --filter @ember/config build && pnpm -r --parallel dev",
     "dev:mock": "pnpm --filter @ember/config build && pnpm --filter @ember/web dev:mock",
     "build": "pnpm -r build",
-    "build:mock": "pnpm --filter @ember/config build && pnpm --filter @ember/web build:mock",
+    "build:mock": "pnpm --filter @ember/config build && pnpm --filter @ember/domain build && pnpm --filter @ember/web build:mock",
     "test": "pnpm -r test",
     "test:e2e": "pnpm --filter @ember/web test:e2e",
     "db:migrate": "pnpm --filter @ember/db migrate",

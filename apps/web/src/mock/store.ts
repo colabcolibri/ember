@@ -168,6 +168,7 @@ function asPopulationDeclarations(rows: MockDeclarationRow[]): MockPopulationDec
       intention: row.intention as 'surprise' | 'frontier' | 'ease',
       languages: [...row.languages],
       timezone: row.timezone ?? 'UTC',
+      response: 'attending' as const,
     }));
 }
 
@@ -681,9 +682,7 @@ export const mockStore = {
     const session = state.session!;
     const userId = resolveSessionUserId(session.email);
     const populationUser = MOCK_USER_BY_ID.get(userId);
-    const response = input.response === 'declined' ? 'declined' : 'attending';
-
-    if (response === 'declined') {
+    if (input.response === 'declined') {
       const row: MockDeclarationRow = {
         userId,
         memberLabel: populationUser?.memberLabel ?? state.profile.displayName,

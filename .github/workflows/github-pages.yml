@@ -41,6 +41,9 @@ jobs:
       - name: Build config package
         run: pnpm --filter @ember/config build
 
+      - name: Build domain package
+        run: pnpm --filter @ember/domain build
+
       - name: Build mock for GitHub Pages
         working-directory: apps/web
         env:
