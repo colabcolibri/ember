@@ -12,6 +12,8 @@ export * from './profile/completeness.js';
 export * from './matching/constraints.js';
 export * from './matching/scoring.js';
 export * from './matching/engine.js';
+export * from './matching/unmatched.js';
+export * from './matching/run-match.js';
 export * from './meeting/jitsi.js';
 export * from './meeting/slots.js';
 export * from './meeting/slot-calendars.js';

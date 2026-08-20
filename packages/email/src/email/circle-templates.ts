@@ -156,3 +156,74 @@ export function buildCircleFormedEmailContent(input: {
 
   return { subject, text, html };
 }
+
+export type CircleReminderEmailContent = {
+  subject: string;
+  text: string;
+  html: string;
+};
+
+export function buildCircleReminderEmailContent(input: {
+  question: string;
+  whenLabel: string;
+  jitsiUrl: string;
+  circleUrl: string;
+  kind: '24h' | '15min';
+  locale?: EmailLocale;
+}): CircleReminderEmailContent {
+  const locale = input.locale ?? 'pt';
+  const lead =
+    input.kind === '24h'
+      ? locale === 'pt'
+        ? 'Seu encontro Ember é amanhã'
+        : 'Your Ember circle is tomorrow'
+      : locale === 'pt'
+        ? 'Seu encontro Ember começa em 15 minutos'
+        : 'Your Ember circle starts in 15 minutes';
+  const intro =
+    locale === 'pt'
+      ? 'Lembrete do horário local do encontro. Use o link abaixo para entrar.'
+      : 'Reminder for your local meeting time. Use the link below to join.';
+  const questionLabel = locale === 'pt' ? 'Pergunta do encontro' : 'Circle question';
+  const whenLabel = locale === 'pt' ? 'Horário do encontro' : 'Time';
+  const ctaJitsi = locale === 'pt' ? 'Entrar no Jitsi' : 'Join Jitsi';
+  const ctaCircle = locale === 'pt' ? 'Ver convite' : 'View invite';
+  const footer =
+    locale === 'pt'
+      ? 'Você recebe este lembrete porque confirmou presença na rodada.'
+      : 'You receive this reminder because you joined the round.';
+
+  const text = [
+    lead,
+    '',
+    intro,
+    '',
+    `${questionLabel}: "${input.question}"`,
+    `${whenLabel}: ${input.whenLabel}`,
+    '',
+    input.circleUrl,
+    input.jitsiUrl,
+  ].join('\n');
+
+  const panel = `
+    ${emailLead(lead)}
+    ${emailMuted(intro)}
+    ${emailSectionLabel(questionLabel)}
+    ${emailParagraph(input.question)}
+    ${emailSectionLabel(whenLabel)}
+    ${emailParagraph(input.whenLabel)}
+    ${ctaButton(ctaJitsi, input.jitsiUrl)}
+    ${ctaButton(ctaCircle, input.circleUrl)}`;
+
+  const html = wrapEmailDocument(locale, panel, footer);
+  const subject =
+    input.kind === '24h'
+      ? locale === 'pt'
+        ? 'Lembrete: encontro Ember amanhã'
+        : 'Reminder: Ember circle tomorrow'
+      : locale === 'pt'
+        ? 'Lembrete: encontro Ember em 15 minutos'
+        : 'Reminder: Ember circle in 15 minutes';
+
+  return { subject, text, html };
+}

@@ -14,6 +14,7 @@ export { buildLoginCodeEmailContent } from './email/login-code-templates.js';
 export { buildMagicLinkEmailContent, buildMagicLinkUrl } from './email/magic-link-templates.js';
 export {
   buildCircleFormedEmailContent,
+  buildCircleReminderEmailContent,
   buildRoundOpenEmailContent,
 } from './email/circle-templates.js';
 export { EMAIL_BRAND } from './email/email-brand.js';

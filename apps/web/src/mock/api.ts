@@ -264,6 +264,40 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
       }
     }
 
+    const autoMatchGet = pathname.match(/^\/admin\/matching-rounds\/([^/]+)\/auto-match$/);
+    if (autoMatchGet && method === 'GET') {
+      try {
+        return mockStore.getAutoMatchDraft(autoMatchGet[1]!) as T;
+      } catch {
+        forbidden();
+      }
+    }
+
+    if (autoMatchGet && method === 'POST') {
+      try {
+        return mockStore.runAutoMatch(autoMatchGet[1]!) as T;
+      } catch {
+        forbidden();
+      }
+    }
+
+    if (autoMatchGet && method === 'DELETE') {
+      try {
+        return mockStore.undoAutoMatch(autoMatchGet[1]!) as T;
+      } catch {
+        forbidden();
+      }
+    }
+
+    const retryEmailsPost = pathname.match(/^\/admin\/matching-rounds\/([^/]+)\/publish\/retry-emails$/);
+    if (retryEmailsPost && method === 'POST') {
+      try {
+        return mockStore.retryPublishEmails(retryEmailsPost[1]!) as T;
+      } catch {
+        forbidden();
+      }
+    }
+
     const publishPost = pathname.match(/^\/admin\/matching-rounds\/([^/]+)\/publish$/);
     if (publishPost && method === 'POST') {
       try {

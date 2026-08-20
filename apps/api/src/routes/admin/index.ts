@@ -16,6 +16,7 @@ import {
   loadMetPairs,
   publishTriosWithDelivery,
   resolveRoundSlotOptionsFromJson,
+  scheduleCircleReminderJobs,
   updateMeetingTemplate,
   type MatchingRoundListItem,
 } from '@ember/db';
@@ -24,8 +25,8 @@ import {
   meetingTemplateSchema,
   normalizeCreateRoundSlots,
   parseRoundSlotsJson,
-  proposeTrios,
   publishTriosSchema,
+  runMatchingEngine,
   type CreateRoundInput,
   type TrioProposal,
 } from '@ember/domain';
@@ -38,6 +39,10 @@ import {
 import { createAdminSlotCalendarRoutes, validateRoundSlotRefs } from './slot-calendars.js';
 import { createAdminBrandingRoutes } from './branding.js';
 import { createAdminMembersRoutes } from './members.js';
+import {
+  createAdminMatchingAutomationRoutes,
+  recordPublishAudit,
+} from './matching-automation.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -333,10 +338,13 @@ export function createAdminRoundRoutes(db: Db) {
     }
 
     const metPairs = loadMetPairs(db, communityId);
-    const trios: TrioProposal[] = proposeTrios(members, metPairs);
-    const unmatched = members.length - trios.length * 3;
+    const result = runMatchingEngine(members, metPairs);
 
-    return c.json({ trios, unmatched });
+    return c.json({
+      trios: result.trios,
+      unmatched: result.unmatched,
+      unmatchedMembers: result.unmatchedMembers,
+    });
   });
 
   routes.post('/matching-rounds/:id/publish', requireFacilitator, async (c) => {
@@ -368,11 +376,19 @@ export function createAdminRoundRoutes(db: Db) {
       parsed.data.trios.map((trio) => ({ ...trio, score: trio.score ?? 0 })),
       process.env.EMBER_JITSI_BASE_URL,
     );
-    await sendCircleFormedNotifications(db, {
+    const emails = await sendCircleFormedNotifications(db, {
       communityId,
       roundId,
       question: round.question ?? '',
       circles,
+    });
+    scheduleCircleReminderJobs(db, circles);
+    recordPublishAudit(db, {
+      roundId,
+      actorUserId: c.get('userId'),
+      circleCount: circles.length,
+      emailsSent: emails.sent,
+      emailsFailed: emails.failed.length,
     });
     return c.json({
       roundId,
@@ -384,6 +400,7 @@ export function createAdminRoundRoutes(db: Db) {
         jitsiUrl: circle.jitsi_url,
         scheduledAt: circle.scheduled_at,
       })),
+      emails,
     });
   });
 
@@ -474,5 +491,6 @@ export function createAdminRoutes(db: Db) {
   admin.route('/', createAdminSlotCalendarRoutes(db));
   admin.route('/', createAdminBrandingRoutes(db));
   admin.route('/', createAdminMembersRoutes(db));
+  admin.route('/', createAdminMatchingAutomationRoutes(db));
   return admin;
 }

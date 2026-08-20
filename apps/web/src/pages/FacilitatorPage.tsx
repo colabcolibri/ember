@@ -12,7 +12,11 @@ import {
   FacilitatorRoundPanel,
   FacilitatorTemplatesPanel,
   TrioPreview,
+  UnmatchedPanel,
+  buildUnmatchedRows,
   type MeetingTemplate,
+  type UnmatchedMemberRow,
+  type UnmatchedReason,
 } from '../components/app/index.js';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiFetch, ApiError } from '../lib/api.js';
@@ -37,24 +41,65 @@ type Trio = {
   score: number;
 };
 
+type EmailFailure = {
+  circleId: string;
+  userId: string;
+  email: string;
+  error: string;
+};
+
 export function FacilitatorPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [templates, setTemplates] = useState<MeetingTemplate[]>([]);
   const [roundId, setRoundId] = useState<string | null>(null);
   const [slotLabels, setSlotLabels] = useState<Record<string, string>>({});
   const [declarations, setDeclarations] = useState<Declaration[]>([]);
   const [trios, setTrios] = useState<Trio[]>([]);
   const [unmatched, setUnmatched] = useState(0);
+  const [unmatchedMembers, setUnmatchedMembers] = useState<UnmatchedMemberRow[]>([]);
+  const [emailFailures, setEmailFailures] = useState<EmailFailure[]>([]);
+  const [hasAutoDraft, setHasAutoDraft] = useState(false);
   const [accessDeniedMessage, setAccessDeniedMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [activeTab, setActiveTab] = useState('templates');
 
+  const applyMatchResult = (result: {
+    trios: Trio[];
+    unmatched: number;
+    unmatchedMembers?: Array<{ userId: string; reasons: UnmatchedReason[] }>;
+  }) => {
+    setTrios(result.trios);
+    setUnmatched(result.unmatched);
+    setUnmatchedMembers(
+      buildUnmatchedRows(result.unmatchedMembers ?? [], declarations),
+    );
+  };
+
   const loadTemplates = async () => {
     const res = await apiFetch<{ templates: MeetingTemplate[] }>('/admin/templates');
     setTemplates(res.templates);
     return res.templates;
+  };
+
+  const loadAutoDraft = async (id: string, declarationItems?: Declaration[]) => {
+    const res = await apiFetch<{
+      draft: {
+        trios: Trio[];
+        unmatched: number;
+        unmatchedMembers: Array<{ userId: string; reasons: UnmatchedReason[] }>;
+      } | null;
+    }>(`/admin/matching-rounds/${id}/auto-match`);
+    if (!res.draft) {
+      setHasAutoDraft(false);
+      return;
+    }
+    setHasAutoDraft(true);
+    const labels = declarationItems ?? declarations;
+    setTrios(res.draft.trios);
+    setUnmatched(res.draft.unmatched);
+    setUnmatchedMembers(buildUnmatchedRows(res.draft.unmatchedMembers, labels));
   };
 
   const loadCurrentRound = async () => {
@@ -64,7 +109,8 @@ export function FacilitatorPage() {
     if (!current.round) return;
     setRoundId(current.round.id);
     setSlotLabels(current.round.slotLabels ?? {});
-    await loadDeclarations(current.round.id);
+    const items = await loadDeclarations(current.round.id);
+    await loadAutoDraft(current.round.id, items);
   };
 
   const { initialLoading } = useInitialLoad(async () => {
@@ -95,6 +141,11 @@ export function FacilitatorPage() {
       });
       setRoundId(res.round.id);
       setActiveTab('round');
+      setTrios([]);
+      setUnmatched(0);
+      setUnmatchedMembers([]);
+      setHasAutoDraft(false);
+      setEmailFailures([]);
       showSuccess(t('facilitator.roundCreated'));
       setSlotLabels({});
       await loadDeclarations(res.round.id);
@@ -140,18 +191,60 @@ export function FacilitatorPage() {
   const loadDeclarations = async (id: string) => {
     const res = await apiFetch<{ items: Declaration[] }>(`/admin/matching-rounds/${id}/declarations`);
     setDeclarations(res.items);
+    return res.items;
+  };
+
+  const runAutoMatch = async () => {
+    if (!roundId) return;
+    setLoading(true);
+    try {
+      const items = declarations.length ? declarations : await loadDeclarations(roundId);
+      const res = await apiFetch<{
+        trios: Trio[];
+        unmatched: number;
+        unmatchedMembers: Array<{ userId: string; reasons: UnmatchedReason[] }>;
+      }>(`/admin/matching-rounds/${roundId}/auto-match`, { method: 'POST', body: '{}' });
+      setHasAutoDraft(true);
+      setTrios(res.trios);
+      setUnmatched(res.unmatched);
+      setUnmatchedMembers(buildUnmatchedRows(res.unmatchedMembers, items));
+      showSuccess(t('facilitator.autoMatchReady'));
+    } catch (e) {
+      showError(formatApiError(e, t));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const undoAutoMatch = async () => {
+    if (!roundId) return;
+    setLoading(true);
+    try {
+      await apiFetch(`/admin/matching-rounds/${roundId}/auto-match`, { method: 'DELETE' });
+      setTrios([]);
+      setUnmatched(0);
+      setUnmatchedMembers([]);
+      setHasAutoDraft(false);
+      showSuccess(t('facilitator.autoMatchUndone'));
+    } catch (e) {
+      showError(formatApiError(e, t));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const runMatch = async () => {
     if (!roundId) return;
     setLoading(true);
     try {
-      const res = await apiFetch<{ trios: Trio[]; unmatched: number }>(
-        `/admin/matching-rounds/${roundId}/match`,
-        { method: 'POST', body: '{}' },
-      );
-      setTrios(res.trios);
-      setUnmatched(res.unmatched);
+      const items = declarations.length ? declarations : await loadDeclarations(roundId);
+      const res = await apiFetch<{
+        trios: Trio[];
+        unmatched: number;
+        unmatchedMembers: Array<{ userId: string; reasons: UnmatchedReason[] }>;
+      }>(`/admin/matching-rounds/${roundId}/match`, { method: 'POST', body: '{}' });
+      applyMatchResult(res);
+      setUnmatchedMembers(buildUnmatchedRows(res.unmatchedMembers ?? [], items));
       showSuccess(t('facilitator.matchReady'));
     } catch (e) {
       showError(formatApiError(e, t));
@@ -164,12 +257,64 @@ export function FacilitatorPage() {
     if (!roundId || trios.length === 0) return;
     setLoading(true);
     try {
-      await apiFetch(`/admin/matching-rounds/${roundId}/publish`, {
+      const res = await apiFetch<{
+        emails?: { sent: number; failed: EmailFailure[] };
+      }>(`/admin/matching-rounds/${roundId}/publish`, {
         method: 'POST',
         body: JSON.stringify({ trios }),
       });
       setPublishOpen(false);
+      setHasAutoDraft(false);
+      setEmailFailures(res.emails?.failed ?? []);
       showSuccess(t('facilitator.published'));
+    } catch (e) {
+      showError(formatApiError(e, t));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const retryFailedEmails = async () => {
+    if (!roundId || emailFailures.length === 0) return;
+    setLoading(true);
+    try {
+      const res = await apiFetch<{ sent: number; failed: EmailFailure[] }>(
+        `/admin/matching-rounds/${roundId}/publish/retry-emails`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            targets: emailFailures.map((item) => ({
+              circleId: item.circleId,
+              userId: item.userId,
+            })),
+          }),
+        },
+      );
+      setEmailFailures(res.failed);
+      showSuccess(t('facilitator.emailsRetried'));
+    } catch (e) {
+      showError(formatApiError(e, t));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const exportUnmatchedCsv = async () => {
+    if (!roundId) return;
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `/api/v1/admin/matching-rounds/${roundId}/unmatched/export.csv?locale=${i18n.language.startsWith('en') ? 'en' : 'pt'}`,
+        { credentials: 'include' },
+      );
+      if (!res.ok) throw new Error('export_failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `unmatched-${roundId}.csv`;
+      anchor.click();
+      URL.revokeObjectURL(url);
     } catch (e) {
       showError(formatApiError(e, t));
     } finally {
@@ -191,6 +336,22 @@ export function FacilitatorPage() {
         <AppAlert variant="error" title={t('facilitator.accessDeniedTitle')}>
           {accessDeniedMessage}
           <span className="mt-1 block text-sm opacity-90">{t('facilitator.accessDeniedHint')}</span>
+        </AppAlert>
+      ) : null}
+
+      {emailFailures.length > 0 ? (
+        <AppAlert variant="error" title={t('facilitator.emailFailuresTitle')} className="mb-6">
+          {t('facilitator.emailFailuresHint')}
+          <ul className="mt-2 list-inside list-disc text-sm">
+            {emailFailures.map((item) => (
+              <li key={`${item.circleId}-${item.userId}`}>
+                {item.email}: {item.error}
+              </li>
+            ))}
+          </ul>
+          <AppButton className="mt-3 w-full sm:w-auto" variant="outline" loading={loading} onClick={retryFailedEmails}>
+            {t('facilitator.retryFailedEmails')}
+          </AppButton>
         </AppAlert>
       ) : null}
 
@@ -234,7 +395,7 @@ export function FacilitatorPage() {
                       emptyMessage={t('facilitator.noDeclarations')}
                       slotLabels={slotLabels}
                     />
-                    <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <AppButton
                         variant="outline"
                         onClick={() => loadDeclarations(roundId)}
@@ -242,9 +403,17 @@ export function FacilitatorPage() {
                       >
                         {t('facilitator.refresh')}
                       </AppButton>
-                      <AppButton onClick={runMatch} loading={loading} disabled={declarations.length < 3}>
+                      <AppButton onClick={runAutoMatch} loading={loading} disabled={declarations.length < 3}>
+                        {t('facilitator.autoMatch')}
+                      </AppButton>
+                      <AppButton variant="outline" onClick={runMatch} loading={loading} disabled={declarations.length < 3}>
                         {t('facilitator.runMatch')}
                       </AppButton>
+                      {hasAutoDraft ? (
+                        <AppButton variant="ghost" onClick={undoAutoMatch} loading={loading}>
+                          {t('facilitator.undoAutoMatch')}
+                        </AppButton>
+                      ) : null}
                     </div>
                   </AppCard>
 
@@ -263,6 +432,15 @@ export function FacilitatorPage() {
                         {t('facilitator.publish')}
                       </AppButton>
                     </AppCard>
+                  ) : null}
+
+                  {unmatchedMembers.length > 0 ? (
+                    <UnmatchedPanel
+                      items={unmatchedMembers}
+                      roundId={roundId}
+                      loading={loading}
+                      onExport={exportUnmatchedCsv}
+                    />
                   ) : null}
                 </div>
               ) : null}

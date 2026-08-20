@@ -10,6 +10,7 @@ import { createCircleRoutes } from './routes/circles.js';
 import { createAdminRoutes } from './routes/admin/index.js';
 import { createPlacesRoutes } from './routes/places.js';
 import { createPublicCommunityRoutes } from './routes/public/community.js';
+import { processDueCircleReminders } from './services/circle-notifications.js';
 
 loadRepoEnv();
 
@@ -51,5 +52,13 @@ const port = resolveApiPort();
 serve({ fetch: app.fetch, port }, (info) => {
   console.info(`[api] http://127.0.0.1:${info.port}`);
 });
+
+if (process.env.EMBER_REMINDER_WORKER !== 'false') {
+  setInterval(() => {
+    void processDueCircleReminders(db).catch((error) => {
+      console.error('[reminders] worker failed', error);
+    });
+  }, 60_000);
+}
 
 export { app };

@@ -21,6 +21,7 @@ import {
   MOCK_THEMES,
   MOCK_TRIOS,
   MOCK_UNMATCHED_COUNT,
+  MOCK_UNMATCHED_MEMBERS,
 } from './data.js';
 
 const STORAGE_KEY = 'ember-mock-v3';
@@ -96,6 +97,10 @@ type MockRound = {
   templateId: string;
   circleCount: number;
   declarations: MockDeclarationRow[];
+  autoMatchDraft: {
+    trios: typeof MOCK_TRIOS;
+    unmatchedMembers: typeof MOCK_UNMATCHED_MEMBERS;
+  } | null;
 };
 
 function mockTemplateFor(round: MockRound) {
@@ -155,6 +160,7 @@ function seedRounds(): MockRound[] {
       templateId: 'tpl-council',
       circleCount: 0,
       declarations: seedDeclarations(),
+      autoMatchDraft: null,
     },
     {
       id: 'mock-round-published',
@@ -165,6 +171,7 @@ function seedRounds(): MockRound[] {
       templateId: 'tpl-council',
       circleCount: 3,
       declarations: MOCK_DECLARATIONS.slice(0, 7).map((item) => ({ ...item })),
+      autoMatchDraft: null,
     },
     {
       id: 'mock-round-closed',
@@ -175,6 +182,7 @@ function seedRounds(): MockRound[] {
       templateId: 'tpl-cafe',
       circleCount: 0,
       declarations: MOCK_DECLARATIONS.slice(2, 8).map((item) => ({ ...item })),
+      autoMatchDraft: null,
     },
     {
       id: 'mock-round-closed-2',
@@ -185,6 +193,7 @@ function seedRounds(): MockRound[] {
       templateId: 'tpl-walk',
       circleCount: 1,
       declarations: MOCK_DECLARATIONS.slice(0, 5).map((item) => ({ ...item })),
+      autoMatchDraft: null,
     },
     {
       id: 'mock-round-archived',
@@ -195,6 +204,7 @@ function seedRounds(): MockRound[] {
       templateId: 'tpl-council',
       circleCount: 2,
       declarations: MOCK_DECLARATIONS.slice(4, 10).map((item) => ({ ...item })),
+      autoMatchDraft: null,
     },
   ];
 }
@@ -741,6 +751,7 @@ export const mockStore = {
       templateId: input.templateId,
       circleCount: 0,
       declarations: [],
+      autoMatchDraft: null,
     });
     state.declaration = null;
     persist();
@@ -771,7 +782,64 @@ export const mockStore = {
     return {
       trios: MOCK_TRIOS.map((trio) => ({ ...trio, memberIds: [...trio.memberIds] as [string, string, string] })),
       unmatched: MOCK_UNMATCHED_COUNT,
+      unmatchedMembers: MOCK_UNMATCHED_MEMBERS.map((item) => ({
+        userId: item.userId,
+        reasons: [...item.reasons],
+      })),
     };
+  },
+
+  runAutoMatch(roundId: string) {
+    requireSession();
+    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    const round = findRound(state, roundId);
+    if (!round || round.status !== 'open') throw new Error('round not found');
+    const trios = MOCK_TRIOS.map((trio) => ({
+      ...trio,
+      memberIds: [...trio.memberIds] as [string, string, string],
+    }));
+    round.autoMatchDraft = {
+      trios,
+      unmatchedMembers: MOCK_UNMATCHED_MEMBERS.map((item) => ({
+        userId: item.userId,
+        reasons: [...item.reasons],
+      })),
+    };
+    persist();
+    return {
+      trios,
+      unmatched: MOCK_UNMATCHED_COUNT,
+      unmatchedMembers: round.autoMatchDraft.unmatchedMembers,
+      auditEventId: 'mock-audit',
+      draftCreatedAt: new Date().toISOString(),
+    };
+  },
+
+  getAutoMatchDraft(roundId: string) {
+    requireSession();
+    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    const round = findRound(state, roundId);
+    if (!round?.autoMatchDraft) return { draft: null };
+    return {
+      draft: {
+        trios: round.autoMatchDraft.trios,
+        unmatched: round.autoMatchDraft.unmatchedMembers.length,
+        unmatchedMembers: round.autoMatchDraft.unmatchedMembers,
+        triggeredBy: 'mock-facilitator',
+        createdAt: new Date().toISOString(),
+      },
+    };
+  },
+
+  undoAutoMatch(roundId: string) {
+    requireSession();
+    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    const round = findRound(state, roundId);
+    if (!round) throw new Error('round not found');
+    const removed = Boolean(round.autoMatchDraft);
+    round.autoMatchDraft = null;
+    persist();
+    return { removed };
   },
 
   publish(roundId: string) {
@@ -781,7 +849,19 @@ export const mockStore = {
     if (!round || round.status !== 'open') throw new Error('round not found');
     round.status = 'published';
     round.circleCount = 3;
+    round.autoMatchDraft = null;
     persist();
-    return { published: true };
+    return {
+      published: true,
+      emails: { sent: 9, failed: [] as Array<{ circleId: string; userId: string; email: string; error: string }> },
+    };
+  },
+
+  retryPublishEmails(roundId: string) {
+    requireSession();
+    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    const round = findRound(state, roundId);
+    if (!round) throw new Error('round not found');
+    return { sent: 0, failed: [] as Array<{ circleId: string; userId: string; email: string; error: string }> };
   },
 };

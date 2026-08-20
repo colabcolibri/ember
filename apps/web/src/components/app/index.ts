@@ -37,5 +37,11 @@ export { AttendancePrompt } from './AttendancePrompt.js';
 export { ProfileOnboardingBanner } from './ProfileOnboardingBanner.js';
 export { DeclarationTable } from './DeclarationTable.js';
 export { TrioPreview } from './TrioPreview.js';
+export {
+  UnmatchedPanel,
+  buildUnmatchedRows,
+  type UnmatchedMemberRow,
+  type UnmatchedReason,
+} from './UnmatchedPanel.js';
 export { TimezoneCombobox } from './TimezoneCombobox.js';
 export { PlaceAutocomplete } from './PlaceAutocomplete.js';

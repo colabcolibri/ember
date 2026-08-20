@@ -302,3 +302,8 @@ export const MOCK_TRIOS = [
 ];
 
 export const MOCK_UNMATCHED_COUNT = 2;
+
+export const MOCK_UNMATCHED_MEMBERS = [
+  { userId: 'u-kenji', reasons: ['NO_COMMON_SLOT', 'ODD_POOL'] as const },
+  { userId: 'u-amira', reasons: ['INCOMPLETE_PROFILE'] as const },
+];
