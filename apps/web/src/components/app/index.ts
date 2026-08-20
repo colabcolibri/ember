@@ -43,5 +43,6 @@ export {
   type UnmatchedMemberRow,
   type UnmatchedReason,
 } from './UnmatchedPanel.js';
+export { RoundMetricsPanel, type RoundMetricsResponse } from './RoundMetricsPanel.js';
 export { TimezoneCombobox } from './TimezoneCombobox.js';
 export { PlaceAutocomplete } from './PlaceAutocomplete.js';

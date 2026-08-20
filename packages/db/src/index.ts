@@ -9,6 +9,7 @@ export * from './repos/matching.js';
 export * from './repos/matching-drafts.js';
 export * from './repos/matching-audit.js';
 export * from './repos/circle-reminders.js';
+export * from './repos/round-metrics.js';
 export * from './repos/circles.js';
 export * from './repos/slot-calendars.js';
 export * from './repos/community-branding.js';

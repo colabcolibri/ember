@@ -203,6 +203,16 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
       }
     }
 
+    const metricsGet = pathname.match(/^\/admin\/matching-rounds\/([^/]+)\/metrics$/);
+    if (metricsGet && method === 'GET') {
+      try {
+        return mockStore.getRoundMetrics(metricsGet[1]!) as T;
+      } catch (err) {
+        if (err instanceof Error && err.message === 'not found') notFound('Encontro não encontrado');
+        forbidden();
+      }
+    }
+
     const roundGet = pathname.match(/^\/admin\/matching-rounds\/([^/]+)$/);
     if (roundGet && method === 'GET' && roundGet[1] !== 'current') {
       try {

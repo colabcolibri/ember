@@ -864,4 +864,43 @@ export const mockStore = {
     if (!round) throw new Error('round not found');
     return { sent: 0, failed: [] as Array<{ circleId: string; userId: string; email: string; error: string }> };
   },
+
+  getRoundMetrics(roundId: string) {
+    requireSession();
+    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    const round = findRound(state, roundId);
+    if (!round) throw new Error('not found');
+    const metrics = {
+      newPairs: round.status === 'published' ? 9 : 0,
+      noShow: {
+        invited: round.declarations.length,
+        responded: round.status === 'published' ? 8 : 0,
+        yes: round.status === 'published' ? 7 : 0,
+        no: round.status === 'published' ? 1 : 0,
+        rate: round.status === 'published' ? 0.125 : null,
+      },
+      diversity: {
+        editionYears: [2018, 2019, 2021],
+        languages: ['pt', 'en'],
+        countries: ['Brazil', 'Portugal'],
+      },
+      exceptions: { unmatched: round.status === 'published' ? 2 : 0 },
+    };
+    return {
+      roundId,
+      metrics,
+      previous:
+        round.id === MOCK_ROUND_ID
+          ? null
+          : {
+              roundId: 'mock-round-published',
+              metrics: {
+                ...metrics,
+                newPairs: 6,
+                noShow: { ...metrics.noShow, rate: 0.1 },
+              },
+              delta: { newPairs: metrics.newPairs - 6, noShowRate: 0.025 },
+            },
+    };
+  },
 };

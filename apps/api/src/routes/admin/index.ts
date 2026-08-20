@@ -43,6 +43,7 @@ import {
   createAdminMatchingAutomationRoutes,
   recordPublishAudit,
 } from './matching-automation.js';
+import { createAdminRoundMetricsRoutes } from './round-metrics.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -492,5 +493,6 @@ export function createAdminRoutes(db: Db) {
   admin.route('/', createAdminBrandingRoutes(db));
   admin.route('/', createAdminMembersRoutes(db));
   admin.route('/', createAdminMatchingAutomationRoutes(db));
+  admin.route('/', createAdminRoundMetricsRoutes(db));
   return admin;
 }

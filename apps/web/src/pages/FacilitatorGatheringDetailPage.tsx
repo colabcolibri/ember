@@ -8,6 +8,8 @@ import {
   AppPage,
   DeclarationTable,
   GatheringOverviewCard,
+  RoundMetricsPanel,
+  type RoundMetricsResponse,
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
@@ -31,6 +33,7 @@ export function FacilitatorGatheringDetailPage() {
   const { id } = useParams();
   const [gathering, setGathering] = useState<GatheringDetail | null>(null);
   const [declarations, setDeclarations] = useState<Declaration[]>([]);
+  const [metrics, setMetrics] = useState<RoundMetricsResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
@@ -39,6 +42,12 @@ export function FacilitatorGatheringDetailPage() {
     setGathering(detail.round);
     const res = await apiFetch<{ items: Declaration[] }>(`/admin/matching-rounds/${id}/declarations`);
     setDeclarations(res.items);
+    if (detail.round.circleCount > 0 || detail.round.status === 'published') {
+      const metricsRes = await apiFetch<RoundMetricsResponse>(`/admin/matching-rounds/${id}/metrics`);
+      setMetrics(metricsRes);
+    } else {
+      setMetrics(null);
+    }
   };
 
   const { initialLoading } = useInitialLoad(async () => {
@@ -97,6 +106,8 @@ export function FacilitatorGatheringDetailPage() {
       </AppButton>
 
       <GatheringOverviewCard gathering={gathering} statusLabel={statusLabel} />
+
+      {metrics ? <RoundMetricsPanel data={metrics} /> : null}
 
       <AppCard title={t('facilitator.declarations')}>
         <DeclarationTable
