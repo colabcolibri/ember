@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type Database from 'better-sqlite3';
-import type { CreateRoundInput, MatchingMember, PresenceInput } from '@ember/domain';
+import type { CreateRoundInput, MatchingMember, PresenceInput, PresenceResponse } from '@ember/domain';
 import { decryptRecipientEmail } from '../crypto/recipient-email-vault.js';
 
 export type RoundRow = {
@@ -42,7 +42,7 @@ export function listMatchingRounds(
     .prepare(
       `SELECT r.id, r.status, r.theme, r.question, r.questions_json, r.slots_json, r.template_id, r.created_at,
               mt.name AS template_name, mt.circle_size, mt.duration_minutes,
-              (SELECT COUNT(*) FROM round_declarations rd WHERE rd.round_id = r.id) AS declaration_count,
+              (SELECT COUNT(*) FROM round_declarations rd WHERE rd.round_id = r.id AND rd.response = 'attending') AS declaration_count,
               (SELECT COUNT(*) FROM circles c WHERE c.round_id = r.id) AS circle_count
        FROM rounds r
        LEFT JOIN meeting_templates mt ON mt.id = r.template_id
@@ -82,6 +82,15 @@ export function listMatchingRounds(
   }));
 }
 
+export function listOpenRounds(db: Database.Database, communityId: string): RoundDetailRow[] {
+  return db
+    .prepare(
+      `SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id, created_at
+       FROM rounds WHERE community_id = ? AND status = 'open' ORDER BY created_at DESC`,
+    )
+    .all(communityId) as RoundDetailRow[];
+}
+
 export function findOpenRound(db: Database.Database, communityId: string): RoundDetailRow | null {
   return (
     (db
@@ -118,7 +127,7 @@ export function closeMatchingRound(db: Database.Database, roundId: string): Roun
 
 export type ReopenMatchingRoundResult =
   | { ok: true; round: RoundDetailRow }
-  | { ok: false; code: 'NOT_CLOSED' | 'OTHER_ROUND_OPEN' };
+  | { ok: false; code: 'NOT_CLOSED' };
 
 export function reopenMatchingRound(
   db: Database.Database,
@@ -128,11 +137,6 @@ export function reopenMatchingRound(
   const round = findRoundById(db, roundId);
   if (!round || round.community_id !== communityId || round.status !== 'closed') {
     return { ok: false, code: 'NOT_CLOSED' };
-  }
-
-  const openRound = findOpenRound(db, communityId);
-  if (openRound) {
-    return { ok: false, code: 'OTHER_ROUND_OPEN' };
   }
 
   db.prepare("UPDATE rounds SET status = 'open' WHERE id = ? AND status = 'closed'").run(roundId);
@@ -172,7 +176,6 @@ export function createMatchingRound(
   input: CreateRoundInput,
   templateId: string,
 ): RoundDetailRow {
-  closeOpenRoundsInCommunity(db, communityId);
   const id = randomUUID();
   const now = new Date().toISOString();
   const primaryQuestion = input.questions[0] ?? '';
@@ -201,6 +204,7 @@ export type DeclarationListItem = {
   intention: string;
   languages: string[];
   timezone: string | null;
+  response: PresenceResponse;
 };
 
 export function listRoundDeclarations(
@@ -216,7 +220,7 @@ export function listRoundDeclarations(
   const offset = (page - 1) * limit;
   const rows = db
     .prepare(
-      `SELECT rd.user_id, rd.slots_json, rd.intention, mp.display_name, mp.languages_json, mp.timezone, u.email_vault
+      `SELECT rd.user_id, rd.slots_json, rd.intention, rd.response, mp.display_name, mp.languages_json, mp.timezone, u.email_vault
        FROM round_declarations rd
        JOIN users u ON u.id = rd.user_id
        LEFT JOIN member_profiles mp ON mp.user_id = rd.user_id
@@ -228,6 +232,7 @@ export function listRoundDeclarations(
     user_id: string;
     slots_json: string;
     intention: string;
+    response: PresenceResponse;
     display_name: string | null;
     languages_json: string | null;
     timezone: string | null;
@@ -246,6 +251,7 @@ export function listRoundDeclarations(
       intention: row.intention,
       languages: row.languages_json ? (JSON.parse(row.languages_json) as string[]) : [],
       timezone: row.timezone,
+      response: row.response ?? 'attending',
     };
   });
 
@@ -262,7 +268,7 @@ export function loadMatchingMembers(
       `SELECT rd.user_id, rd.slots_json, rd.intention, mp.languages_json
        FROM round_declarations rd
        LEFT JOIN member_profiles mp ON mp.user_id = rd.user_id AND mp.community_id = ?
-       WHERE rd.round_id = ?`,
+       WHERE rd.round_id = ? AND rd.response = 'attending'`,
     )
     .all(communityId, roundId) as {
     user_id: string;
@@ -293,6 +299,7 @@ export type RoundDeclarationRow = {
   user_id: string;
   slots_json: string;
   intention: string;
+  response: PresenceResponse;
 };
 
 export function upsertRoundDeclaration(
@@ -301,7 +308,17 @@ export function upsertRoundDeclaration(
   userId: string,
   input: PresenceInput,
 ): RoundDeclarationRow {
-  const slotsJson = JSON.stringify(input.slots);
+  const response: PresenceResponse = input.response === 'declined' ? 'declined' : 'attending';
+  let slotsJson = '[]';
+  let intention = 'declined';
+
+  if (response === 'attending') {
+    if (!('slots' in input) || !('intention' in input)) {
+      throw new Error('Invalid attending declaration');
+    }
+    slotsJson = JSON.stringify(input.slots);
+    intention = input.intention;
+  }
   const now = new Date().toISOString();
   const existing = db
     .prepare('SELECT round_id FROM round_declarations WHERE round_id = ? AND user_id = ?')
@@ -309,17 +326,17 @@ export function upsertRoundDeclaration(
 
   if (existing) {
     db.prepare(
-      'UPDATE round_declarations SET slots_json = ?, intention = ?, created_at = ? WHERE round_id = ? AND user_id = ?',
-    ).run(slotsJson, input.intention, now, roundId, userId);
+      'UPDATE round_declarations SET slots_json = ?, intention = ?, response = ?, created_at = ? WHERE round_id = ? AND user_id = ?',
+    ).run(slotsJson, intention, response, now, roundId, userId);
   } else {
     db.prepare(
-      'INSERT INTO round_declarations (id, round_id, user_id, slots_json, intention, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-    ).run(randomUUID(), roundId, userId, slotsJson, input.intention, now);
+      'INSERT INTO round_declarations (id, round_id, user_id, slots_json, intention, response, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    ).run(randomUUID(), roundId, userId, slotsJson, intention, response, now);
   }
 
   return db
     .prepare(
-      'SELECT round_id, user_id, slots_json, intention FROM round_declarations WHERE round_id = ? AND user_id = ?',
+      'SELECT round_id, user_id, slots_json, intention, response FROM round_declarations WHERE round_id = ? AND user_id = ?',
     )
     .get(roundId, userId) as RoundDeclarationRow;
 }
@@ -332,7 +349,7 @@ export function getRoundDeclaration(
   return (
     (db
       .prepare(
-        'SELECT round_id, user_id, slots_json, intention FROM round_declarations WHERE round_id = ? AND user_id = ?',
+        'SELECT round_id, user_id, slots_json, intention, response FROM round_declarations WHERE round_id = ? AND user_id = ?',
       )
       .get(roundId, userId) as RoundDeclarationRow | undefined) ?? null
   );

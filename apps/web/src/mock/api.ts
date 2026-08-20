@@ -124,6 +124,11 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
       return mockStore.updateProfile(body ?? {}) as T;
     }
 
+    if (pathname === '/rounds/open' && method === 'GET') {
+      if (!mockStore.isAuthed()) unauthorized();
+      return { rounds: mockStore.listOpenRoundsForMember() } as T;
+    }
+
     if (pathname === '/rounds/current' && method === 'GET') {
       if (!mockStore.isAuthed()) unauthorized();
       const round = mockStore.getRound();
@@ -137,6 +142,17 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
       return round as T;
     }
 
+    const roundDetailGet = pathname.match(/^\/rounds\/([^/]+)$/);
+    if (roundDetailGet && method === 'GET') {
+      if (!mockStore.isAuthed()) unauthorized();
+      try {
+        const timezone = params.get('timezone') ?? undefined;
+        return mockStore.getRoundById(roundDetailGet[1]!, timezone) as T;
+      } catch {
+        notFound('Convite não encontrado');
+      }
+    }
+
     const presenceGet = pathname.match(/^\/rounds\/([^/]+)\/presence$/);
     if (presenceGet && method === 'GET') {
       if (!mockStore.isAuthed()) unauthorized();
@@ -146,7 +162,11 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
     const presencePost = pathname.match(/^\/rounds\/([^/]+)\/presence$/);
     if (presencePost && method === 'POST') {
       if (!mockStore.isAuthed()) unauthorized();
+      if (body?.response === 'declined') {
+        return mockStore.saveDeclaration(presencePost[1]!, { response: 'declined' }) as T;
+      }
       return mockStore.saveDeclaration(presencePost[1]!, {
+        response: 'attending',
         slots: (body?.slots as string[]) ?? [],
         intention: (body?.intention as 'surprise' | 'frontier' | 'ease') ?? 'surprise',
       }) as T;

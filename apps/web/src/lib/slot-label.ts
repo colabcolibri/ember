@@ -30,3 +30,15 @@ export function formatTimezoneShort(timezone: string, locale: string): string {
     return timezone;
   }
 }
+
+export function formatTimezoneOffset(timezone: string, locale: string): string {
+  try {
+    const parts = new Intl.DateTimeFormat(locale, {
+      timeZone: timezone,
+      timeZoneName: 'shortOffset',
+    }).formatToParts(new Date());
+    return parts.find((part) => part.type === 'timeZoneName')?.value ?? '';
+  } catch {
+    return '';
+  }
+}

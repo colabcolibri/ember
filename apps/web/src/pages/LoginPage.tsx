@@ -17,6 +17,8 @@ import {
   MOCK_DEMO_CODE,
   MOCK_DEMO_EMAIL,
   MOCK_FACILITATOR_DEMO_EMAIL,
+  MOCK_NEW_MEMBER_DEMO_EMAIL,
+  MOCK_ORG_ADMIN_DEMO_EMAIL,
 } from '../lib/mock-mode.js';
 
 type Step = 'email' | 'code';
@@ -60,11 +62,12 @@ function MockLoginForm({
             {t('login.demoPrefilledHint', { code: MOCK_DEMO_CODE })}
           </p>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
             <AppButton
               type="button"
               variant="outline"
               size="sm"
+              className="w-full sm:w-auto"
               onClick={() => setEmail(MOCK_DEMO_EMAIL)}
             >
               {t('login.demoMember')}
@@ -73,9 +76,28 @@ function MockLoginForm({
               type="button"
               variant="outline"
               size="sm"
+              className="w-full sm:w-auto"
               onClick={() => setEmail(MOCK_FACILITATOR_DEMO_EMAIL)}
             >
               {t('login.demoFacilitator')}
+            </AppButton>
+            <AppButton
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+              onClick={() => setEmail(MOCK_ORG_ADMIN_DEMO_EMAIL)}
+            >
+              {t('login.demoAdmin')}
+            </AppButton>
+            <AppButton
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+              onClick={() => setEmail(MOCK_NEW_MEMBER_DEMO_EMAIL)}
+            >
+              {t('login.demoIncomplete')}
             </AppButton>
           </div>
 

@@ -1,6 +1,10 @@
 import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { CommunityBrandingInput, CommunityPublicResponse } from '@ember/domain/schemas/community-branding';
+import type {
+  CommunityBrandingInput,
+  CommunityPublicResponse,
+  CommunityThemePreset,
+} from '@ember/domain/schemas/community-branding';
 import {
   AppButton,
   AppCard,
@@ -8,6 +12,7 @@ import {
   AppInput,
   AppLoading,
   AppPage,
+  ThemePresetPicker,
 } from '@/components/app/index.js';
 import { apiFetch } from '@/lib/api.js';
 import { formatApiError } from '@/lib/api-errors.js';
@@ -29,7 +34,7 @@ export function AdminCommunityPage() {
   const [blockTwoBody, setBlockTwoBody] = useState('');
   const [blockThreeTitle, setBlockThreeTitle] = useState('');
   const [blockThreeBody, setBlockThreeBody] = useState('');
-  const [themePreset, setThemePreset] = useState<'ember' | 'warm' | 'forest'>('ember');
+  const [themePreset, setThemePreset] = useState<CommunityThemePreset>('ember');
   const [saving, setSaving] = useState(false);
 
   const { initialLoading } = useInitialLoad(async () => {
@@ -48,6 +53,11 @@ export function AdminCommunityPage() {
     setThemePreset(data.settings.theme?.preset ?? 'ember');
     applyCommunityTheme(data.settings.theme);
   }, []);
+
+  function onThemePresetChange(preset: CommunityThemePreset) {
+    setThemePreset(preset);
+    applyCommunityTheme({ preset });
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -128,17 +138,11 @@ export function AdminCommunityPage() {
             );
           })}
 
-          <AppFormField label={t('adminCommunity.themePreset')} htmlFor="themePreset">
-            <select
-              id="themePreset"
-              className="w-full rounded-xl border border-outline-variant/30 bg-paper px-3 py-2 text-sm"
-              value={themePreset}
-              onChange={(e) => setThemePreset(e.target.value as 'ember' | 'warm' | 'forest')}
-            >
-              <option value="ember">Ember</option>
-              <option value="warm">{t('adminCommunity.themeWarm')}</option>
-              <option value="forest">{t('adminCommunity.themeForest')}</option>
-            </select>
+          <AppFormField label={t('adminCommunity.themePreset')}>
+            <ThemePresetPicker value={themePreset} onChange={onThemePresetChange} />
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              {t('adminCommunity.themeSwatchLegend')}
+            </p>
           </AppFormField>
 
           <AppButton type="submit" disabled={saving}>

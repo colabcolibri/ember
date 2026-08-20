@@ -21,7 +21,7 @@ export function DemoResetButton() {
         type="button"
         variant="outline"
         size="sm"
-        className="fixed right-4 bottom-20 z-50 max-w-[min(calc(100vw-2rem),14rem)] shadow-md sm:right-6 sm:bottom-6"
+        className="fixed bottom-20 left-4 z-50 max-w-[min(calc(100vw-2rem),14rem)] shadow-md sm:right-6 sm:bottom-6 sm:left-auto"
         onClick={() => setDialogOpen(true)}
         aria-label={t('app.demoReset')}
       >

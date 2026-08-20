@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { AppBadge } from './AppBadge.js';
-import { formatTimezoneShort, parseSlotLabel, slotLabelsMatch } from '@/lib/slot-label';
+import { formatTimezoneShort, parseSlotLabel } from '@/lib/slot-label';
 import { cn } from '@/lib/utils';
 
 export type RegionalSlotOption = {
@@ -14,24 +14,27 @@ type RegionalSlotPickerProps = {
   slots: RegionalSlotOption[];
   selected: string[];
   onToggle: (ref: string) => void;
-  officialHint: string;
-  localHint: string;
   memberTimezone: string;
   multiCalendarHint?: string;
   selectedCountLabel?: (selected: number, total: number) => string;
 };
 
-function formatCalendarHeading(label: string, locale: string): string {
-  if (!label.includes('/')) return label;
-  return formatTimezoneShort(label, locale);
+function resolveGroupTitle(
+  calendarLabel: string,
+  memberTimezone: string,
+  locale: string,
+  multipleCalendars: boolean,
+): string {
+  if (multipleCalendars && !calendarLabel.includes('/')) {
+    return calendarLabel;
+  }
+  return formatTimezoneShort(memberTimezone, locale);
 }
 
 export function RegionalSlotPicker({
   slots,
   selected,
   onToggle,
-  officialHint,
-  localHint,
   memberTimezone,
   multiCalendarHint,
   selectedCountLabel,
@@ -67,7 +70,7 @@ export function RegionalSlotPicker({
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-semibold text-foreground">
-                {formatCalendarHeading(calendarLabel, i18n.language)}
+                {resolveGroupTitle(calendarLabel, memberTimezone, i18n.language, multipleCalendars)}
               </p>
               {selectedCountLabel ? (
                 <AppBadge variant={selectedInCalendar > 0 ? 'rust' : 'muted'}>
@@ -80,8 +83,6 @@ export function RegionalSlotPicker({
               {calendarSlots.map((slot) => {
                 const active = selected.includes(slot.ref);
                 const local = parseSlotLabel(slot.localLabel);
-                const official = parseSlotLabel(slot.officialLabel);
-                const sameInstant = slotLabelsMatch(slot.localLabel, slot.officialLabel);
 
                 return (
                   <button
@@ -105,25 +106,12 @@ export function RegionalSlotPicker({
                       )}
                       aria-hidden="true"
                     >
-                      <span className="material-symbols-outlined text-[14px]">check</span>
+                      <span className="material-symbols-outlined text-[11px] leading-none">check</span>
                     </span>
 
                     <span className="block pr-8 text-base font-semibold leading-snug text-foreground">
                       {local.when}
                     </span>
-
-                    <span className="mt-1.5 inline-flex max-w-full items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-primary uppercase">
-                      {localHint}: {formatTimezoneShort(memberTimezone, i18n.language)}
-                    </span>
-
-                    {!sameInstant ? (
-                      <span className="mt-2 block text-xs leading-relaxed text-muted-foreground">
-                        {officialHint}: {official.when}
-                        {official.timezone ? (
-                          <span className="text-muted-foreground/80"> · {formatTimezoneShort(official.timezone, i18n.language)}</span>
-                        ) : null}
-                      </span>
-                    ) : null}
                   </button>
                 );
               })}

@@ -12,19 +12,24 @@ import {
 } from '@ember/domain/schemas/community-branding';
 import {
   MOCK_COMMUNITY_NAME,
-  MOCK_DECLARATIONS,
   MOCK_PLACES,
   MOCK_QUESTIONS,
   MOCK_REGIONAL_SLOTS,
-  MOCK_ROUND_ID,
   MOCK_TEMPLATES,
-  MOCK_THEMES,
-  MOCK_TRIOS,
-  MOCK_UNMATCHED_COUNT,
-  MOCK_UNMATCHED_MEMBERS,
 } from './data.js';
+import {
+  MOCK_ROUND_SEEDS,
+  MOCK_USERS,
+  MOCK_USER_BY_ID,
+  buildMatchDraftFromDeclarations,
+  buildPopulationMemberRecords,
+  buildRoundDeclarations,
+  type MockPopulationDeclaration,
+  type MockTrio,
+  type MockUnmatchedMember,
+} from './population.js';
 
-const STORAGE_KEY = 'ember-mock-v3';
+const STORAGE_KEY = 'ember-mock-v4';
 
 type MockSession = {
   email: string;
@@ -61,10 +66,15 @@ type MockDeclarationRow = {
   memberLabel: string;
   emailMasked: string;
   slots: string[];
-  intention: string;
+  intention: 'surprise' | 'frontier' | 'ease' | 'declined';
   languages: string[];
   timezone: string | null;
+  response: 'attending' | 'declined';
 };
+
+function attendingDeclarationCount(round: MockRound): number {
+  return round.declarations.filter((item) => item.response === 'attending').length;
+}
 
 type MockCircle = {
   id: string;
@@ -98,8 +108,8 @@ type MockRound = {
   circleCount: number;
   declarations: MockDeclarationRow[];
   autoMatchDraft: {
-    trios: typeof MOCK_TRIOS;
-    unmatchedMembers: typeof MOCK_UNMATCHED_MEMBERS;
+    trios: MockTrio[];
+    unmatchedMembers: MockUnmatchedMember[];
   } | null;
 };
 
@@ -117,7 +127,7 @@ function mapMockGatheringSummary(round: MockRound) {
     theme: round.theme,
     questions: [...round.questions],
     createdAt: round.createdAt,
-    declarationCount: round.declarations.length,
+    declarationCount: attendingDeclarationCount(round),
     templateName: template.name,
     circleSize: template.circleSize,
     durationMinutes: template.durationMinutes,
@@ -147,72 +157,67 @@ type PersistedState = {
   members: MockMemberRecord[];
 };
 
-function seedDeclarations(): MockDeclarationRow[] {
-  return MOCK_DECLARATIONS.map((item) => ({ ...item }));
+function asPopulationDeclarations(rows: MockDeclarationRow[]): MockPopulationDeclaration[] {
+  return rows
+    .filter((row) => row.response === 'attending')
+    .map((row) => ({
+      userId: row.userId,
+      memberLabel: row.memberLabel,
+      emailMasked: row.emailMasked,
+      slots: [...row.slots],
+      intention: row.intention as 'surprise' | 'frontier' | 'ease',
+      languages: [...row.languages],
+      timezone: row.timezone ?? 'UTC',
+    }));
+}
+
+function cloneMatchGroups(groups: MockTrio[]): MockTrio[] {
+  return groups.map((group) => ({
+    slot: group.slot,
+    score: group.score,
+    memberIds: [...group.memberIds] as MockTrio['memberIds'],
+  }));
+}
+
+function resolveSessionUserId(email: string): string {
+  const populationUser = MOCK_USERS.find((user) => user.email === email.trim().toLowerCase());
+  return populationUser?.userId ?? `user-${email.trim().toLowerCase()}`;
 }
 
 function seedRounds(): MockRound[] {
-  return [
-    {
-      id: MOCK_ROUND_ID,
-      status: 'open',
-      theme: MOCK_THEMES.open,
-      questions: [...MOCK_QUESTIONS.open],
-      createdAt: '2026-08-19T18:00:00.000Z',
-      templateId: 'tpl-council',
-      circleCount: 0,
-      declarations: seedDeclarations(),
-      autoMatchDraft: null,
-    },
-    {
-      id: 'mock-round-published',
-      status: 'published',
-      theme: MOCK_THEMES.published,
-      questions: [...MOCK_QUESTIONS.published],
-      createdAt: '2026-08-05T18:00:00.000Z',
-      templateId: 'tpl-council',
-      circleCount: 3,
-      declarations: MOCK_DECLARATIONS.slice(0, 7).map((item) => ({ ...item })),
-      autoMatchDraft: null,
-    },
-    {
-      id: 'mock-round-closed',
-      status: 'closed',
-      theme: MOCK_THEMES.closedCulture,
-      questions: [...MOCK_QUESTIONS.closedCulture],
-      createdAt: '2026-07-20T18:00:00.000Z',
-      templateId: 'tpl-cafe',
-      circleCount: 0,
-      declarations: MOCK_DECLARATIONS.slice(2, 8).map((item) => ({ ...item })),
-      autoMatchDraft: null,
-    },
-    {
-      id: 'mock-round-closed-2',
-      status: 'closed',
-      theme: MOCK_THEMES.closedRoots,
-      questions: [...MOCK_QUESTIONS.closedRoots],
-      createdAt: '2026-06-28T18:00:00.000Z',
-      templateId: 'tpl-walk',
-      circleCount: 1,
-      declarations: MOCK_DECLARATIONS.slice(0, 5).map((item) => ({ ...item })),
-      autoMatchDraft: null,
-    },
-    {
-      id: 'mock-round-archived',
-      status: 'published',
-      theme: MOCK_THEMES.archived,
-      questions: [...MOCK_QUESTIONS.archived],
-      createdAt: '2026-05-15T18:00:00.000Z',
-      templateId: 'tpl-council',
-      circleCount: 2,
-      declarations: MOCK_DECLARATIONS.slice(4, 10).map((item) => ({ ...item })),
-      autoMatchDraft: null,
-    },
-  ];
+  return MOCK_ROUND_SEEDS.map((seed) => {
+    const declarations = buildRoundDeclarations(seed);
+    const numericSeed = seed.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const autoMatchDraft =
+      seed.withAutoMatchDraft && seed.status === 'closed'
+        ? buildMatchDraftFromDeclarations(declarations, seed.templateId, numericSeed)
+        : null;
+
+    return {
+      id: seed.id,
+      status: seed.status,
+      theme: seed.theme,
+      questions: [...seed.questions],
+      createdAt: seed.createdAt,
+      templateId: seed.templateId,
+      circleCount: seed.circleCount ?? 0,
+      declarations,
+      autoMatchDraft: autoMatchDraft
+        ? {
+            trios: autoMatchDraft.trios,
+            unmatchedMembers: autoMatchDraft.unmatchedMembers,
+          }
+        : null,
+    };
+  });
+}
+
+function listOpenRounds(state: PersistedState): MockRound[] {
+  return state.rounds.filter((round) => round.status === 'open');
 }
 
 function findOpenRound(state: PersistedState): MockRound | null {
-  return state.rounds.find((round) => round.status === 'open') ?? null;
+  return listOpenRounds(state)[0] ?? null;
 }
 
 function findRound(state: PersistedState, roundId: string): MockRound | null {
@@ -231,47 +236,44 @@ function maskEmail(email: string): string {
 }
 
 function defaultProfile(email?: string): MockProfile {
-  const localPart = email?.split('@')[0]?.replace(/[._-]/g, ' ') ?? 'Alex Demo';
-  const displayName = localPart.charAt(0).toUpperCase() + localPart.slice(1);
-  const incomplete = email ? isNewMemberDemoEmail(email) : false;
+  const normalized = email?.trim().toLowerCase();
+  const populationUser = normalized
+    ? MOCK_USERS.find((user) => user.email === normalized)
+    : undefined;
+  const localPart = normalized?.split('@')[0]?.replace(/[._-]/g, ' ') ?? 'Alex Demo';
+  const displayName =
+    populationUser?.displayName ??
+    (localPart.charAt(0).toUpperCase() + localPart.slice(1));
+  const incomplete = normalized ? isNewMemberDemoEmail(normalized) : false;
 
   return {
     displayName: incomplete ? '' : displayName,
-    editionYear: incomplete ? null : 2024,
-    timezone: 'America/Sao_Paulo',
-    languages: incomplete ? [] : ['pt', 'en'],
-    originPlace: incomplete ? null : (MOCK_PLACES[0] ?? null),
-    residencePlace: incomplete ? null : (MOCK_PLACES[2] ?? null),
-    isFacilitator: email ? isFacilitatorDemoEmail(email) : false,
-    isOrgAdmin: email ? isOrgAdminDemoEmail(email) : false,
+    editionYear: incomplete ? null : (populationUser?.editionYear ?? 2024),
+    timezone: populationUser?.timezone ?? 'America/Sao_Paulo',
+    languages: incomplete ? [] : [...(populationUser?.languages ?? ['pt', 'en'])],
+    originPlace: incomplete
+      ? null
+      : (MOCK_PLACES[populationUser?.originPlaceIndex ?? 0] ?? MOCK_PLACES[0] ?? null),
+    residencePlace: incomplete
+      ? null
+      : (MOCK_PLACES[populationUser?.residencePlaceIndex ?? 2] ?? MOCK_PLACES[2] ?? null),
+    isFacilitator: normalized ? isFacilitatorDemoEmail(normalized) : false,
+    isOrgAdmin: normalized ? isOrgAdminDemoEmail(normalized) : false,
   };
 }
 
 function defaultMembers(): MockMemberRecord[] {
-  return [
-    {
-      userId: 'm-demo',
-      email: 'demo@ember.app',
-      role: 'member',
-      invitedAt: '2026-08-01T10:00:00.000Z',
-      profileComplete: true,
-      displayName: 'Alex Demo',
-    },
-    {
-      userId: 'm-facil',
-      email: 'facilitador@demo.ember',
-      role: 'facilitator',
-      invitedAt: '2026-08-01T10:00:00.000Z',
-      profileComplete: true,
-      displayName: 'Facilitador Demo',
-    },
-  ];
+  return buildPopulationMemberRecords();
+}
+
+function memberLabel(userId: string): string {
+  return MOCK_USER_BY_ID.get(userId)?.memberLabel ?? userId;
 }
 
 function defaultCircles(): MockCircle[] {
   const q1 = MOCK_QUESTIONS.open[0]!;
-  const q2 = MOCK_QUESTIONS.published[0]!;
-  const q3 = MOCK_QUESTIONS.closedRoots[0]!;
+  const q2 = MOCK_ROUND_SEEDS[2]!.questions[0]!;
+  const q3 = MOCK_ROUND_SEEDS[4]!.questions[0]!;
 
   return [
     {
@@ -288,8 +290,8 @@ function defaultCircles(): MockCircle[] {
       myAttendance: null,
       members: [
         { userId: 'm-you', label: 'Você · You', status: 'invited', attendance: null },
-        { userId: 'u-marina', label: 'Marina Silva · Marina S.', status: 'confirmed', attendance: null },
-        { userId: 'u-jonas', label: 'Jonas Keller · Jonas K.', status: 'confirmed', attendance: null },
+        { userId: 'u-001', label: memberLabel('u-001'), status: 'confirmed', attendance: null },
+        { userId: 'u-012', label: memberLabel('u-012'), status: 'confirmed', attendance: null },
       ],
     },
     {
@@ -306,8 +308,8 @@ function defaultCircles(): MockCircle[] {
       myAttendance: null,
       members: [
         { userId: 'm-you', label: 'Você · You', status: 'confirmed', attendance: null },
-        { userId: 'u-sofia', label: 'Sofia Martins · Sofia M.', status: 'confirmed', attendance: null },
-        { userId: 'u-alex', label: 'Alex Chen · Alex C.', status: 'confirmed', attendance: null },
+        { userId: 'u-005', label: memberLabel('u-005'), status: 'confirmed', attendance: null },
+        { userId: 'u-006', label: memberLabel('u-006'), status: 'confirmed', attendance: null },
       ],
     },
     {
@@ -324,8 +326,8 @@ function defaultCircles(): MockCircle[] {
       myAttendance: null,
       members: [
         { userId: 'm-you', label: 'Você · You', status: 'confirmed', attendance: null },
-        { userId: 'u-priya', label: 'Priya Mehta · Priya M.', status: 'confirmed', attendance: null },
-        { userId: 'u-lucas', label: 'Lucas Almeida · Lucas A.', status: 'confirmed', attendance: null },
+        { userId: 'u-003', label: memberLabel('u-003'), status: 'confirmed', attendance: null },
+        { userId: 'u-004', label: memberLabel('u-004'), status: 'confirmed', attendance: null },
       ],
     },
     {
@@ -342,8 +344,8 @@ function defaultCircles(): MockCircle[] {
       myAttendance: 'yes',
       members: [
         { userId: 'm-you', label: 'Você · You', status: 'confirmed', attendance: 'yes' },
-        { userId: 'u-elena', label: 'Elena Rossi · Elena R.', status: 'confirmed', attendance: 'yes' },
-        { userId: 'u-noah', label: 'Noah Williams · Noah W.', status: 'confirmed', attendance: 'yes' },
+        { userId: 'u-007', label: memberLabel('u-007'), status: 'confirmed', attendance: 'yes' },
+        { userId: 'u-008', label: memberLabel('u-008'), status: 'confirmed', attendance: 'yes' },
       ],
     },
   ];
@@ -374,9 +376,9 @@ function readState(): PersistedState {
       ...parsed,
       templates: parsed.templates?.length ? parsed.templates : MOCK_TEMPLATES.map((t) => ({ ...t })),
       circles: parsed.circles?.length ? parsed.circles : defaultCircles(),
-      rounds: parsed.rounds?.length ? parsed.rounds : seedRounds(),
+      rounds: parsed.rounds?.length === 12 ? parsed.rounds : seedRounds(),
       publicSettings: mergeCommunityPublicSettings(parsed.publicSettings),
-      members: parsed.members?.length ? parsed.members : defaultMembers(),
+      members: parsed.members?.length === 100 ? parsed.members : defaultMembers(),
     };
   } catch {
     return createDefaultState();
@@ -384,6 +386,10 @@ function readState(): PersistedState {
 }
 
 let state = readState();
+
+if (state.session && state.profile) {
+  state.session.isFacilitator = state.profile.isFacilitator || state.profile.isOrgAdmin;
+}
 
 function persist() {
   if (typeof window === 'undefined') return;
@@ -395,6 +401,17 @@ function requireSession(): MockSession {
     throw new Error('unauthorized');
   }
   return state.session;
+}
+
+function canUseFacilitatorPanel(): boolean {
+  return state.profile.isFacilitator || state.profile.isOrgAdmin;
+}
+
+function requireFacilitator() {
+  requireSession();
+  if (!canUseFacilitatorPanel()) {
+    throw new Error('forbidden');
+  }
 }
 
 function requireOrgAdmin() {
@@ -418,7 +435,7 @@ export const mockStore = {
     const normalized = email.trim().toLowerCase();
     const isFacilitator = isFacilitatorDemoEmail(normalized);
     const isOrgAdmin = isOrgAdminDemoEmail(normalized);
-    state.session = { email: normalized, isFacilitator };
+    state.session = { email: normalized, isFacilitator: isFacilitator || isOrgAdmin };
     state.profile = {
       ...defaultProfile(normalized),
       isFacilitator,
@@ -458,7 +475,7 @@ export const mockStore = {
     state.profile = {
       ...state.profile,
       ...input,
-      isFacilitator: state.session?.isFacilitator ?? false,
+      isFacilitator: state.profile.isFacilitator,
       isOrgAdmin: state.profile.isOrgAdmin,
     };
     persist();
@@ -543,29 +560,62 @@ export const mockStore = {
     if (!openRound) {
       return { round: null, slots: MOCK_REGIONAL_SLOTS, memberTimezone: state.profile.timezone };
     }
+    return this.getRoundById(openRound.id);
+  },
+
+  listOpenRoundsForMember() {
+    requireSession();
+    const userId = resolveSessionUserId(state.session!.email);
+    return listOpenRounds(state).map((round) => {
+      const template = mockTemplateFor(round);
+      const row = round.declarations.find((item) => item.userId === userId);
+      const responseStatus = !row ? ('none' as const) : row.response;
+      return {
+        id: round.id,
+        status: round.status,
+        theme: round.theme,
+        questions: [...round.questions],
+        createdAt: round.createdAt,
+        templateName: template.name,
+        circleSize: template.circleSize,
+        durationMinutes: template.durationMinutes,
+        responseStatus,
+        declared: responseStatus === 'attending',
+      };
+    });
+  },
+
+  getRoundById(roundId: string, timezone?: string) {
+    requireSession();
+    const round = findRound(state, roundId);
+    if (!round || round.status !== 'open') {
+      throw new Error('round not open');
+    }
+    const template = mockTemplateFor(round);
     return {
       round: {
-        id: openRound.id,
-        status: openRound.status,
-        theme: openRound.theme,
-        questions: [...openRound.questions],
+        id: round.id,
+        status: round.status,
+        theme: round.theme,
+        questions: [...round.questions],
+        templateName: template.name,
+        circleSize: template.circleSize,
+        durationMinutes: template.durationMinutes,
       },
       slots: MOCK_REGIONAL_SLOTS,
-      memberTimezone: state.profile.timezone,
+      memberTimezone: timezone ?? state.profile.timezone,
     };
   },
 
   listGatherings() {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     return state.rounds
       .map((round) => mapMockGatheringSummary(round))
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
 
   getGathering(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round) throw new Error('not found');
     return {
@@ -574,8 +624,7 @@ export const mockStore = {
   },
 
   getCurrentOpenRound() {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const openRound = findOpenRound(state);
     if (!openRound) return { round: null, declarationCount: 0 };
     return {
@@ -586,57 +635,97 @@ export const mockStore = {
         questions: [...openRound.questions],
         slotLabels: SLOT_LABELS,
       },
-      declarationCount: openRound.declarations.length,
+      declarationCount: attendingDeclarationCount(openRound),
     };
   },
 
   getDeclaration(roundId: string) {
     requireSession();
-    const openRound = findOpenRound(state);
-    if (!openRound || roundId !== openRound.id || !state.declaration) {
+    const round = findRound(state, roundId);
+    if (!round || round.status !== 'open') {
+      return { declaration: null };
+    }
+    const userId = resolveSessionUserId(state.session!.email);
+    const row = round.declarations.find((item) => item.userId === userId);
+    if (!row) {
       return { declaration: null };
     }
     return {
       declaration: {
         roundId,
-        slots: [...state.declaration.slots],
-        intention: state.declaration.intention,
+        response: row.response,
+        slots: [...row.slots],
+        intention: row.response === 'declined' ? null : row.intention,
       },
     };
   },
 
   saveDeclaration(
     roundId: string,
-    input: { slots: string[]; intention: 'surprise' | 'frontier' | 'ease' },
+    input:
+      | {
+          response: 'declined';
+        }
+      | {
+          response?: 'attending';
+          slots: string[];
+          intention: 'surprise' | 'frontier' | 'ease';
+        },
   ) {
     requireSession();
-    const openRound = findOpenRound(state);
-    if (!openRound || roundId !== openRound.id) {
+    const round = findRound(state, roundId);
+    if (!round || round.status !== 'open') {
       throw new Error('round not open');
     }
-    state.declaration = { slots: [...input.slots], intention: input.intention };
 
     const session = state.session!;
-    const userId = `user-${session.email}`;
+    const userId = resolveSessionUserId(session.email);
+    const populationUser = MOCK_USER_BY_ID.get(userId);
+    const response = input.response === 'declined' ? 'declined' : 'attending';
+
+    if (response === 'declined') {
+      const row: MockDeclarationRow = {
+        userId,
+        memberLabel: populationUser?.memberLabel ?? state.profile.displayName,
+        emailMasked: maskEmail(session.email),
+        slots: [],
+        intention: 'declined',
+        languages: [...state.profile.languages],
+        timezone: state.profile.timezone,
+        response: 'declined',
+      };
+      const existingIndex = round.declarations.findIndex((item) => item.userId === userId);
+      if (existingIndex >= 0) {
+        round.declarations[existingIndex] = row;
+      } else {
+        round.declarations.push(row);
+      }
+      persist();
+      return { roundId, response: 'declined' as const, slots: [] as string[], intention: null };
+    }
+
+    state.declaration = { slots: [...input.slots], intention: input.intention };
     const row: MockDeclarationRow = {
       userId,
-      memberLabel: state.profile.displayName,
+      memberLabel: populationUser?.memberLabel ?? state.profile.displayName,
       emailMasked: maskEmail(session.email),
       slots: [...input.slots],
       intention: input.intention,
       languages: [...state.profile.languages],
       timezone: state.profile.timezone,
+      response: 'attending',
     };
-    const existingIndex = openRound.declarations.findIndex((item) => item.userId === userId);
+    const existingIndex = round.declarations.findIndex((item) => item.userId === userId);
     if (existingIndex >= 0) {
-      openRound.declarations[existingIndex] = row;
+      round.declarations[existingIndex] = row;
     } else {
-      openRound.declarations.push(row);
+      round.declarations.push(row);
     }
 
     persist();
     return {
       roundId,
+      response: 'attending' as const,
       slots: [...input.slots],
       intention: input.intention,
     };
@@ -706,16 +795,12 @@ export const mockStore = {
   },
 
   listTemplates() {
-    requireSession();
-    if (!state.session?.isFacilitator) {
-      throw new Error('forbidden');
-    }
+    requireFacilitator();
     return state.templates.map((template) => ({ ...template }));
   },
 
   createTemplate(input: Omit<MockTemplate, 'id'>) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const template = { id: `tpl-${Date.now()}`, ...input };
     state.templates.push(template);
     persist();
@@ -723,8 +808,7 @@ export const mockStore = {
   },
 
   updateTemplate(id: string, input: Omit<MockTemplate, 'id'>) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const index = state.templates.findIndex((template) => template.id === id);
     if (index < 0) throw new Error('template not found');
     state.templates[index] = { id, ...input };
@@ -738,12 +822,8 @@ export const mockStore = {
     questions: string[];
     slots: unknown[];
   }) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const roundId = `mock-round-${Date.now()}`;
-    for (const round of state.rounds) {
-      if (round.status === 'open') round.status = 'closed';
-    }
     state.rounds.unshift({
       id: roundId,
       status: 'open',
@@ -769,27 +849,28 @@ export const mockStore = {
   },
 
   listDeclarations(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round) return { items: [] as MockDeclarationRow[] };
     return { items: round.declarations.map((item) => ({ ...item })) };
   },
 
   runMatch(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round || round.status !== 'closed') throw new Error('round not found');
-    const groups = MOCK_TRIOS.map((trio) => ({
-      ...trio,
-      memberIds: [...trio.memberIds],
-    }));
+    const numericSeed = roundId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const draft = buildMatchDraftFromDeclarations(
+      asPopulationDeclarations(round.declarations),
+      round.templateId,
+      numericSeed,
+    );
+    const groups = cloneMatchGroups(draft.trios);
     return {
       groups,
       trios: groups,
-      unmatched: MOCK_UNMATCHED_COUNT,
-      unmatchedMembers: MOCK_UNMATCHED_MEMBERS.map((item) => ({
+      unmatched: draft.unmatchedCount,
+      unmatchedMembers: draft.unmatchedMembers.map((item) => ({
         userId: item.userId,
         reasons: [...item.reasons],
       })),
@@ -800,8 +881,7 @@ export const mockStore = {
     roundId: string,
     input: { theme: string; questions: string[]; slots: unknown[] },
   ) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round || round.status !== 'open') throw new Error('round not found');
     round.theme = input.theme;
@@ -811,8 +891,7 @@ export const mockStore = {
   },
 
   closeGathering(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round || round.status !== 'open') throw new Error('round not found');
     round.status = 'closed';
@@ -821,12 +900,9 @@ export const mockStore = {
   },
 
   reopenGathering(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round || round.status !== 'closed') throw new Error('round not found');
-    const otherOpen = state.rounds.find((item) => item.status === 'open');
-    if (otherOpen) throw new Error('other open');
     round.status = 'open';
     round.autoMatchDraft = null;
     persist();
@@ -834,26 +910,27 @@ export const mockStore = {
   },
 
   runAutoMatch(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round || round.status !== 'closed') throw new Error('round not found');
-    const groups = MOCK_TRIOS.map((trio) => ({
-      ...trio,
-      memberIds: [...trio.memberIds],
-    }));
+    const numericSeed = roundId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const draft = buildMatchDraftFromDeclarations(
+      asPopulationDeclarations(round.declarations),
+      round.templateId,
+      numericSeed,
+    );
     round.autoMatchDraft = {
-      trios: groups as typeof MOCK_TRIOS,
-      unmatchedMembers: MOCK_UNMATCHED_MEMBERS.map((item) => ({
+      trios: cloneMatchGroups(draft.trios),
+      unmatchedMembers: draft.unmatchedMembers.map((item) => ({
         userId: item.userId,
         reasons: [...item.reasons],
       })),
     };
     persist();
     return {
-      groups,
-      trios: groups,
-      unmatched: MOCK_UNMATCHED_COUNT,
+      groups: cloneMatchGroups(draft.trios),
+      trios: cloneMatchGroups(draft.trios),
+      unmatched: draft.unmatchedCount,
       unmatchedMembers: round.autoMatchDraft.unmatchedMembers,
       auditEventId: 'mock-audit',
       draftCreatedAt: new Date().toISOString(),
@@ -861,8 +938,7 @@ export const mockStore = {
   },
 
   getAutoMatchDraft(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round?.autoMatchDraft) return { draft: null };
     return {
@@ -878,8 +954,7 @@ export const mockStore = {
   },
 
   undoAutoMatch(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round) throw new Error('round not found');
     const removed = Boolean(round.autoMatchDraft);
@@ -889,64 +964,107 @@ export const mockStore = {
   },
 
   publish(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round || round.status !== 'closed') throw new Error('round not found');
+    const numericSeed = roundId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const draft = round.autoMatchDraft ?? buildMatchDraftFromDeclarations(
+      asPopulationDeclarations(round.declarations),
+      round.templateId,
+      numericSeed,
+    );
     round.status = 'published';
-    round.circleCount = 3;
+    round.circleCount = draft.trios.length;
     round.autoMatchDraft = null;
     persist();
     return {
       published: true,
-      emails: { sent: 9, failed: [] as Array<{ circleId: string; userId: string; email: string; error: string }> },
+      emails: {
+        sent: draft.trios.length * mockTemplateFor(round).circleSize,
+        failed: [] as Array<{ circleId: string; userId: string; email: string; error: string }>,
+      },
     };
   },
 
   retryPublishEmails(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round) throw new Error('round not found');
     return { sent: 0, failed: [] as Array<{ circleId: string; userId: string; email: string; error: string }> };
   },
 
   getRoundMetrics(roundId: string) {
-    requireSession();
-    if (!state.session?.isFacilitator) throw new Error('forbidden');
+    requireFacilitator();
     const round = findRound(state, roundId);
     if (!round) throw new Error('not found');
+
+    const matchedCount = round.circleCount * mockTemplateFor(round).circleSize;
+    const invited = round.declarations.length;
+    const responded = round.status === 'published' ? Math.max(matchedCount, invited - 3) : 0;
+    const yes = round.status === 'published' ? Math.max(0, responded - 2) : 0;
+    const no = round.status === 'published' ? Math.min(2, responded - yes) : 0;
+    const languages = [...new Set(round.declarations.flatMap((item) => item.languages))].slice(0, 6);
+    const editionYears = [
+      ...new Set(
+        round.declarations
+          .map((item) => MOCK_USER_BY_ID.get(item.userId)?.editionYear)
+          .filter((year): year is number => typeof year === 'number'),
+      ),
+    ].slice(0, 5);
+
     const metrics = {
-      newPairs: round.status === 'published' ? 9 : 0,
+      newPairs: round.status === 'published' ? matchedCount : 0,
       noShow: {
-        invited: round.declarations.length,
-        responded: round.status === 'published' ? 8 : 0,
-        yes: round.status === 'published' ? 7 : 0,
-        no: round.status === 'published' ? 1 : 0,
-        rate: round.status === 'published' ? 0.125 : null,
+        invited,
+        responded,
+        yes,
+        no,
+        rate: round.status === 'published' && responded > 0 ? no / responded : null,
       },
       diversity: {
-        editionYears: [2018, 2019, 2021],
-        languages: ['pt', 'en'],
-        countries: ['Brazil', 'Portugal'],
+        editionYears: editionYears.length ? editionYears : [2019, 2021, 2023],
+        languages: languages.length ? languages : ['pt', 'en'],
+        countries: ['Brazil', 'Portugal', 'Germany', 'United States', 'Japan'],
       },
-      exceptions: { unmatched: round.status === 'published' ? 2 : 0 },
+      exceptions: {
+        unmatched: round.status === 'published' ? Math.max(0, invited - matchedCount) : 0,
+      },
     };
+
+    const sortedRounds = [...state.rounds].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const roundIndex = sortedRounds.findIndex((item) => item.id === roundId);
+    const previousRound = roundIndex >= 0 ? sortedRounds[roundIndex + 1] : null;
+    const previousMatched =
+      previousRound && previousRound.status === 'published'
+        ? previousRound.circleCount * mockTemplateFor(previousRound).circleSize
+        : 0;
+
     return {
       roundId,
       metrics,
-      previous:
-        round.id === MOCK_ROUND_ID
-          ? null
-          : {
-              roundId: 'mock-round-published',
-              metrics: {
-                ...metrics,
-                newPairs: 6,
-                noShow: { ...metrics.noShow, rate: 0.1 },
+      previous: previousRound
+        ? {
+            roundId: previousRound.id,
+            metrics: {
+              ...metrics,
+              newPairs: previousMatched,
+              noShow: {
+                ...metrics.noShow,
+                rate:
+                  previousRound.status === 'published' && metrics.noShow.responded > 0
+                    ? metrics.noShow.no / metrics.noShow.responded
+                    : null,
               },
-              delta: { newPairs: metrics.newPairs - 6, noShowRate: 0.025 },
             },
+            delta: {
+              newPairs: metrics.newPairs - previousMatched,
+              noShowRate:
+                metrics.noShow.rate !== null && previousRound.status === 'published'
+                  ? metrics.noShow.rate - (metrics.noShow.no / Math.max(metrics.noShow.responded, 1))
+                  : null,
+            },
+          }
+        : null,
     };
   },
 };

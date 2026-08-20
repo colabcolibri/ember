@@ -1,10 +1,10 @@
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { AppBrand, AppButton, AppLoading } from '@/components/app/index.js';
-import { shellContainerClass } from '@/lib/layout';
 import { loginPath } from '@/lib/app-mode.js';
+import { shellContainerClass } from '@/lib/layout';
 import { usePublicCommunity } from '@/lib/usePublicCommunity.js';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 export function CommunityHomePage() {
   const { t } = useTranslation();
@@ -39,7 +39,7 @@ export function CommunityHomePage() {
               <img
                 src={hero.logoUrl}
                 alt={data.name}
-                className="mb-8 h-16 w-auto max-w-[12rem] object-contain sm:h-20"
+                className="mb-8 h-16 w-auto max-w-48 object-contain sm:h-20"
               />
             ) : (
               <AppBrand markOnly={false} size="lg" className="mb-8 h-16 w-auto sm:h-20" />
@@ -53,7 +53,7 @@ export function CommunityHomePage() {
               <p className="mt-4 max-w-2xl text-lg text-muted-foreground sm:text-xl">{hero.subtitle}</p>
             ) : null}
 
-            <AppButton asChild variant="ink" size="lg" className="mt-10 w-full sm:w-auto sm:min-w-[12rem]">
+            <AppButton asChild variant="ink" size="lg" className="mt-10 w-full sm:w-auto sm:min-w-48">
               <Link to={loginPath()}>{t('communityHome.cta')}</Link>
             </AppButton>
           </div>

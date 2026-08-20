@@ -219,7 +219,7 @@ Variáveis definidas em `apps/web/src/styles/globals.css` — usar parênteses, 
 className="rounded-(--radius-card) border-outline-variant/30"
 
 // evitar (legado v3 / arbitrário redundante)
-className="rounded-[var(--radius-card)]"
+className="rounded-(--radius-card)"
 ```
 
 ### Quando manter valor arbitrário

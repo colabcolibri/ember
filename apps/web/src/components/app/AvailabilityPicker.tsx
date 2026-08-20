@@ -34,7 +34,7 @@ export function AvailabilityPicker({ slots, selected, onToggle, label }: Availab
               )}
               aria-hidden="true"
             >
-              <span className="material-symbols-outlined text-[14px]">check</span>
+              <span className="material-symbols-outlined text-[11px] leading-none">check</span>
             </span>
             <span className="block pr-8">{label(slot)}</span>
           </button>

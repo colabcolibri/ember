@@ -1,6 +1,20 @@
 import { z } from 'zod';
 
-export const communityThemePresetSchema = z.enum(['ember', 'warm', 'forest']);
+export const communityThemePresetSchema = z.enum([
+  'ember',
+  'warm',
+  'forest',
+  'ocean',
+  'dusk',
+  'clay',
+  'slate',
+  'rose',
+  'citrus',
+  'indigo',
+  'sand',
+  'moss',
+  'berry',
+]);
 export type CommunityThemePreset = z.infer<typeof communityThemePresetSchema>;
 
 export const communityThemeSchema = z.object({

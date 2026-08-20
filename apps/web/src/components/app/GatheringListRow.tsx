@@ -9,12 +9,22 @@ import { GatheringMetaChips } from './GatheringMetaChips.js';
 type GatheringListRowProps = {
   gathering: GatheringSummary;
   statusLabel: string;
+  statusTone?: 'open' | 'confirmed' | 'declined';
+  to?: string;
   className?: string;
 };
 
-export function GatheringListRow({ gathering, statusLabel, className }: GatheringListRowProps) {
+export function GatheringListRow({
+  gathering,
+  statusLabel,
+  statusTone = 'open',
+  to,
+  className,
+}: GatheringListRowProps) {
   const { t, i18n } = useTranslation();
   const isOpen = gathering.status === 'open';
+  const badgeVariant =
+    statusTone === 'confirmed' ? 'rust' : statusTone === 'declined' ? 'muted' : isOpen ? 'rust' : 'muted';
   const title = gatheringTitle(gathering, t('facilitator.untitledGathering'));
 
   const metaItems = [
@@ -59,7 +69,7 @@ export function GatheringListRow({ gathering, statusLabel, className }: Gatherin
 
   return (
     <Link
-      to={`/facilitator/gatherings/${gathering.id}`}
+      to={to ?? `/facilitator/gatherings/${gathering.id}`}
       className={cn(
         'group relative block overflow-hidden rounded-(--radius-card)er bg-paper p-5 shadow-sm transition-colors sm:p-6',
         isOpen ? 'border-primary/30 hover:border-primary/50' : 'border-outline-variant/30 hover:border-primary/30',
@@ -71,7 +81,7 @@ export function GatheringListRow({ gathering, statusLabel, className }: Gatherin
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <AppBadge variant={isOpen ? 'rust' : 'muted'}>{statusLabel}</AppBadge>
+              <AppBadge variant={badgeVariant}>{statusLabel}</AppBadge>
             </div>
             <div className="space-y-1">
               <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">

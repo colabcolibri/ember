@@ -22,16 +22,44 @@ export type MagicLinkRequest = LoginCodeRequest;
 export const presenceIntentionSchema = z.enum(['surprise', 'frontier', 'ease']);
 export type PresenceIntention = z.infer<typeof presenceIntentionSchema>;
 
+export const presenceResponseSchema = z.enum(['attending', 'declined']);
+export type PresenceResponse = z.infer<typeof presenceResponseSchema>;
+
 export const roundSlotSchema = z.enum(['mon-evening', 'wed-evening', 'sat-morning']);
 export type RoundSlot = z.infer<typeof roundSlotSchema>;
 
 const presenceSlotSchema = z.union([roundSlotSchema, regionalSlotRefSchema]);
 
-export const presenceInputSchema = z.object({
+const presenceAttendingInputSchema = z.object({
+  response: z.literal('attending').optional().default('attending'),
   slots: z.array(presenceSlotSchema).min(1).max(10),
   intention: presenceIntentionSchema,
   timezone: z.string().trim().min(1).max(64).optional(),
 });
+
+const presenceDeclinedInputSchema = z.object({
+  response: z.literal('declined'),
+  timezone: z.string().trim().min(1).max(64).optional(),
+});
+
+const legacyPresenceInputSchema = z
+  .object({
+    slots: z.array(presenceSlotSchema).min(1).max(10),
+    intention: presenceIntentionSchema,
+    timezone: z.string().trim().min(1).max(64).optional(),
+  })
+  .transform((data) => ({
+    response: 'attending' as const,
+    slots: data.slots,
+    intention: data.intention,
+    timezone: data.timezone,
+  }));
+
+export const presenceInputSchema = z.union([
+  presenceAttendingInputSchema,
+  presenceDeclinedInputSchema,
+  legacyPresenceInputSchema,
+]);
 
 export type PresenceInput = z.infer<typeof presenceInputSchema>;
 

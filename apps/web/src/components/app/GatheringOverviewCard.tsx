@@ -4,6 +4,7 @@ import { formatGatheringDate, gatheringTitle } from '@/lib/gathering.js';
 import { AppBadge } from './AppBadge.js';
 import { AppButton } from './AppButton.js';
 import { GatheringMetaChips } from './GatheringMetaChips.js';
+import { GatheringQuestionsList } from './GatheringQuestionsList.js';
 
 type GatheringOverviewCardProps = {
   gathering: GatheringDetail;
@@ -115,16 +116,10 @@ export function GatheringOverviewCard({
         <GatheringMetaChips items={metaItems} />
 
         {gathering.questions.length > 0 ? (
-          <div className="space-y-2">
-            <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-              {t('presence.questionsLabel')}
-            </p>
-            <ol className="list-decimal space-y-2 border-l-2 border-primary/20 pl-5 text-sm leading-relaxed text-foreground">
-              {gathering.questions.map((question) => (
-                <li key={question}>{question}</li>
-              ))}
-            </ol>
-          </div>
+          <GatheringQuestionsList
+            label={t('presence.questionsLabel')}
+            questions={gathering.questions}
+          />
         ) : null}
 
         {slotLabels.length > 0 ? (

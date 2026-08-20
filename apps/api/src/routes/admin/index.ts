@@ -394,17 +394,6 @@ export function createAdminRoundRoutes(db: Db) {
 
     const result = reopenMatchingRound(db, communityId, roundId);
     if (!result.ok) {
-      if (result.code === 'OTHER_ROUND_OPEN') {
-        return c.json(
-          {
-            error: {
-              code: 'OTHER_ROUND_OPEN',
-              message: 'Já existe outro convite com inscrições abertas nesta comunidade',
-            },
-          },
-          409,
-        );
-      }
       return c.json(
         { error: { code: 'ROUND_NOT_CLOSED', message: 'Só é possível reabrir inscrições encerradas' } },
         400,

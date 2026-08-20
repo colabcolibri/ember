@@ -87,7 +87,7 @@ export function RoundMetricsPanel({ data }: RoundMetricsPanelProps) {
   ];
 
   return (
-    <AppCard title={t('facilitator.metrics.title')} className="lg:col-span-12">
+    <AppCard title={t('facilitator.metrics.title')} className="min-w-0">
       <p className="mb-4 text-sm text-muted-foreground">{t('facilitator.metrics.subtitle')}</p>
 
       <div className="grid gap-3 sm:grid-cols-3">

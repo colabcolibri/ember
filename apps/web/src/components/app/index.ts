@@ -25,7 +25,9 @@ export { FacilitatorRoundPanel } from './FacilitatorRoundPanel.js';
 export { RoundSlotBuilder } from './RoundSlotBuilder.js';
 export type { DraftRoundSlot } from './RoundSlotBuilder.js';
 export { IntentionPicker } from './IntentionPicker.js';
-export { PresenceRoundHero } from './PresenceRoundHero.js';
+export { GatheringQuestionsList } from './GatheringQuestionsList.js';
+export { GatheringAboutSection } from './GatheringAboutSection.js';
+export { PresenceDeclareView } from './PresenceDeclareView.js';
 export { PresenceStepSection } from './PresenceStepSection.js';
 export { LanguageChipPicker } from './LanguageChipPicker.js';
 export { CircleListRow } from './CircleListRow.js';
@@ -36,7 +38,7 @@ export { GatheringCycleStepper } from './GatheringCycleStepper.js';
 export { CircleInviteCard } from './CircleInviteCard.js';
 export { AttendancePrompt } from './AttendancePrompt.js';
 export { ProfileOnboardingBanner } from './ProfileOnboardingBanner.js';
-export { DeclarationTable } from './DeclarationTable.js';
+export { DeclarationTable, type DeclarationRow } from './DeclarationTable.js';
 export { GroupPreview, TrioPreview, type MatchGroupRow, type TrioRow } from './GroupPreview.js';
 export { FacilitatorMatchingPanel } from './FacilitatorMatchingPanel.js';
 export { GatheringEditDialog } from './GatheringEditDialog.js';
@@ -47,5 +49,6 @@ export {
   type UnmatchedReason,
 } from './UnmatchedPanel.js';
 export { RoundMetricsPanel, type RoundMetricsResponse } from './RoundMetricsPanel.js';
+export { ThemePresetPicker } from './ThemePresetPicker.js';
 export { TimezoneCombobox } from './TimezoneCombobox.js';
 export { PlaceAutocomplete } from './PlaceAutocomplete.js';

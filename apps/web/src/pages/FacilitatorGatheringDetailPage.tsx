@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import {
@@ -168,19 +168,19 @@ export function FacilitatorGatheringDetailPage() {
 
   return (
     <AppPage
+      eyebrow={statusLabel}
       title={gatheringTitle(gathering, t('facilitator.untitledGathering'))}
       lead={t('facilitator.gatheringDetailSubtitle')}
       actions={
-        <AppButton variant="outline" onClick={refresh} loading={loading}>
+        <AppButton variant="outline" onClick={refresh} loading={loading} className="shrink-0">
           {t('facilitator.refresh')}
         </AppButton>
       }
     >
+      <div className="grid min-w-0 gap-6">
       <AppButton asChild variant="outline" className="w-fit">
         <Link to="/facilitator/gatherings">{t('facilitator.backToGatherings')}</Link>
       </AppButton>
-
-      <GatheringCycleStepper status={gathering.status} match={matchProgress} />
 
       <GatheringOverviewCard
         gathering={gathering}
@@ -192,6 +192,8 @@ export function FacilitatorGatheringDetailPage() {
         onCloseRegistrations={() => setCloseOpen(true)}
         onReopenRegistrations={() => setReopenOpen(true)}
       />
+
+      <GatheringCycleStepper status={gathering.status} match={matchProgress} />
 
       <GatheringEditDialog
         gathering={gathering}
@@ -246,13 +248,14 @@ export function FacilitatorGatheringDetailPage() {
 
       {metrics ? <RoundMetricsPanel data={metrics} /> : null}
 
-      <AppCard title={t('facilitator.declarations')}>
+      <AppCard title={t('facilitator.declarations')} className="min-w-0">
         <DeclarationTable
           items={declarations}
           emptyMessage={t('facilitator.noDeclarations')}
           slotLabels={gathering.slotLabels}
         />
       </AppCard>
+      </div>
     </AppPage>
   );
 }

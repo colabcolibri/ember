@@ -8,6 +8,7 @@ import { CommunityHomePage } from './pages/CommunityHomePage.js';
 import { AdminCommunityPage } from './pages/AdminCommunityPage.js';
 import { AdminMembersPage } from './pages/AdminMembersPage.js';
 import { PresencePage } from './pages/PresencePage.js';
+import { PresenceRoundPage } from './pages/PresenceRoundPage.js';
 import { CirclesPage } from './pages/CirclesPage.js';
 import { CircleDetailPage } from './pages/CircleDetailPage.js';
 import { FacilitatorPage } from './pages/FacilitatorPage.js';
@@ -107,6 +108,7 @@ export function App() {
 
       <Route element={<AppLayout {...layoutProps} mode="member" auth />}>
         <Route path="/presence" element={<PresencePage />} />
+        <Route path="/presence/:roundId" element={<PresenceRoundPage />} />
         <Route path="/circles" element={<CirclesPage />} />
         <Route path="/circles/:id" element={<CircleDetailPage />} />
         <Route path="/profile" element={<ProfilePage />} />

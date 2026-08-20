@@ -21,12 +21,12 @@ export function AppPageHeader({
   return (
     <header
       className={cn(
-        'flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between',
+        'flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between',
         centered && 'text-center sm:text-center',
         className,
       )}
     >
-      <div className={cn('min-w-0 space-y-3', centered && 'mx-auto')}>
+      <div className={cn('min-w-0 flex-1 space-y-3', centered && 'mx-auto')}>
         {eyebrow ? (
           <p className="inline-flex w-fit items-center rounded-full border border-primary bg-primary/5 px-3 py-1 text-[11px] font-bold tracking-[0.12em] text-primary uppercase">
             {eyebrow}
@@ -39,7 +39,11 @@ export function AppPageHeader({
           <p className="max-w-prose text-base leading-relaxed text-muted-foreground">{lead}</p>
         ) : null}
       </div>
-      {actions ? <div className="flex shrink-0 flex-wrap justify-center gap-2 sm:justify-end">{actions}</div> : null}
+      {actions ? (
+        <div className="flex w-full min-w-0 shrink-0 flex-wrap justify-start gap-2 sm:w-auto sm:justify-end">
+          {actions}
+        </div>
+      ) : null}
     </header>
   );
 }

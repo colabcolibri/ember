@@ -11,6 +11,21 @@ export type GatheringSummary = {
   slotCount: number;
   slotPreview: string[];
   circleCount: number;
+  declared?: boolean;
+};
+
+export type OpenRoundSummary = {
+  id: string;
+  status: string;
+  theme: string | null;
+  questions: string[];
+  createdAt: string;
+  templateName: string | null;
+  circleSize: number | null;
+  durationMinutes: number | null;
+  responseStatus: 'none' | 'attending' | 'declined';
+  /** @deprecated use responseStatus */
+  declared: boolean;
 };
 
 export type GatheringDetail = GatheringSummary & {

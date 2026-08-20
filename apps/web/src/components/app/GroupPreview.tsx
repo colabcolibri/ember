@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { AppCard } from './AppCard.js';
 import { AppBadge } from './AppBadge.js';
+import { AppCard } from './AppCard.js';
 
 export type MatchGroupRow = {
   memberIds: string[];
@@ -50,7 +50,7 @@ export function GroupPreview({
               <p className="text-xs font-bold tracking-[0.12em] text-primary uppercase">
                 {t('facilitator.groupLabel', { index: idx + 1 })} · {groupSizeLabel(group.memberIds.length, t)}
               </p>
-              <p className="mt-1 break-words text-sm font-medium">{group.memberIds.join(' · ')}</p>
+              <p className="mt-1 wrap-break-word text-sm font-medium">{group.memberIds.join(' · ')}</p>
               <p className="text-sm text-muted-foreground">{slotLabels[group.slot] ?? group.slot}</p>
             </div>
             <AppBadge variant="muted">score {group.score}</AppBadge>
