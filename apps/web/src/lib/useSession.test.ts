@@ -20,34 +20,50 @@ describe('useSession', () => {
     vi.clearAllMocks();
   });
 
-  it('starts with authed null then true when profile loads', async () => {
-    vi.mocked(apiFetch).mockResolvedValueOnce({ isFacilitator: false });
+  it('starts with authed null then true when session is authenticated', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce({
+      authenticated: true,
+      isFacilitator: false,
+      isOrgAdmin: false,
+      role: 'member',
+    });
     const { result } = renderHook(() => useSession());
     expect(result.current.authed).toBe(null);
 
     await waitFor(() => expect(result.current.authed).toBe(true));
     expect(result.current.isFacilitator).toBe(false);
+    expect(apiFetch).toHaveBeenCalledWith('/auth/session');
   });
 
-  it('sets facilitator flag from profile', async () => {
-    vi.mocked(apiFetch).mockResolvedValueOnce({ isFacilitator: true });
+  it('sets facilitator flag from session', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce({
+      authenticated: true,
+      isFacilitator: true,
+      isOrgAdmin: false,
+      role: 'facilitator',
+    });
     const { result } = renderHook(() => useSession());
 
     await waitFor(() => expect(result.current.isFacilitator).toBe(true));
   });
 
-  it('sets authed false when profile fetch fails', async () => {
-    vi.mocked(apiFetch).mockRejectedValueOnce(new Error('unauthorized'));
+  it('sets authed false when guest session is returned', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce({ authenticated: false });
     const { result } = renderHook(() => useSession());
 
     await waitFor(() => expect(result.current.authed).toBe(false));
     expect(result.current.isFacilitator).toBe(false);
   });
 
-  it('onAuthenticated refetches profile', async () => {
+  it('onAuthenticated refetches session', async () => {
     vi.mocked(apiFetch)
-      .mockRejectedValueOnce(new Error('unauthorized'))
-      .mockResolvedValueOnce({ isFacilitator: true });
+      .mockResolvedValueOnce({ authenticated: false })
+      .mockResolvedValueOnce({
+        authenticated: true,
+        isFacilitator: true,
+        isOrgAdmin: false,
+        role: 'facilitator',
+      });
     const { result } = renderHook(() => useSession());
     await waitFor(() => expect(result.current.authed).toBe(false));
 
@@ -58,7 +74,12 @@ describe('useSession', () => {
   });
 
   it('onLoggedOut clears session and navigates to login', async () => {
-    vi.mocked(apiFetch).mockResolvedValueOnce({ isFacilitator: false });
+    vi.mocked(apiFetch).mockResolvedValueOnce({
+      authenticated: true,
+      isFacilitator: false,
+      isOrgAdmin: false,
+      role: 'member',
+    });
     const { result } = renderHook(() => useSession());
     await waitFor(() => expect(result.current.authed).toBe(true));
 

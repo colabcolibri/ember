@@ -18,5 +18,9 @@ export function resolveApiPort(): number {
 }
 
 export function resolveApiOrigin(): string {
+  const fromEnv = process.env.EMBER_API_ORIGIN?.trim();
+  if (fromEnv) {
+    return fromEnv.replace(/\/$/, '');
+  }
   return `http://127.0.0.1:${resolveApiPort()}`;
 }

@@ -15,7 +15,7 @@ export function CircleListRow({ id, communityName, question, status, className }
     <Link
       to={`/circles/${id}`}
       className={cn(
-        'group relative block overflow-hidden rounded-[var(--radius-card)] border border-outline-variant/30 bg-paper p-6 shadow-sm transition-colors hover:border-primary/30',
+        'group relative block overflow-hidden rounded-(--radius-card) border border-outline-variant/30 bg-paper p-6 shadow-sm transition-colors hover:border-primary/30',
         className,
       )}
     >

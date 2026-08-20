@@ -34,6 +34,7 @@ export { GatheringMetaChips } from './GatheringMetaChips.js';
 export { GatheringOverviewCard } from './GatheringOverviewCard.js';
 export { CircleInviteCard } from './CircleInviteCard.js';
 export { AttendancePrompt } from './AttendancePrompt.js';
+export { ProfileOnboardingBanner } from './ProfileOnboardingBanner.js';
 export { DeclarationTable } from './DeclarationTable.js';
 export { TrioPreview } from './TrioPreview.js';
 export { TimezoneCombobox } from './TimezoneCombobox.js';

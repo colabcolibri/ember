@@ -7,6 +7,8 @@ export * from './schemas/auth.js';
 export * from './schemas/admin.js';
 export * from './schemas/circles.js';
 export * from './schemas/slot-calendar.js';
+export * from './schemas/community-branding.js';
+export * from './profile/completeness.js';
 export * from './matching/constraints.js';
 export * from './matching/scoring.js';
 export * from './matching/engine.js';

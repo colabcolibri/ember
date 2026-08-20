@@ -2,7 +2,7 @@
 title: Environments
 status: approved
 version: 1.0
-updated: 2026-08-19
+updated: 2026-08-20
 depends_on: [01_tech_stack.md, 05_architecture.md]
 blocks: [10_test_strategy.md]
 ---
@@ -13,7 +13,7 @@ blocks: [10_test_strategy.md]
 
 | Environment | Purpose | URL / access | Data | Deploy trigger |
 | ----------- | ------- | ------------ | ---- | -------------- |
-| local | dev | `http://localhost:3000` | synthetic / seed GSA | manual |
+| local | dev | `http://localhost:2000` | synthetic / seed GSA | manual |
 | staging | pre-prod piloto GSA | `https://ember-staging.vercel.app` `(candidate)` | seed + membros teste | push `main` |
 | production | live | a definir | real GSA | tag / manual |
 
@@ -40,7 +40,13 @@ pnpm db:migrate
 pnpm dev
 ```
 
-Portas locais: `config/dev-ports.json` — web `3000`, API `3001`, Mailpit SMTP `1025`, UI `8025`.
+**Importante:** use `pnpm install` completo (sem `--prod`). O app web declara `vite`, `typescript` e `@types/*` em `devDependencies`; sem elas, o IDE acusa erro em `apps/web/tsconfig.json` / `src/vite-env.d.ts` (“não é possível encontrar o arquivo de definição de tipo para `vite/client`”). Se isso aparecer após clone ou Docker, rode na raiz:
+
+```bash
+pnpm install
+```
+
+Portas locais: `config/dev-ports.json` — web `2000`, API `2001`, Mailpit SMTP `1025`, UI `8025`.
 
 ### Daily commands
 
@@ -58,7 +64,7 @@ Portas locais: `config/dev-ports.json` — web `3000`, API `3001`, Mailpit SMTP 
 | -------- | -------- | ------ | ------- | -------------------- |
 | `EMBER_DB_PATH` | yes | no | SQLite MVP 0 | `data/ember.db` |
 | `EMBER_API_PORT` | no | no | porta da API | `3001` |
-| `EMBER_APP_URL` | yes | no | links em templates | `http://localhost:3000` |
+| `EMBER_APP_URL` | yes | no | links em templates | `http://localhost:2000` |
 
 ## Staging
 
@@ -104,6 +110,16 @@ Portas locais: `config/dev-ports.json` — web `3000`, API `3001`, Mailpit SMTP 
 | ------ | ---- | --------- |
 | Logs | Vercel logs | — |
 | Errors | Sentry `(candidate)` | — |
+
+## Troubleshooting (IDE / TypeScript)
+
+| Sintoma | Causa provável | Correção |
+| ------- | ---------------- | -------- |
+| `Não é possível encontrar o arquivo de definição de tipo para 'vite/client'` em `apps/web/tsconfig.json` ou `src/vite-env.d.ts` | `node_modules` sem `devDependencies` (ex.: `pnpm install --prod`, install interrompido) | Na raiz: `pnpm install` — confirme `apps/web/node_modules/vite/client.d.ts` |
+| Comandos `vite` / `tsc` não encontrados no workspace `@ember/web` | Mesma causa — binários só linkados com install completo | `pnpm install` na raiz do monorepo |
+| Portas diferentes do README | Docs antigos vs `config/dev-ports.json` | Web `2000`, API `2001` (fonte: `packages/config`) |
+
+Tipos do Vite: `apps/web/src/vite-env.d.ts` referencia `vite/client` (padrão Vite + React). Não remover; depende de `vite` listado em `apps/web/package.json` → `devDependencies`.
 
 ## Gaps / open questions
 

@@ -38,7 +38,7 @@ export function AppDialog({
 }: AppDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn('rounded-[var(--radius-card)]', sizeClasses[size])}>
+      <DialogContent className={cn('rounded-(--radius-card)', sizeClasses[size])}>
         <DialogHeader>
           <DialogTitle className={variant === 'destructive' ? 'text-destructive' : undefined}>
             {title}

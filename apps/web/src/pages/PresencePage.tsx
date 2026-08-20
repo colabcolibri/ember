@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { profileCompleteness, type ProfileCompletenessInput } from '@ember/domain/profile/completeness';
 import {
   AppButton,
   AppCard,
@@ -11,6 +12,7 @@ import {
   IntentionPicker,
   PresenceRoundHero,
   PresenceStepSection,
+  ProfileOnboardingBanner,
   RegionalSlotPicker,
   type RegionalSlotOption,
 } from '../components/app/index.js';
@@ -32,6 +34,15 @@ type DeclarationResponse = {
     slots: string[];
     intention: PresenceIntention;
   } | null;
+};
+
+type ProfileResponse = {
+  displayName: string;
+  editionYear: number | null;
+  timezone: string;
+  languages: string[];
+  originPlace: unknown;
+  residencePlace: unknown;
 };
 
 type PresenceIntention = 'surprise' | 'frontier' | 'ease';
@@ -62,6 +73,7 @@ export function PresencePage() {
   const [alreadyDeclared, setAlreadyDeclared] = useState(false);
   const [loading, setLoading] = useState(false);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [profileMissing, setProfileMissing] = useState<ReturnType<typeof profileCompleteness>['missing']>([]);
 
   const applyRoundData = useCallback((data: RoundResponse) => {
     setRoundId(data.round?.id ?? null);
@@ -78,6 +90,9 @@ export function PresencePage() {
 
   const { initialLoading } = useInitialLoad(async () => {
     try {
+      const profile = await apiFetch<ProfileResponse>('/me/profile');
+      setProfileMissing(profileCompleteness(profile as ProfileCompletenessInput).missing);
+
       const data = await apiFetch<RoundResponse>('/rounds/current');
       const timezone = data.memberTimezone ?? 'America/Sao_Paulo';
       setMemberTimezone(timezone);
@@ -108,10 +123,13 @@ export function PresencePage() {
     () => (regionalSlots.length ? countCalendars(regionalSlots) : 0),
     [regionalSlots],
   );
+  const profileIncomplete = profileMissing.length > 0;
   const submitHint =
-    selectedSlots.length === 0
-      ? t('presence.selectAtLeastOne')
-      : t('presence.submitSummary', { count: selectedSlots.length });
+    profileIncomplete
+      ? t('onboarding.presenceHint')
+      : selectedSlots.length === 0
+        ? t('presence.selectAtLeastOne')
+        : t('presence.submitSummary', { count: selectedSlots.length });
 
   async function handleTimezoneChange(timezone: string) {
     setMemberTimezone(timezone);
@@ -134,7 +152,7 @@ export function PresencePage() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!roundId || selectedSlots.length === 0) return;
+    if (!roundId || selectedSlots.length === 0 || profileIncomplete) return;
     setLoading(true);
     try {
       await apiFetch(`/rounds/${roundId}/presence`, {
@@ -182,6 +200,8 @@ export function PresencePage() {
       centered
       className="pb-28 sm:pb-8"
     >
+      {profileIncomplete ? <ProfileOnboardingBanner missing={profileMissing} /> : null}
+
       <PresenceRoundHero
         theme={roundTheme}
         questions={roundQuestions}
@@ -264,7 +284,7 @@ export function PresencePage() {
             type="submit"
             size="lg"
             loading={loading}
-            disabled={selectedSlots.length === 0 || slotsLoading}
+            disabled={selectedSlots.length === 0 || slotsLoading || profileIncomplete}
             className="min-w-[min(100%,20rem)]"
           >
             {t('presence.submit')}
@@ -282,7 +302,7 @@ export function PresencePage() {
             form="presence-form"
             size="lg"
             loading={loading}
-            disabled={selectedSlots.length === 0 || slotsLoading}
+            disabled={selectedSlots.length === 0 || slotsLoading || profileIncomplete}
             className="w-full"
           >
             {t('presence.submit')}

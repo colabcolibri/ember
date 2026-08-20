@@ -6,6 +6,7 @@ import { DemoResetButton } from './DemoResetButton.js';
 import { LanguageSwitcher } from '../LanguageSwitcher.js';
 import { shellContainerClass } from '@/lib/layout';
 import { isMockMode } from '@/lib/mock-mode.js';
+import { loginPath } from '@/lib/app-mode.js';
 import { cn } from '@/lib/utils';
 
 export type AppShellMode = 'auth' | 'member' | 'catalog';
@@ -14,6 +15,7 @@ type AppShellProps = {
   mode?: AppShellMode;
   authed?: boolean | null;
   isFacilitator?: boolean;
+  isOrgAdmin?: boolean;
   onLoggedOut?: () => void;
   children: ReactNode;
 };
@@ -22,6 +24,7 @@ export function AppShell({
   mode = 'member',
   authed,
   isFacilitator = false,
+  isOrgAdmin = false,
   onLoggedOut,
   children,
 }: AppShellProps) {
@@ -42,6 +45,12 @@ export function AppShell({
                 { to: '/facilitator', label: t('nav.facilitator'), end: true },
               ]
             : []),
+          ...(isOrgAdmin
+            ? [
+                { to: '/admin/community', label: t('nav.adminCommunity') },
+                { to: '/admin/members', label: t('nav.adminMembers') },
+              ]
+            : []),
         ]
       : [];
 
@@ -56,7 +65,9 @@ export function AppShell({
       : [];
 
   const guestItems =
-    mode === 'auth' && authed === false ? [{ to: '/login', label: t('nav.login') }] : [];
+    mode === 'auth' && authed === false
+      ? [{ to: loginPath(), label: t('nav.login') }]
+      : [];
 
   const navItems = memberItems.length ? memberItems : catalogItems.length ? catalogItems : guestItems;
 

@@ -132,6 +132,58 @@ Open http://localhost:2000 and explore member presence, facilitator flows, and g
 
 A static mock build is deployed to **GitHub Pages** on pushes to `main` via `.github/workflows/github-pages.yml`—useful for sharing the UI without running the full stack.
 
+### Docker (dev and production)
+
+Prerequisites: **Docker** and **Docker Compose** v2.
+
+```bash
+cp .env.docker.example .env   # adjust values as needed
+```
+
+**Development** — hot reload, Mailpit, SQLite volume:
+
+```bash
+pnpm docker:dev
+# or: docker compose up --build
+```
+
+| Service | URL |
+| ------- | --- |
+| Web | http://localhost:2000 |
+| API | http://localhost:2001 |
+| Mailpit UI | http://localhost:8025 |
+
+**Production** — multi-stage build, nginx + API, persistent SQLite. The web image is built with `VITE_APP_ONLY=true`: **`/` is the login page** (no marketing landing). Configure bootstrap before first deploy:
+
+```bash
+cp .env.docker.example .env
+# Required: admin email (first login gets facilitator role) + working email provider (smtp/resend)
+```
+
+```bash
+pnpm docker:prod
+# or: docker compose -f docker-compose.prod.yml up --build -d
+```
+
+| Service | URL |
+| ------- | --- |
+| App (nginx → API) | http://localhost:8080 |
+
+| Variable | Purpose |
+| -------- | ------- |
+| `EMBER_BOOTSTRAP_FACILITATOR_EMAIL` | Admin email — first magic-link login assigns **facilitator** role |
+| `EMBER_EMAIL_PROVIDER` | Must be `smtp` or `resend` (not `noop`) so the admin receives login codes |
+| `EMBER_APP_URL` | Public URL for magic links (e.g. `http://localhost:8080` locally) |
+
+For HTTPS in production, terminate TLS at a reverse proxy and set `EMBER_APP_URL=https://your-domain`.
+
+Stop containers:
+
+```bash
+pnpm docker:dev:down
+pnpm docker:prod:down
+```
+
 ### Other commands
 
 ```bash
@@ -146,6 +198,7 @@ pnpm test           # run tests across the monorepo
 
 ```
 ember/
+├── docker/           # Dockerfiles, nginx, entrypoints
 ├── apps/
 │   ├── web/          # React SPA — member UI, facilitator panel
 │   └── api/          # Hono API — auth, rounds, matching, circles

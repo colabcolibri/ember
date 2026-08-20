@@ -33,6 +33,7 @@ function serializeProfile(
       updatedAt: null as string | null,
       role: role ?? 'member',
       isFacilitator: isFacilitatorRole(role),
+      isOrgAdmin: role === 'org_admin',
     };
   }
 
@@ -48,6 +49,7 @@ function serializeProfile(
     updatedAt: row.updated_at,
     role: role ?? 'member',
     isFacilitator: isFacilitatorRole(role),
+    isOrgAdmin: role === 'org_admin',
   };
 }
 

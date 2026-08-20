@@ -14,6 +14,8 @@
     "circles": "Meus encontros",
     "facilitator": "Facilitador",
     "gatherings": "Encontros",
+    "adminCommunity": "Identidade",
+    "adminMembers": "Membros",
     "logout": "Sair",
     "logoutConfirmTitle": "Sair da conta?",
     "logoutConfirmDescription": "Você precisará entrar novamente para acessar seus encontros.",
@@ -195,6 +197,7 @@
   },
   "common": {
     "loading": "Carregando…",
+    "saving": "Salvando…",
     "apiNetworkError": "Sem conexão com o servidor. Verifique sua internet e tente de novo.",
     "apiSessionExpired": "Sua sessão expirou. Faça login novamente.",
     "apiServerError": "Erro no servidor. Tente de novo em instantes.",
@@ -315,5 +318,47 @@
     "attendanceNoBtn": "Não aconteceu",
     "attendanceYes": "Obrigado, registramos que o encontro aconteceu.",
     "attendanceNo": "Registramos que o encontro não aconteceu."
+  },
+  "communityHome": {
+    "cta": "Entrar na comunidade",
+    "loadError": "Não foi possível carregar a home da comunidade."
+  },
+  "adminCommunity": {
+    "title": "Identidade da comunidade",
+    "lead": "Configure logo, textos da home pública e tema de cores.",
+    "heroTitle": "Título do hero",
+    "heroSubtitle": "Subtítulo do hero",
+    "logoUrl": "URL do logo",
+    "introParagraph": "Parágrafo introdutório",
+    "block": "Bloco {{index}}",
+    "blockTitle": "Título",
+    "blockBody": "Texto",
+    "themePreset": "Tema",
+    "themeWarm": "Quente",
+    "themeForest": "Floresta",
+    "save": "Salvar identidade",
+    "saved": "Identidade atualizada."
+  },
+  "adminMembers": {
+    "title": "Membros da comunidade",
+    "lead": "Convide pessoas por email ou importe uma lista CSV.",
+    "email": "Email",
+    "displayName": "Nome (opcional)",
+    "sendInvite": "Enviar convite",
+    "inviteSent": "Convite enviado.",
+    "csvLabel": "Importar CSV",
+    "csvPlaceholder": "email,nome\npessoa@exemplo.com,Ana",
+    "importCsv": "Importar lista",
+    "importResult": "{{created}} convite(s) enviado(s), {{errors}} erro(s).",
+    "tableEmail": "Membro",
+    "tableRole": "Papel",
+    "tableProfile": "Perfil",
+    "profileComplete": "Completo",
+    "profileIncomplete": "Incompleto"
+  },
+  "onboarding": {
+    "bannerTitle": "Complete seu perfil antes de declarar presença:",
+    "goToProfile": "Ir para o perfil",
+    "presenceHint": "Alguns campos do perfil ainda faltam para participar da rodada."
   }
 }

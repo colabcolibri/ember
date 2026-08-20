@@ -11,12 +11,16 @@ import {
   ensureCommunityMember,
   findCommunityBySlug,
   findValidLoginCode,
+  findValidSession,
+  getMemberRole,
   markLoginCodeUsed,
   resolveEmailFromLoginCode,
   upsertUserByEmail,
 } from '@ember/db';
 import { createRateLimit, resetRateLimitsForTests } from '../lib/rate-limit.js';
-import { setSessionCookie, clearSessionCookie, SESSION_COOKIE } from '../lib/session.js';
+import { resolveCommunityId, setSessionCookie, clearSessionCookie, SESSION_COOKIE } from '../lib/session.js';
+
+const FACILITATOR_ROLES = new Set(['facilitador', 'org_admin']);
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -32,7 +36,7 @@ function bootstrapUser(db: Db, email: string, pepper: string): string {
   if (community) {
     const bootstrapEmail = process.env.EMBER_BOOTSTRAP_FACILITATOR_EMAIL?.trim().toLowerCase();
     const role =
-      bootstrapEmail && email.toLowerCase() === bootstrapEmail ? 'facilitador' : 'member';
+      bootstrapEmail && email.toLowerCase() === bootstrapEmail ? 'org_admin' : 'member';
     ensureCommunityMember(db, community.id, userId, role);
   }
   return userId;
@@ -53,6 +57,28 @@ export function createAuthRoutes(db: Db) {
     keyPrefix: 'login-code-verify',
   });
 
+  auth.get('/session', (c) => {
+    const sessionId = getCookie(c, SESSION_COOKIE);
+    if (!sessionId) {
+      return c.json({ authenticated: false });
+    }
+
+    const session = findValidSession(db, sessionId);
+    if (!session) {
+      return c.json({ authenticated: false });
+    }
+
+    const communityId = resolveCommunityId(c, db);
+    const role = communityId ? (getMemberRole(db, communityId, session.user_id) ?? 'member') : 'member';
+
+    return c.json({
+      authenticated: true,
+      role,
+      isFacilitator: FACILITATOR_ROLES.has(role),
+      isOrgAdmin: role === 'org_admin',
+    });
+  });
+
   auth.post('/code', codeRequestRateLimit, async (c) => {
     const body = await c.req.json().catch(() => null);
     const parsed = loginCodeRequestSchema.safeParse(body);
@@ -71,7 +97,7 @@ export function createAuthRoutes(db: Db) {
     const { code } = createLoginCode(db, email, pepper);
     const content = buildLoginCodeEmailContent({ code, ttlMinutes: CODE_TTL_MINUTES, locale: 'pt' });
 
-    await sendTransactionalEmail({
+    const sendResult = await sendTransactionalEmail({
       to: email,
       subject: content.subject,
       text: content.text,
@@ -86,6 +112,22 @@ export function createAuthRoutes(db: Db) {
         },
       }),
     });
+
+    if (!sendResult.ok) {
+      console.error('[auth] login code email failed', {
+        provider: sendResult.provider,
+        error: sendResult.error,
+      });
+      return c.json(
+        {
+          error: {
+            code: 'EMAIL_UNAVAILABLE',
+            message: 'Não foi possível enviar o código agora. Tente novamente em instantes.',
+          },
+        },
+        503,
+      );
+    }
 
     return c.json({ message: GENERIC_MESSAGE }, 202);
   });

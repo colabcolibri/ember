@@ -55,7 +55,7 @@ export function DeclarationTable({ items, emptyMessage, slotLabels = {} }: Decla
                 <div className="font-medium">{row.memberLabel}</div>
                 <div className="text-xs text-muted-foreground">{row.emailMasked}</div>
               </TableCell>
-              <TableCell className="max-w-[14rem] text-sm leading-relaxed">
+              <TableCell className="max-w-56 text-sm leading-relaxed">
                 {formatSlotList(row.slots, slotLabels)}
               </TableCell>
               <TableCell>

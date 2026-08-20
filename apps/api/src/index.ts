@@ -9,6 +9,7 @@ import { createRoundRoutes } from './routes/rounds.js';
 import { createCircleRoutes } from './routes/circles.js';
 import { createAdminRoutes } from './routes/admin/index.js';
 import { createPlacesRoutes } from './routes/places.js';
+import { createPublicCommunityRoutes } from './routes/public/community.js';
 
 loadRepoEnv();
 
@@ -34,6 +35,7 @@ v1.route('/rounds', createRoundRoutes(db));
 v1.route('/circles', createCircleRoutes(db));
 v1.route('/admin', createAdminRoutes(db));
 v1.route('/places', createPlacesRoutes(db));
+v1.route('/public', createPublicCommunityRoutes(db));
 
 app.route('/api/v1', v1);
 

@@ -36,6 +36,8 @@ import {
   sendRoundOpenNotifications,
 } from '../../services/circle-notifications.js';
 import { createAdminSlotCalendarRoutes, validateRoundSlotRefs } from './slot-calendars.js';
+import { createAdminBrandingRoutes } from './branding.js';
+import { createAdminMembersRoutes } from './members.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -470,5 +472,7 @@ export function createAdminRoutes(db: Db) {
   admin.route('/', createAdminRoundRoutes(db));
   admin.route('/', createAdminTemplateRoutes(db));
   admin.route('/', createAdminSlotCalendarRoutes(db));
+  admin.route('/', createAdminBrandingRoutes(db));
+  admin.route('/', createAdminMembersRoutes(db));
   return admin;
 }

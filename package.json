@@ -8,7 +8,12 @@
     "build": "pnpm -r build",
     "build:mock": "pnpm --filter @ember/config build && pnpm --filter @ember/web build:mock",
     "test": "pnpm -r test",
-    "db:migrate": "pnpm --filter @ember/db migrate"
+    "test:e2e": "pnpm --filter @ember/web test:e2e",
+    "db:migrate": "pnpm --filter @ember/db migrate",
+    "docker:dev": "docker compose up --build",
+    "docker:dev:down": "docker compose down",
+    "docker:prod": "docker compose -f docker-compose.prod.yml up --build -d",
+    "docker:prod:down": "docker compose -f docker-compose.prod.yml down"
   },
   "engines": {
     "node": ">=20"

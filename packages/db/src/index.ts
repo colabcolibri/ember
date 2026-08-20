@@ -8,3 +8,5 @@ export * from './repos/templates.js';
 export * from './repos/matching.js';
 export * from './repos/circles.js';
 export * from './repos/slot-calendars.js';
+export * from './repos/community-branding.js';
+export * from './repos/community-members.js';

@@ -1,0 +1,42 @@
+name: ember
+
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
+  ember:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    ports:
+      - "2000:2000"
+      - "2001:2001"
+    volumes:
+      - .:/app
+      - ember_node_modules:/app/node_modules
+      - ember_pnpm_store:/pnpm
+      - ember_data:/app/data
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      EMBER_APP_URL: http://localhost:2000
+      EMBER_API_PORT: "2001"
+      EMBER_DB_PATH: /app/data/ember.db
+      EMBER_BOOTSTRAP_FACILITATOR_EMAIL: ${EMBER_BOOTSTRAP_FACILITATOR_EMAIL:-admin@example.com}
+      EMBER_EMAIL_PROVIDER: smtp
+      EMBER_SMTP_HOST: mailpit
+      EMBER_SMTP_PORT: "1025"
+      EMBER_SMTP_SECURE: "false"
+    depends_on:
+      - mailpit
+    restart: unless-stopped
+
+volumes:
+  ember_node_modules:
+  ember_pnpm_store:
+  ember_data:

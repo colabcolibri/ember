@@ -1,5 +1,6 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { profileCompleteness, type ProfileCompletenessInput } from '@ember/domain/profile/completeness';
 import type { PlaceRef } from '../lib/place.js';
 import {
   AppButton,
@@ -10,6 +11,7 @@ import {
   AppPage,
   LanguageChipPicker,
   PlaceAutocomplete,
+  ProfileOnboardingBanner,
   TimezoneCombobox,
 } from '../components/app/index.js';
 import { apiFetch } from '../lib/api.js';
@@ -51,6 +53,19 @@ export function ProfilePage() {
       showError(formatApiError(err, t));
     }
   }, [t]);
+
+  const missingFields = useMemo(
+    () =>
+      profileCompleteness({
+        displayName,
+        editionYear: editionYear ? Number(editionYear) : null,
+        timezone,
+        languages,
+        originPlace,
+        residencePlace,
+      } as ProfileCompletenessInput).missing,
+    [displayName, editionYear, timezone, languages, originPlace, residencePlace],
+  );
 
   function toggleLanguage(code: string) {
     setLanguages((prev) =>
@@ -96,6 +111,7 @@ export function ProfilePage() {
 
   return (
     <AppPage title={t('profile.title')}>
+      {missingFields.length > 0 ? <ProfileOnboardingBanner missing={missingFields} /> : null}
       <AppCard>
         <form className="relative z-10 grid gap-6" onSubmit={onSubmit}>
           <div className="grid gap-6 sm:grid-cols-2 sm:gap-x-5">

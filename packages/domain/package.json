@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./profile/completeness": "./dist/profile/completeness.js",
+    "./schemas/community-branding": "./dist/schemas/community-branding.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

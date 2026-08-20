@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { AppLoading, AppShell, type AppShellMode } from '@/components/app/index.js';
+import { loginPath } from '@/lib/app-mode.js';
 
 export type AppOutletContext = {
   onAuthenticated: () => void;
@@ -8,6 +9,7 @@ export type AppOutletContext = {
 type AppLayoutProps = {
   authed: boolean | null;
   isFacilitator?: boolean;
+  isOrgAdmin?: boolean;
   onLoggedOut: () => void;
   onAuthenticated: () => void;
   mode: AppShellMode;
@@ -26,13 +28,14 @@ function AuthLoading({ mode, authed }: { mode: AppShellMode; authed: boolean | n
 export function AppLayout({
   authed,
   isFacilitator = false,
+  isOrgAdmin = false,
   onLoggedOut,
   onAuthenticated,
   mode,
   auth,
 }: AppLayoutProps) {
   if (auth === true && authed === false) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={loginPath()} replace />;
   }
 
   if (auth === 'guest' && authed === true) {
@@ -44,7 +47,13 @@ export function AppLayout({
   }
 
   return (
-    <AppShell mode={mode} authed={authed} isFacilitator={isFacilitator} onLoggedOut={onLoggedOut}>
+    <AppShell
+      mode={mode}
+      authed={authed}
+      isFacilitator={isFacilitator}
+      isOrgAdmin={isOrgAdmin}
+      onLoggedOut={onLoggedOut}
+    >
       <Outlet context={{ onAuthenticated } satisfies AppOutletContext} />
     </AppShell>
   );

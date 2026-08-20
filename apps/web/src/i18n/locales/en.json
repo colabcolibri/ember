@@ -14,6 +14,8 @@
     "circles": "My gatherings",
     "facilitator": "Facilitator",
     "gatherings": "Gatherings",
+    "adminCommunity": "Branding",
+    "adminMembers": "Members",
     "logout": "Sign out",
     "logoutConfirmTitle": "Sign out of your account?",
     "logoutConfirmDescription": "You will need to sign in again to access your gatherings.",
@@ -195,6 +197,7 @@
   },
   "common": {
     "loading": "Loading…",
+    "saving": "Saving…",
     "apiNetworkError": "Cannot reach the server. Check your connection and try again.",
     "apiSessionExpired": "Your session expired. Please sign in again.",
     "apiServerError": "Server error. Please try again shortly.",
@@ -315,5 +318,47 @@
     "attendanceNoBtn": "It did not happen",
     "attendanceYes": "Thanks, we recorded that the gathering happened.",
     "attendanceNo": "We recorded that the gathering did not happen."
+  },
+  "communityHome": {
+    "cta": "Enter the community",
+    "loadError": "Could not load the community home."
+  },
+  "adminCommunity": {
+    "title": "Community identity",
+    "lead": "Configure logo, public home copy, and color theme.",
+    "heroTitle": "Hero title",
+    "heroSubtitle": "Hero subtitle",
+    "logoUrl": "Logo URL",
+    "introParagraph": "Intro paragraph",
+    "block": "Block {{index}}",
+    "blockTitle": "Title",
+    "blockBody": "Body",
+    "themePreset": "Theme",
+    "themeWarm": "Warm",
+    "themeForest": "Forest",
+    "save": "Save identity",
+    "saved": "Identity updated."
+  },
+  "adminMembers": {
+    "title": "Community members",
+    "lead": "Invite people by email or import a CSV list.",
+    "email": "Email",
+    "displayName": "Name (optional)",
+    "sendInvite": "Send invite",
+    "inviteSent": "Invite sent.",
+    "csvLabel": "Import CSV",
+    "csvPlaceholder": "email,name\nperson@example.com,Ana",
+    "importCsv": "Import list",
+    "importResult": "{{created}} invite(s) sent, {{errors}} error(s).",
+    "tableEmail": "Member",
+    "tableRole": "Role",
+    "tableProfile": "Profile",
+    "profileComplete": "Complete",
+    "profileIncomplete": "Incomplete"
+  },
+  "onboarding": {
+    "bannerTitle": "Complete your profile before declaring presence:",
+    "goToProfile": "Go to profile",
+    "presenceHint": "Some profile fields are still missing to join the round."
   }
 }

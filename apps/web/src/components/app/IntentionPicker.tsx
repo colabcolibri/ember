@@ -19,7 +19,7 @@ export function IntentionPicker({ value, onChange, options, label, hint }: Inten
           <label
             key={option}
             className={cn(
-              'flex min-h-[5.5rem] cursor-pointer flex-col justify-center rounded-xl border px-3 py-3 text-center transition-colors sm:min-h-[6.5rem] sm:px-4',
+              'flex min-h-22 cursor-pointer flex-col justify-center rounded-xl border px-3 py-3 text-center transition-colors sm:min-h-26 sm:px-4',
               active
                 ? 'border-2 border-primary bg-primary/10 shadow-sm'
                 : 'border border-outline-variant/60 bg-background/50 hover:border-primary/40',

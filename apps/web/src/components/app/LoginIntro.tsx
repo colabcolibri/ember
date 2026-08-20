@@ -15,7 +15,7 @@ export function LoginIntro({ compact = false, className }: LoginIntroProps) {
   if (compact) {
     return (
       <div className={cn('mx-auto w-full max-w-xl text-center', className)}>
-        <AppBrand markOnly={false} size="lg" className="mx-auto mb-4 h-9 w-auto max-w-[8rem] sm:h-10 sm:max-w-[9rem]" />
+        <AppBrand markOnly={false} size="lg" className="mx-auto mb-4 h-9 w-auto max-w-32 sm:h-10 sm:max-w-36" />
         <p className="font-serif text-xl font-bold tracking-tight text-foreground lowercase sm:text-2xl">
           {t('login.introTitleCompact')}
         </p>
@@ -28,7 +28,7 @@ export function LoginIntro({ compact = false, className }: LoginIntroProps) {
       <AppBrand
         markOnly={false}
         size="lg"
-        className="mx-auto mb-6 h-11 w-auto max-w-[10rem] sm:mb-8 sm:h-14 sm:max-w-[12rem]"
+        className="mx-auto mb-6 h-11 w-auto max-w-40 sm:mb-8 sm:h-14 sm:max-w-48"
       />
 
       <h1 className="font-serif text-[clamp(1.65rem,4.5vw,2.25rem)] leading-[1.08] font-bold tracking-tight text-foreground lowercase">

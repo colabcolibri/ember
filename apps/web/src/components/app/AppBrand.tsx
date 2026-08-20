@@ -13,7 +13,7 @@ type AppBrandProps = {
 const sizeClasses = {
   sm: 'h-7 w-7',
   md: 'h-8 w-8',
-  lg: 'h-10 w-auto max-w-[7.5rem]',
+  lg: 'h-10 w-auto max-w-30',
 } as const;
 
 export function AppBrand({ className, markOnly = true, size = 'md' }: AppBrandProps) {

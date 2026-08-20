@@ -1,5 +1,15 @@
 import type { PlaceRef } from '../lib/place.js';
-import { isFacilitatorDemoEmail } from '../lib/mock-mode.js';
+import {
+  isFacilitatorDemoEmail,
+  isNewMemberDemoEmail,
+  isOrgAdminDemoEmail,
+} from '../lib/mock-mode.js';
+import {
+  DEFAULT_COMMUNITY_PUBLIC_SETTINGS,
+  mergeCommunityPublicSettings,
+  type CommunityBrandingInput,
+  type CommunityPublicSettings,
+} from '@ember/domain/schemas/community-branding';
 import {
   MOCK_COMMUNITY_NAME,
   MOCK_DECLARATIONS,
@@ -28,6 +38,16 @@ type MockProfile = {
   originPlace: PlaceRef | null;
   residencePlace: PlaceRef | null;
   isFacilitator: boolean;
+  isOrgAdmin: boolean;
+};
+
+type MockMemberRecord = {
+  userId: string;
+  email: string;
+  role: string;
+  invitedAt: string | null;
+  profileComplete: boolean;
+  displayName: string | null;
 };
 
 type MockDeclaration = {
@@ -116,6 +136,8 @@ type PersistedState = {
   rounds: MockRound[];
   circles: MockCircle[];
   templates: MockTemplate[];
+  publicSettings: CommunityPublicSettings;
+  members: MockMemberRecord[];
 };
 
 function seedDeclarations(): MockDeclarationRow[] {
@@ -199,16 +221,39 @@ function maskEmail(email: string): string {
 function defaultProfile(email?: string): MockProfile {
   const localPart = email?.split('@')[0]?.replace(/[._-]/g, ' ') ?? 'Alex Demo';
   const displayName = localPart.charAt(0).toUpperCase() + localPart.slice(1);
+  const incomplete = email ? isNewMemberDemoEmail(email) : false;
 
   return {
-    displayName,
-    editionYear: 2024,
+    displayName: incomplete ? '' : displayName,
+    editionYear: incomplete ? null : 2024,
     timezone: 'America/Sao_Paulo',
-    languages: ['pt', 'en'],
-    originPlace: MOCK_PLACES[0] ?? null,
-    residencePlace: MOCK_PLACES[2] ?? null,
+    languages: incomplete ? [] : ['pt', 'en'],
+    originPlace: incomplete ? null : (MOCK_PLACES[0] ?? null),
+    residencePlace: incomplete ? null : (MOCK_PLACES[2] ?? null),
     isFacilitator: email ? isFacilitatorDemoEmail(email) : false,
+    isOrgAdmin: email ? isOrgAdminDemoEmail(email) : false,
   };
+}
+
+function defaultMembers(): MockMemberRecord[] {
+  return [
+    {
+      userId: 'm-demo',
+      email: 'demo@ember.app',
+      role: 'member',
+      invitedAt: '2026-08-01T10:00:00.000Z',
+      profileComplete: true,
+      displayName: 'Alex Demo',
+    },
+    {
+      userId: 'm-facil',
+      email: 'facilitador@demo.ember',
+      role: 'facilitator',
+      invitedAt: '2026-08-01T10:00:00.000Z',
+      profileComplete: true,
+      displayName: 'Facilitador Demo',
+    },
+  ];
 }
 
 function defaultCircles(): MockCircle[] {
@@ -300,6 +345,8 @@ function createDefaultState(): PersistedState {
     rounds: seedRounds(),
     circles: defaultCircles(),
     templates: MOCK_TEMPLATES.map((template) => ({ ...template })),
+    publicSettings: { ...DEFAULT_COMMUNITY_PUBLIC_SETTINGS },
+    members: defaultMembers(),
   };
 }
 
@@ -316,6 +363,8 @@ function readState(): PersistedState {
       templates: parsed.templates?.length ? parsed.templates : MOCK_TEMPLATES.map((t) => ({ ...t })),
       circles: parsed.circles?.length ? parsed.circles : defaultCircles(),
       rounds: parsed.rounds?.length ? parsed.rounds : seedRounds(),
+      publicSettings: mergeCommunityPublicSettings(parsed.publicSettings),
+      members: parsed.members?.length ? parsed.members : defaultMembers(),
     };
   } catch {
     return createDefaultState();
@@ -336,6 +385,13 @@ function requireSession(): MockSession {
   return state.session;
 }
 
+function requireOrgAdmin() {
+  requireSession();
+  if (!state.profile.isOrgAdmin) {
+    throw new Error('forbidden');
+  }
+}
+
 export const mockStore = {
   reset() {
     state = createDefaultState();
@@ -349,10 +405,12 @@ export const mockStore = {
   login(email: string) {
     const normalized = email.trim().toLowerCase();
     const isFacilitator = isFacilitatorDemoEmail(normalized);
+    const isOrgAdmin = isOrgAdminDemoEmail(normalized);
     state.session = { email: normalized, isFacilitator };
     state.profile = {
       ...defaultProfile(normalized),
       isFacilitator,
+      isOrgAdmin,
     };
     persist();
   },
@@ -367,15 +425,104 @@ export const mockStore = {
     return { ...state.profile };
   },
 
+  getSession() {
+    if (!state.session) {
+      return { authenticated: false as const };
+    }
+
+    const { isFacilitator, isOrgAdmin } = state.profile;
+    const role = isOrgAdmin ? 'org_admin' : isFacilitator ? 'facilitator' : 'member';
+
+    return {
+      authenticated: true as const,
+      role,
+      isFacilitator: isFacilitator || isOrgAdmin,
+      isOrgAdmin,
+    };
+  },
+
   updateProfile(input: Partial<MockProfile>) {
     requireSession();
     state.profile = {
       ...state.profile,
       ...input,
       isFacilitator: state.session?.isFacilitator ?? false,
+      isOrgAdmin: state.profile.isOrgAdmin,
     };
     persist();
     return mockStore.getProfile();
+  },
+
+  getPublicCommunity() {
+    return {
+      slug: 'demo-community',
+      name: MOCK_COMMUNITY_NAME,
+      settings: mergeCommunityPublicSettings(state.publicSettings),
+    };
+  },
+
+  getCommunityBranding() {
+    requireOrgAdmin();
+    return mockStore.getPublicCommunity();
+  },
+
+  updateCommunityBranding(input: CommunityBrandingInput) {
+    requireOrgAdmin();
+    const current = mergeCommunityPublicSettings(state.publicSettings);
+    state.publicSettings = mergeCommunityPublicSettings({
+      hero: { ...current.hero, ...input.hero },
+      introParagraph: input.introParagraph ?? current.introParagraph,
+      blocks: input.blocks ?? current.blocks,
+      theme: {
+        preset: input.theme?.preset ?? current.theme?.preset ?? 'ember',
+        primaryOverride: input.theme?.primaryOverride ?? current.theme?.primaryOverride,
+      },
+    });
+    persist();
+    return mockStore.getPublicCommunity();
+  },
+
+  listMembers() {
+    requireOrgAdmin();
+    return state.members.map((member) => ({ ...member }));
+  },
+
+  inviteMember(email: string, displayName?: string | null) {
+    requireOrgAdmin();
+    const normalized = email.trim().toLowerCase();
+    const existing = state.members.find((member) => member.email === normalized);
+    if (existing) {
+      existing.invitedAt = new Date().toISOString();
+      if (displayName?.trim()) existing.displayName = displayName.trim();
+    } else {
+      state.members.unshift({
+        userId: `m-${normalized.replace(/[^a-z0-9]/g, '-')}`,
+        email: normalized,
+        role: 'member',
+        invitedAt: new Date().toISOString(),
+        profileComplete: false,
+        displayName: displayName?.trim() || null,
+      });
+    }
+    persist();
+  },
+
+  importMembers(rows: Array<{ email: string; displayName?: string }>) {
+    requireOrgAdmin();
+    let created = 0;
+    const errors: Array<{ line: number; email: string; message: string }> = [];
+
+    rows.forEach((row, index) => {
+      const email = row.email.trim().toLowerCase();
+      if (!email.includes('@')) {
+        errors.push({ line: index + 1, email: row.email, message: 'Email inválido' });
+        return;
+      }
+      mockStore.inviteMember(email, row.displayName);
+      created += 1;
+    });
+
+    return { created, errors };
   },
 
   getRound() {

@@ -1,0 +1,45 @@
+name: ember-prod
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    expose:
+      - "2001"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      EMBER_APP_URL: ${EMBER_APP_URL:-http://localhost:8080}
+      EMBER_API_PORT: "2001"
+      EMBER_DB_PATH: /data/ember.db
+      EMBER_EMAIL_PROVIDER: ${EMBER_EMAIL_PROVIDER:-noop}
+      EMBER_EMAIL_FROM: ${EMBER_EMAIL_FROM:-Ember <dev@localhost>}
+      EMBER_EMAIL_PEPPER: ${EMBER_EMAIL_PEPPER:-change-me-production}
+      EMBER_DEFAULT_COMMUNITY_SLUG: ${EMBER_DEFAULT_COMMUNITY_SLUG:-gsa-pilot}
+      EMBER_BOOTSTRAP_FACILITATOR_EMAIL: ${EMBER_BOOTSTRAP_FACILITATOR_EMAIL:?Defina EMBER_BOOTSTRAP_FACILITATOR_EMAIL no .env}
+      EMBER_JITSI_BASE_URL: ${EMBER_JITSI_BASE_URL:-https://meet.jit.si}
+      EMBER_SMTP_HOST: ${EMBER_SMTP_HOST:-}
+      EMBER_SMTP_PORT: ${EMBER_SMTP_PORT:-587}
+      EMBER_SMTP_SECURE: ${EMBER_SMTP_SECURE:-true}
+      EMBER_SMTP_USER: ${EMBER_SMTP_USER:-}
+      EMBER_SMTP_PASS: ${EMBER_SMTP_PASS:-}
+    volumes:
+      - ember_data:/data
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    ports:
+      - "${EMBER_WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ember_data:

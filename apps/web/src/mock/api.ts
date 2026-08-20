@@ -55,9 +55,68 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
       return {} as T;
     }
 
+    if (pathname === '/auth/session' && method === 'GET') {
+      return mockStore.getSession() as T;
+    }
+
     if (pathname === '/me/profile' && method === 'GET') {
       if (!mockStore.isAuthed()) unauthorized();
       return mockStore.getProfile() as T;
+    }
+
+    if (pathname === '/public/community' && method === 'GET') {
+      return mockStore.getPublicCommunity() as T;
+    }
+
+    if (pathname === '/admin/community/branding' && method === 'GET') {
+      try {
+        return mockStore.getCommunityBranding() as T;
+      } catch {
+        forbidden();
+      }
+    }
+
+    if (pathname === '/admin/community/branding' && method === 'PUT') {
+      try {
+        return mockStore.updateCommunityBranding((body ?? {}) as never) as T;
+      } catch {
+        forbidden();
+      }
+    }
+
+    if (pathname === '/admin/members' && method === 'GET') {
+      try {
+        return { items: mockStore.listMembers() } as T;
+      } catch {
+        forbidden();
+      }
+    }
+
+    if (pathname === '/admin/invites' && method === 'POST') {
+      try {
+        mockStore.inviteMember(String(body?.email ?? ''), body?.displayName ? String(body.displayName) : undefined);
+        return { ok: true } as T;
+      } catch {
+        forbidden();
+      }
+    }
+
+    if (pathname === '/admin/invites/import' && method === 'POST') {
+      try {
+        const csv = typeof init?.body === 'string' ? init.body : '';
+        const rows = csv
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .filter((line, index) => !(index === 0 && /email/i.test(line)))
+          .map((line) => {
+            const [email, displayName] = line.split(',').map((part) => part.trim());
+            return { email: email ?? '', displayName: displayName || undefined };
+          });
+        return mockStore.importMembers(rows) as T;
+      } catch {
+        forbidden();
+      }
     }
 
     if (pathname === '/me/profile' && method === 'PUT') {

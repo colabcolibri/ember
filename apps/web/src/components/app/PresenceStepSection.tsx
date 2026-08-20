@@ -30,7 +30,7 @@ export function PresenceStepSection({
           {hint ? <p className="text-sm leading-relaxed text-muted-foreground">{hint}</p> : null}
         </div>
       </header>
-      <div className="pl-0 sm:pl-[3.25rem]">{children}</div>
+      <div className="pl-0 sm:pl-13">{children}</div>
     </section>
   );
 }

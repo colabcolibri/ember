@@ -10,9 +10,12 @@
     "build:mock": "tsc -p tsconfig.json && vite build --mode mock.production",
     "preview": "vite preview",
     "preview:mock": "VITE_MOCK=true vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
+    "@ember/domain": "workspace:*",
     "@radix-ui/react-alert-dialog": "^1.1.23",
     "@radix-ui/react-checkbox": "^1.3.11",
     "@radix-ui/react-dialog": "^1.1.23",
@@ -41,6 +44,7 @@
   },
   "devDependencies": {
     "@ember/config": "workspace:*",
+    "@playwright/test": "^1.55.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^22.20.1",

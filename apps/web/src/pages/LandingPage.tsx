@@ -116,9 +116,9 @@ function NotSection() {
       <ul className="mx-auto mt-10 grid max-w-4xl gap-4 sm:mt-12 sm:grid-cols-3 sm:gap-5">
         {NOT_KEYS.map((key) => (
           <li key={key}>
-            <div className="landing-not-reject relative flex min-h-[5.5rem] items-center justify-center rounded-[1.15rem] border border-outline-variant/45 bg-paper px-5 py-6 sm:min-h-[6rem] sm:px-6">
+            <div className="landing-not-reject relative flex min-h-22 items-center justify-center rounded-[1.15rem] border border-outline-variant/45 bg-paper px-5 py-6 sm:min-h-24 sm:px-6">
               <svg
-                className="pointer-events-none absolute inset-0 z-[1] size-full text-primary/55"
+                className="pointer-events-none absolute inset-0 z-1 size-full text-primary/55"
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
                 aria-hidden="true"
@@ -162,7 +162,7 @@ function HostingSection() {
           >
             {key === 'managed' ? (
               <div
-                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/35 to-transparent"
                 aria-hidden="true"
               />
             ) : null}
@@ -367,10 +367,10 @@ export function LandingPage() {
             <AppBrand
               markOnly={false}
               size="lg"
-              className="mb-8 h-[4.5rem] w-auto max-w-[13rem] sm:mb-10 sm:h-[6.25rem] sm:max-w-[17rem]"
+              className="mb-8 h-18 w-auto max-w-52 sm:mb-10 sm:h-25 sm:max-w-68"
             />
 
-            <h1 className="flex max-w-5xl flex-col font-serif text-[clamp(2rem,5.8vw,3.875rem)] leading-[1.08] font-bold tracking-[-0.025em] text-foreground lowercase">
+            <h1 className="flex max-w-5xl flex-col font-serif text-[clamp(2rem,5.8vw,3.875rem)] leading-[1.08] font-bold tracking-tight text-foreground lowercase">
               <span>{t('landing.headlineLine1')}</span>
               <span className="text-primary">{t('landing.headlineLine2')}</span>
             </h1>
@@ -379,7 +379,7 @@ export function LandingPage() {
               {t('landing.lead')}
             </p>
 
-            <DemoCta className="mt-10 w-full sm:w-auto sm:min-w-[12rem]" />
+            <DemoCta className="mt-10 w-full sm:w-auto sm:min-w-48" />
 
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
               {t('landing.demoHint')}
@@ -398,14 +398,14 @@ export function LandingPage() {
       <HostingSection />
 
       <LandingSection className="border-t-0">
-        <div className="landing-cta-panel mx-auto flex max-w-3xl flex-col items-center rounded-[2rem] border border-primary/15 px-6 py-12 text-center sm:px-10 sm:py-14">
+        <div className="landing-cta-panel mx-auto flex max-w-3xl flex-col items-center rounded-4xl border border-primary/15 px-6 py-12 text-center sm:px-10 sm:py-14">
           <h2 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
             {t('landing.finalTitle')}
           </h2>
           <p className="mt-3 max-w-lg text-base leading-relaxed text-muted-foreground">
             {t('landing.finalLead')}
           </p>
-          <DemoCta className="mt-8 w-full sm:w-auto sm:min-w-[12rem]" />
+          <DemoCta className="mt-8 w-full sm:w-auto sm:min-w-48" />
         </div>
       </LandingSection>
 

@@ -17,6 +17,7 @@ export default defineConfig({
   },
   server: {
     port: web,
+    host: true,
     proxy: {
       '/api': {
         target: resolveApiOrigin(),
@@ -25,6 +26,7 @@ export default defineConfig({
     },
   },
   test: {
+    dir: 'src',
     environment: 'jsdom',
   },
 });

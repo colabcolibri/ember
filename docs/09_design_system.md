@@ -2,7 +2,7 @@
 title: Design System
 status: review
 version: 2.0
-updated: 2026-08-19
+updated: 2026-08-20
 depends_on: [01_tech_stack.md, 04_principles.md, 05_architecture.md]
 blocks: []
 ---
@@ -178,7 +178,7 @@ Substitui o layout atual em `App.tsx`.
 
 ## Elevation and depth
 
-- Cards: `border` 1px `--line`, `rounded-2xl` (28px no mockup → `rounded-[28px]` ou token `--radius-card`)
+- Cards: `border` 1px `--line`, `rounded-(--radius-card)` (token `--radius-card: 28px` em `globals.css`)
 - Sombras: mínimas — `shadow-sm` só na nav pill e dialogs
 - Fundo: `--bg` sólido; sem gradientes chamativos
 
@@ -189,9 +189,46 @@ Substitui o layout atual em `App.tsx`.
 | Element | Radius |
 | ------- | ------ |
 | Nav pill, chips, lang buttons | `rounded-full` |
-| Cards, fieldsets | `rounded-2xl` (`--radius-card: 28px`) |
+| Cards, fieldsets | `rounded-(--radius-card)` (`--radius-card: 28px`) |
 | Inputs, buttons | `rounded-lg` (12px) |
-| Dialog | `rounded-2xl` |
+| Dialog | `rounded-(--radius-card)` |
+
+---
+
+## Tailwind CSS 4 — convenções de classe
+
+O app usa **Tailwind CSS 4.x** (`@tailwindcss/vite`). O IntelliSense sugere classes **canônicas** (`suggestCanonicalClasses`); preferir sempre a forma curta quando existir equivalente.
+
+### Regras gerais
+
+| Situação | Evitar | Preferir |
+| -------- | ------ | -------- |
+| CSS variable como valor | `rounded-[var(--radius-card)]` | `rounded-(--radius-card)` |
+| Tamanho com token da escala | `max-w-[14rem]`, `min-h-[5.5rem]`, `h-[4.5rem]` | `max-w-56`, `min-h-22`, `h-18` |
+| Gradiente (v4) | `bg-gradient-to-r` | `bg-linear-to-r` |
+| Z-index baixo | `z-[1]` | `z-1` |
+| Tracking padrão | `tracking-[-0.025em]` | `tracking-tight` |
+| Seletor descendente (cmdk/shadcn) | `[&_[cmdk-group-heading]]:px-2` | `**:[[cmdk-group-heading]]:px-2` |
+
+### Tokens de produto
+
+Variáveis definidas em `apps/web/src/styles/globals.css` — usar parênteses, não `var()` dentro de colchetes:
+
+```tsx
+// correto
+className="rounded-(--radius-card) border-outline-variant/30"
+
+// evitar (legado v3 / arbitrário redundante)
+className="rounded-[var(--radius-card)]"
+```
+
+### Quando manter valor arbitrário
+
+Valores **fora da escala** Tailwind (ex.: `rounded-[1.15rem]`, `text-[clamp(...)]`) permanecem em `[...]` — só migrar quando o IntelliSense indicar equivalente exato na escala (ex.: `rounded-[2rem]` → `rounded-4xl`).
+
+### Onde não documentar
+
+Erros de tipo `vite/client` no IDE → `docs/08_environments.md` (setup `pnpm install` + `src/vite-env.d.ts`), não neste doc.
 
 ---
 

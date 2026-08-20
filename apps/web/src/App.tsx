@@ -4,7 +4,9 @@ import { AppLoading } from './components/app/index.js';
 import { AppLayout } from './layouts/AppLayout.js';
 import { LandingLayout } from './layouts/LandingLayout.js';
 import { LoginPage } from './pages/LoginPage.js';
-import { LandingPage } from './pages/LandingPage.js';
+import { CommunityHomePage } from './pages/CommunityHomePage.js';
+import { AdminCommunityPage } from './pages/AdminCommunityPage.js';
+import { AdminMembersPage } from './pages/AdminMembersPage.js';
 import { PresencePage } from './pages/PresencePage.js';
 import { CirclesPage } from './pages/CirclesPage.js';
 import { CircleDetailPage } from './pages/CircleDetailPage.js';
@@ -17,6 +19,7 @@ import { DesignTokensPage } from './pages/design/DesignTokensPage.js';
 import { DesignComponentsPage } from './pages/design/DesignComponentsPage.js';
 import { DesignPatternsPage } from './pages/design/DesignPatternsPage.js';
 import { useSession } from './lib/useSession.js';
+import { isAppOnlyMode } from './lib/app-mode.js';
 
 function PublicRoot({ authed }: { authed: boolean | null }) {
   if (authed === null) {
@@ -27,7 +30,27 @@ function PublicRoot({ authed }: { authed: boolean | null }) {
     return <Navigate to="/presence" replace />;
   }
 
-  return <LandingPage />;
+  return <CommunityHomePage />;
+}
+
+function OrgAdminRoute({
+  authed,
+  isOrgAdmin,
+  children,
+}: {
+  authed: boolean | null;
+  isOrgAdmin: boolean;
+  children: ReactNode;
+}) {
+  if (authed === null) {
+    return <AppLoading />;
+  }
+
+  if (!isOrgAdmin) {
+    return <Navigate to="/presence" replace />;
+  }
+
+  return children;
 }
 
 function FacilitatorRoute({
@@ -51,24 +74,36 @@ function FacilitatorRoute({
 }
 
 export function App() {
-  const { authed, isFacilitator, onAuthenticated, onLoggedOut } = useSession();
+  const { authed, isFacilitator, isOrgAdmin, onAuthenticated, onLoggedOut } = useSession();
 
   const layoutProps = {
     authed,
     isFacilitator,
+    isOrgAdmin,
     onLoggedOut,
     onAuthenticated,
   };
 
   return (
     <Routes>
-      <Route element={<LandingLayout />}>
-        <Route path="/" element={<PublicRoot authed={authed} />} />
-      </Route>
+      {isAppOnlyMode ? (
+        <>
+          <Route element={<AppLayout {...layoutProps} mode="auth" auth="guest" />}>
+            <Route path="/" element={<LoginPage />} />
+          </Route>
+          <Route path="/login" element={<Navigate to="/" replace />} />
+        </>
+      ) : (
+        <>
+          <Route element={<LandingLayout />}>
+            <Route path="/" element={<PublicRoot authed={authed} />} />
+          </Route>
 
-      <Route element={<AppLayout {...layoutProps} mode="auth" auth="guest" />}>
-        <Route path="/login" element={<LoginPage />} />
-      </Route>
+          <Route element={<AppLayout {...layoutProps} mode="auth" auth="guest" />}>
+            <Route path="/login" element={<LoginPage />} />
+          </Route>
+        </>
+      )}
 
       <Route element={<AppLayout {...layoutProps} mode="member" auth />}>
         <Route path="/presence" element={<PresencePage />} />
@@ -93,6 +128,22 @@ export function App() {
             <FacilitatorRoute authed={authed} isFacilitator={isFacilitator}>
               <FacilitatorGatheringDetailPage />
             </FacilitatorRoute>
+          }
+        />
+        <Route
+          path="/admin/community"
+          element={
+            <OrgAdminRoute authed={authed} isOrgAdmin={isOrgAdmin}>
+              <AdminCommunityPage />
+            </OrgAdminRoute>
+          }
+        />
+        <Route
+          path="/admin/members"
+          element={
+            <OrgAdminRoute authed={authed} isOrgAdmin={isOrgAdmin}>
+              <AdminMembersPage />
+            </OrgAdminRoute>
           }
         />
       </Route>

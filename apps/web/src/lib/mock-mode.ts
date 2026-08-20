@@ -8,6 +8,10 @@ export const MOCK_DEMO_EMAIL = 'demo@ember.app';
 
 export const MOCK_FACILITATOR_DEMO_EMAIL = 'facilitador@demo.ember';
 
+export const MOCK_ORG_ADMIN_DEMO_EMAIL = 'admin@demo.ember';
+
+export const MOCK_NEW_MEMBER_DEMO_EMAIL = 'novo@demo.ember';
+
 export const MOCK_DEMO_PRESENCE = {
   slots: ['cal-americas:slot-mon-1900', 'cal-americas:slot-wed-1900'],
   intention: 'surprise' as const,
@@ -44,4 +48,12 @@ export function routerBasename(basePath = appBasePath): string | undefined {
 
 export function isFacilitatorDemoEmail(email: string): boolean {
   return /facilitador|facilitator/i.test(email);
+}
+
+export function isOrgAdminDemoEmail(email: string): boolean {
+  return /admin|org-admin|orgadmin/i.test(email);
+}
+
+export function isNewMemberDemoEmail(email: string): boolean {
+  return /novo|new-member|incomplete/i.test(email);
 }

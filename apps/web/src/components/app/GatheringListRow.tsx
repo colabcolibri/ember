@@ -1,10 +1,10 @@
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import type { GatheringSummary } from '@/lib/gathering.js';
 import { formatGatheringDate, gatheringTitle } from '@/lib/gathering.js';
+import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { AppBadge } from './AppBadge.js';
 import { GatheringMetaChips } from './GatheringMetaChips.js';
-import { cn } from '@/lib/utils';
 
 type GatheringListRowProps = {
   gathering: GatheringSummary;
@@ -61,7 +61,7 @@ export function GatheringListRow({ gathering, statusLabel, className }: Gatherin
     <Link
       to={`/facilitator/gatherings/${gathering.id}`}
       className={cn(
-        'group relative block overflow-hidden rounded-[var(--radius-card)] border bg-paper p-5 shadow-sm transition-colors sm:p-6',
+        'group relative block overflow-hidden rounded-(--radius-card)er bg-paper p-5 shadow-sm transition-colors sm:p-6',
         isOpen ? 'border-primary/30 hover:border-primary/50' : 'border-outline-variant/30 hover:border-primary/30',
         className,
       )}
