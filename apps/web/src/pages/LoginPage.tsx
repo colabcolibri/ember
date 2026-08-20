@@ -53,7 +53,7 @@ function MockLoginForm({
 
   return (
     <AppPage className="w-full gap-8">
-      <LoginIntro demo />
+      <LoginIntro />
       <AppCard className={loginFormClass}>
         <form className="relative z-10 grid gap-6" onSubmit={verifyCode}>
           <p className="rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
