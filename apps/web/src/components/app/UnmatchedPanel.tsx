@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { AppBadge } from './AppBadge.js';
 import { AppButton } from './AppButton.js';
 import { AppCard } from './AppCard.js';
+import { cn } from '@/lib/utils';
 
 export type UnmatchedReason =
   | 'INCOMPLETE_PROFILE'
@@ -17,18 +18,25 @@ export type UnmatchedMemberRow = {
 
 type UnmatchedPanelProps = {
   items: UnmatchedMemberRow[];
-  roundId: string;
   loading?: boolean;
   onExport?: () => void;
+  variant?: 'card' | 'section';
+  className?: string;
 };
 
-export function UnmatchedPanel({ items, roundId, loading, onExport }: UnmatchedPanelProps) {
+export function UnmatchedPanel({
+  items,
+  loading,
+  onExport,
+  variant = 'card',
+  className,
+}: UnmatchedPanelProps) {
   const { t } = useTranslation();
 
   if (items.length === 0) return null;
 
-  return (
-    <AppCard title={t('facilitator.unmatchedSectionTitle', { count: items.length })} className="lg:col-span-12">
+  const content = (
+    <>
       <p className="mb-4 text-sm text-muted-foreground">{t('facilitator.unmatchedSectionHint')}</p>
       <div className="grid gap-3">
         {items.map((item) => (
@@ -36,10 +44,7 @@ export function UnmatchedPanel({ items, roundId, loading, onExport }: UnmatchedP
             key={item.userId}
             className="flex flex-col gap-2 rounded-xl border border-outline-variant/60 bg-muted/10 px-4 py-3 sm:flex-row sm:items-start sm:justify-between"
           >
-            <div className="min-w-0">
-              <p className="font-medium">{item.memberLabel}</p>
-              <p className="text-xs text-muted-foreground">{item.userId}</p>
-            </div>
+            <p className="min-w-0 font-medium text-foreground">{item.memberLabel}</p>
             <div className="flex flex-wrap gap-2">
               {item.reasons.map((reason) => (
                 <AppBadge key={reason} variant="muted">
@@ -50,7 +55,7 @@ export function UnmatchedPanel({ items, roundId, loading, onExport }: UnmatchedP
           </div>
         ))}
       </div>
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
         <AppButton
           variant="outline"
           className="w-full sm:w-auto"
@@ -60,10 +65,28 @@ export function UnmatchedPanel({ items, roundId, loading, onExport }: UnmatchedP
         >
           {t('facilitator.exportUnmatchedCsv')}
         </AppButton>
-        <p className="self-center text-xs text-muted-foreground">
-          {t('facilitator.unmatchedExportHint', { roundId })}
-        </p>
+        <p className="text-xs text-muted-foreground">{t('facilitator.unmatchedExportHint')}</p>
       </div>
+    </>
+  );
+
+  if (variant === 'section') {
+    return (
+      <section className={cn('border-t border-outline-variant/20 pt-5', className)}>
+        <h3 className="mb-1 font-serif text-lg text-foreground">
+          {t('facilitator.unmatchedSectionTitle', { count: items.length })}
+        </h3>
+        {content}
+      </section>
+    );
+  }
+
+  return (
+    <AppCard
+      title={t('facilitator.unmatchedSectionTitle', { count: items.length })}
+      className={className}
+    >
+      {content}
     </AppCard>
   );
 }

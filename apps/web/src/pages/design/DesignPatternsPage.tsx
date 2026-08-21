@@ -11,7 +11,7 @@ export function DesignPatternsPage() {
             coluna principal em 100% da largura.
           </p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>Participação — presença e meus encontros.</li>
+            <li>Participação — presença e meus grupos.</li>
             <li>Facilitação — encontros e painel (facilitador/admin).</li>
             <li>Organização — identidade e membros (org admin).</li>
             <li>Conta — perfil e sair no rodapé.</li>
@@ -33,7 +33,7 @@ export function DesignPatternsPage() {
       </AppCard>
 
       <AppCard title="Detail pattern">
-        Convite do encontro com ações primárias empilhadas no mobile.
+        Convite do grupo com ações primárias empilhadas no mobile.
       </AppCard>
     </AppPage>
   );

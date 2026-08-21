@@ -30,7 +30,7 @@ export const MOCK_QUESTIONS = {
       'Who taught you to listen for real?',
     ),
     mockBilingual(
-      'Que ponte você gostaria de construir nesta rodada?',
+      'Que ponte você gostaria de construir neste encontro?',
       'What bridge would you like to build in this round?',
     ),
   ],

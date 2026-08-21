@@ -46,7 +46,7 @@ export function DesignComponentsPage() {
           <AppSidebarNav
             items={[
               { to: '/presence', label: 'Presença' },
-              { to: '/circles', label: 'Meus encontros' },
+              { to: '/circles', label: 'Meus grupos' },
             ]}
           />
         </div>
@@ -55,7 +55,7 @@ export function DesignComponentsPage() {
             collapsed
             items={[
               { to: '/presence', label: 'Presença' },
-              { to: '/circles', label: 'Meus encontros' },
+              { to: '/circles', label: 'Meus grupos' },
             ]}
           />
         </div>
@@ -116,7 +116,7 @@ export function DesignComponentsPage() {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           title="Confirmar publicação"
-          description="Esta ação envia convites para todos os trios."
+          description="Esta ação publica os grupos e envia convites por e-mail."
           body={<p className="text-sm text-muted-foreground">Revise o preview antes de continuar.</p>}
           footer={
             <>
@@ -140,8 +140,8 @@ export function DesignComponentsPage() {
         <AppAlertDialog
           open={alertDialogOpen}
           onOpenChange={setAlertDialogOpen}
-          title="Publicar encontros?"
-          description="Esta ação envia convites para todos os trios."
+          title="Publicar grupos?"
+          description="Esta ação publica os grupos e envia convites por e-mail."
           body="Revise o preview antes de continuar."
           cancelLabel="Cancelar"
           confirmLabel="Publicar"
@@ -153,8 +153,8 @@ export function DesignComponentsPage() {
       <section id="empty" className="space-y-3">
         <h2 className="font-serif text-2xl">Empty state</h2>
         <AppEmptyState
-          title="Nenhum encontro no momento"
-          description="Quando um convite for publicado, seu encontro aparecerá aqui."
+          title="Nenhum grupo no momento"
+          description="Quando um grupo for formado para você, ele aparecerá aqui."
         />
       </section>
 
@@ -184,7 +184,7 @@ export function DesignComponentsPage() {
       </section>
 
       <section id="invite" className="space-y-3">
-        <h2 className="font-serif text-2xl">Circle invite</h2>
+        <h2 className="font-serif text-2xl">Convite do grupo</h2>
         <CircleInviteCard
           communityName="Ember Community / Comunidade Ember"
           question="O que você precisa ouvir hoje?"
@@ -197,8 +197,8 @@ export function DesignComponentsPage() {
       <section id="attendance" className="space-y-3">
         <h2 className="font-serif text-2xl">Attendance</h2>
         <AttendancePrompt
-          title="O encontro aconteceu?"
-          subtitle="Ajude a rede a lembrar quem se encontrou."
+          title="O grupo se reuniu?"
+          subtitle="Ajude a rede a lembrar quem conversou."
           yesLabel="Sim"
           noLabel="Não"
           onYes={() => undefined}

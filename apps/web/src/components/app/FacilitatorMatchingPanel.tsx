@@ -1,17 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AppAlertDialog,
   AppButton,
   AppCard,
+} from './index.js';
+import {
   GroupPreview,
+  buildMemberLabelMap,
+  type MatchGroupRow,
+} from './GroupPreview.js';
+import {
   UnmatchedPanel,
   buildUnmatchedRows,
-  type DeclarationRow,
-  type MatchGroupRow,
   type UnmatchedMemberRow,
   type UnmatchedReason,
-} from './index.js';
+} from './UnmatchedPanel.js';
+import type { DeclarationRow } from './DeclarationTable.js';
 import { apiDownload, apiFetch } from '@/lib/api.js';
 import { formatApiError } from '@/lib/api-errors.js';
 import { showError, showSuccess } from '@/lib/app-toast.js';
@@ -54,8 +59,10 @@ export function FacilitatorMatchingPanel({
   const [loading, setLoading] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
 
+  const memberLabels = useMemo(() => buildMemberLabelMap(declarations), [declarations]);
   const canMatch = roundStatus === 'closed';
   const canPublish = canMatch && groups.length > 0;
+  const hasResults = groups.length > 0;
 
   useEffect(() => {
     onMatchStateChange?.({ hasDraft: hasAutoDraft, groupCount: groups.length });
@@ -98,9 +105,19 @@ export function FacilitatorMatchingPanel({
     applyMatchResult(res.draft, declarationItems);
   };
 
-  const ensureDraftLoaded = async () => {
-    if (groups.length > 0 || hasAutoDraft) return;
-    await loadAutoDraft(declarations);
+  const reloadDraft = async () => {
+    setLoading(true);
+    try {
+      const items = declarations.length
+        ? declarations
+        : ((await onReloadDeclarations?.()) as DeclarationRow[] | undefined) ?? declarations;
+      await loadAutoDraft(items);
+      showSuccess(t('facilitator.matchReloaded'));
+    } catch (error) {
+      showError(formatApiError(error, t));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const runAutoMatch = async () => {
@@ -134,27 +151,6 @@ export function FacilitatorMatchingPanel({
       setUnmatchedMembers([]);
       setHasAutoDraft(false);
       showSuccess(t('facilitator.autoMatchUndone'));
-    } catch (error) {
-      showError(formatApiError(error, t));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const runMatch = async () => {
-    setLoading(true);
-    try {
-      const items = declarations.length
-        ? declarations
-        : ((await onReloadDeclarations?.()) as DeclarationRow[] | undefined) ?? declarations;
-      const res = await apiFetch<{
-        groups?: MatchGroupRow[];
-        trios?: MatchGroupRow[];
-        unmatched: number;
-        unmatchedMembers: Array<{ userId: string; reasons: UnmatchedReason[] }>;
-      }>(`/admin/matching-rounds/${roundId}/match`, { method: 'POST', body: '{}' });
-      applyMatchResult(res, items);
-      showSuccess(t('facilitator.matchReady'));
     } catch (error) {
       showError(formatApiError(error, t));
     } finally {
@@ -218,7 +214,7 @@ export function FacilitatorMatchingPanel({
     try {
       await apiDownload(
         `/admin/matching-rounds/${roundId}/unmatched/export.csv?locale=${i18n.language.startsWith('en') ? 'en' : 'pt'}`,
-        `unmatched-${roundId}.csv`,
+        `sem-grupo-${roundId}.csv`,
       );
     } catch (error) {
       showError(formatApiError(error, t));
@@ -232,7 +228,7 @@ export function FacilitatorMatchingPanel({
   }
 
   return (
-    <div className={cn('grid w-full gap-8', className)}>
+    <div className={cn('grid w-full gap-6', className)}>
       {emailFailures.length > 0 ? (
         <AppCard title={t('facilitator.emailFailuresTitle')}>
           <p className="text-sm text-muted-foreground">{t('facilitator.emailFailuresHint')}</p>
@@ -249,64 +245,74 @@ export function FacilitatorMatchingPanel({
         </AppCard>
       ) : null}
 
-      <div className="grid w-full gap-8 lg:grid-cols-12">
-        <AppCard
-          title={t('facilitator.matchingTitle')}
-          className={cn(groups.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12')}
-        >
-          <p className="mb-4 text-sm text-muted-foreground">{t('facilitator.matchingHint')}</p>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+      <AppCard title={t('facilitator.matchingTitle')}>
+        <p className="text-sm leading-relaxed text-muted-foreground">{t('facilitator.matchingHint')}</p>
+
+        {!hasResults ? (
+          <div className="mt-5 space-y-4">
+            <p className="text-sm font-medium text-foreground">{t('facilitator.matchingStepDraw')}</p>
             <AppButton onClick={runAutoMatch} loading={loading} disabled={declarations.length < 2}>
               {t('facilitator.autoMatch')}
             </AppButton>
-            <AppButton variant="outline" onClick={runMatch} loading={loading} disabled={declarations.length < 2}>
-              {t('facilitator.runMatch')}
-            </AppButton>
-            {hasAutoDraft ? (
-              <AppButton variant="ghost" onClick={undoAutoMatch} loading={loading}>
-                {t('facilitator.undoAutoMatch')}
-              </AppButton>
+            {declarations.length < 2 ? (
+              <p className="text-sm text-muted-foreground">{t('facilitator.matchingNeedMoreDeclarations')}</p>
             ) : null}
-            <AppButton
-              variant="outline"
-              onClick={() => void ensureDraftLoaded()}
-              loading={loading}
-              className="sm:ml-auto"
-            >
-              {t('facilitator.refreshMatch')}
-            </AppButton>
           </div>
-        </AppCard>
+        ) : (
+          <div className="mt-5 space-y-6">
+            <div className="flex flex-col gap-3 border-t border-outline-variant/20 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-medium text-foreground">{t('facilitator.matchingStepReview')}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t('facilitator.matchingSummary', {
+                    groups: groups.length,
+                    unmatched,
+                  })}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <AppButton variant="outline" onClick={runAutoMatch} loading={loading}>
+                  {t('facilitator.rerunMatch')}
+                </AppButton>
+                {hasAutoDraft ? (
+                  <AppButton variant="ghost" onClick={undoAutoMatch} loading={loading}>
+                    {t('facilitator.undoAutoMatch')}
+                  </AppButton>
+                ) : null}
+                <AppButton variant="ghost" onClick={() => void reloadDraft()} loading={loading}>
+                  {t('facilitator.refreshMatch')}
+                </AppButton>
+              </div>
+            </div>
 
-        {groups.length > 0 ? (
-          <AppCard title={t('facilitator.preview')} className="lg:col-span-5">
             <GroupPreview
               groups={groups}
               unmatched={unmatched}
               unmatchedLabel={t('facilitator.unmatched', { count: unmatched })}
               slotLabels={slotLabels}
+              memberLabels={memberLabels}
             />
-            {canPublish ? (
-              <AppButton
-                className="mt-4 w-full sm:w-auto"
-                onClick={() => setPublishOpen(true)}
-                loading={loading}
-              >
-                {t('facilitator.publish')}
-              </AppButton>
-            ) : null}
-          </AppCard>
-        ) : null}
 
-        {unmatchedMembers.length > 0 ? (
-          <UnmatchedPanel
-            items={unmatchedMembers}
-            roundId={roundId}
-            loading={loading}
-            onExport={exportUnmatchedCsv}
-          />
-        ) : null}
-      </div>
+            {unmatchedMembers.length > 0 ? (
+              <UnmatchedPanel
+                variant="section"
+                items={unmatchedMembers}
+                loading={loading}
+                onExport={exportUnmatchedCsv}
+              />
+            ) : null}
+
+            <div className="border-t border-outline-variant/20 pt-5">
+              <p className="mb-3 text-sm font-medium text-foreground">{t('facilitator.matchingStepPublish')}</p>
+              {canPublish ? (
+                <AppButton className="w-full sm:w-auto" onClick={() => setPublishOpen(true)} loading={loading}>
+                  {t('facilitator.publish')}
+                </AppButton>
+              ) : null}
+            </div>
+          </div>
+        )}
+      </AppCard>
 
       <AppAlertDialog
         open={publishOpen}
@@ -314,7 +320,10 @@ export function FacilitatorMatchingPanel({
         title={t('facilitator.publish')}
         description={t('facilitator.publishConfirm')}
         variant="destructive"
-        body={t('facilitator.unmatched', { count: unmatched })}
+        body={t('facilitator.publishConfirmBody', {
+          groups: groups.length,
+          unmatched,
+        })}
         cancelLabel={t('facilitator.cancel')}
         confirmLabel={t('facilitator.publish')}
         onConfirm={publish}

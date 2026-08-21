@@ -48,7 +48,7 @@ export { AttendancePrompt } from './AttendancePrompt.js';
 export { ProfileOnboardingBanner } from './ProfileOnboardingBanner.js';
 export { RequireCompleteProfile } from './RequireCompleteProfile.js';
 export { DeclarationTable, type DeclarationRow } from './DeclarationTable.js';
-export { GroupPreview, TrioPreview, type MatchGroupRow, type TrioRow } from './GroupPreview.js';
+export { GroupPreview, TrioPreview, buildMemberLabelMap, type MatchGroupRow, type TrioRow } from './GroupPreview.js';
 export { FacilitatorMatchingPanel } from './FacilitatorMatchingPanel.js';
 export { GatheringEditDialog } from './GatheringEditDialog.js';
 export {

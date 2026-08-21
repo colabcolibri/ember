@@ -228,7 +228,7 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
       try {
         return mockStore.getCircle(circleGet[1]!) as T;
       } catch {
-        notFound('Roda não encontrada');
+        notFound('Grupo não encontrado');
       }
     }
 
