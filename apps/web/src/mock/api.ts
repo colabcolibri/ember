@@ -20,6 +20,17 @@ function forbidden(message = 'Acesso restrito'): never {
   throw new ApiError('client', message, 403);
 }
 
+function requireCompleteProfile(): void {
+  if (!mockStore.isProfileComplete()) {
+    forbidden('Complete seu perfil antes de continuar.');
+  }
+}
+
+function requireAuthedMember(): void {
+  if (!mockStore.isAuthed()) unauthorized();
+  requireCompleteProfile();
+}
+
 function notFound(message: string): never {
   throw new ApiError('client', message, 404);
 }
@@ -159,12 +170,12 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
     }
 
     if (pathname === '/rounds/open' && method === 'GET') {
-      if (!mockStore.isAuthed()) unauthorized();
+      requireAuthedMember();
       return { rounds: mockStore.listOpenRoundsForMember() } as T;
     }
 
     if (pathname === '/rounds/current' && method === 'GET') {
-      if (!mockStore.isAuthed()) unauthorized();
+      requireAuthedMember();
       const round = mockStore.getRound();
       const timezone = params.get('timezone');
       if (timezone) {
@@ -178,7 +189,7 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
 
     const roundDetailGet = pathname.match(/^\/rounds\/([^/]+)$/);
     if (roundDetailGet && method === 'GET') {
-      if (!mockStore.isAuthed()) unauthorized();
+      requireAuthedMember();
       try {
         const timezone = params.get('timezone') ?? undefined;
         return mockStore.getRoundById(roundDetailGet[1]!, timezone) as T;
@@ -189,13 +200,13 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
 
     const presenceGet = pathname.match(/^\/rounds\/([^/]+)\/presence$/);
     if (presenceGet && method === 'GET') {
-      if (!mockStore.isAuthed()) unauthorized();
+      requireAuthedMember();
       return mockStore.getDeclaration(presenceGet[1]!) as T;
     }
 
     const presencePost = pathname.match(/^\/rounds\/([^/]+)\/presence$/);
     if (presencePost && method === 'POST') {
-      if (!mockStore.isAuthed()) unauthorized();
+      requireAuthedMember();
       if (body?.response === 'declined') {
         return mockStore.saveDeclaration(presencePost[1]!, { response: 'declined' }) as T;
       }
@@ -207,13 +218,13 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
     }
 
     if (pathname === '/circles' && method === 'GET') {
-      if (!mockStore.isAuthed()) unauthorized();
+      requireAuthedMember();
       return { circles: mockStore.listCircles() } as T;
     }
 
     const circleGet = pathname.match(/^\/circles\/([^/]+)$/);
     if (circleGet && method === 'GET') {
-      if (!mockStore.isAuthed()) unauthorized();
+      requireAuthedMember();
       try {
         return mockStore.getCircle(circleGet[1]!) as T;
       } catch {
@@ -223,14 +234,14 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
 
     const circleConfirm = pathname.match(/^\/circles\/([^/]+)\/confirm$/);
     if (circleConfirm && method === 'POST') {
-      if (!mockStore.isAuthed()) unauthorized();
+      requireAuthedMember();
       mockStore.confirmCircle(circleConfirm[1]!);
       return {} as T;
     }
 
     const circleAttendance = pathname.match(/^\/circles\/([^/]+)\/attendance$/);
     if (circleAttendance && method === 'POST') {
-      if (!mockStore.isAuthed()) unauthorized();
+      requireAuthedMember();
       mockStore.recordAttendance(circleAttendance[1]!, Boolean(body?.happened));
       return {} as T;
     }
@@ -410,6 +421,9 @@ export async function mockApiFetch<T>(path: string, init?: RequestInit): Promise
     if (error instanceof ApiError) throw error;
     if (error instanceof Error && error.message === 'unauthorized') unauthorized();
     if (error instanceof Error && error.message === 'forbidden') forbidden();
+    if (error instanceof Error && error.message === 'profile_incomplete') {
+      forbidden('Complete seu perfil antes de continuar.');
+    }
     throw error;
   }
 }

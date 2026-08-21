@@ -52,7 +52,7 @@ export function GatheringAboutSection({
   const listedQuestions = theme ? questions : questions.slice(1);
 
   return (
-    <article className="relative overflow-hidden rounded-[28px] border border-outline-variant/25 bg-paper shadow-sm">
+    <article className="relative overflow-hidden rounded-card border border-outline-variant/25 bg-paper shadow-sm">
       <div
         className="pointer-events-none absolute -top-10 -right-10 size-36 rounded-full border border-primary/10"
         aria-hidden="true"

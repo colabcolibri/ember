@@ -14,6 +14,7 @@ import {
 } from '@ember/db';
 import { createAdminRoutes } from './index.js';
 import { SESSION_COOKIE } from '../../lib/session.js';
+import { seedCompleteMemberProfile } from '../../test/complete-profile.js';
 
 const SLOTS = ['mon-19h', 'tue-19h', 'wed-19h', 'thu-19h', 'sat-10h'] as const;
 
@@ -48,6 +49,7 @@ describe('matching automation routes', () => {
     const pepper = 'test-pepper';
     const facilitatorId = upsertUserByEmail(db, 'fac@example.com', pepper);
     ensureCommunityMember(db, communityId, facilitatorId, 'facilitador');
+    seedCompleteMemberProfile(db, communityId, facilitatorId, { displayName: 'Facilitator' });
     facilitatorSession = createSession(db, facilitatorId).sessionId;
   });
 

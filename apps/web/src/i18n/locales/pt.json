@@ -21,6 +21,18 @@
     "logoutConfirmDescription": "Você precisará entrar novamente para acessar seus encontros.",
     "cancel": "Cancelar"
   },
+  "sidebar": {
+    "navigation": "Navegação",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "expand": "Expandir barra lateral",
+    "collapse": "Recolher barra lateral",
+    "groupParticipation": "Participação",
+    "groupFacilitation": "Facilitação",
+    "groupOrganization": "Organização",
+    "groupAccount": "Conta",
+    "groupDesign": "Design system"
+  },
   "login": {
     "title": "Entrar com email",
     "subtitle": "Entre com o email da sua comunidade.",
@@ -467,7 +479,7 @@
     "profileIncomplete": "Incompleto"
   },
   "onboarding": {
-    "bannerTitle": "Complete seu perfil antes de declarar presença:",
+    "bannerTitle": "Complete seu perfil para acessar presença, encontros e demais áreas:",
     "goToProfile": "Ir para o perfil",
     "presenceHint": "Alguns campos do perfil ainda faltam para participar da rodada."
   }

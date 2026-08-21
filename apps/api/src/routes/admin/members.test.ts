@@ -12,6 +12,7 @@ import {
 import { resetEmailSenderCacheForTests, sendTransactionalEmail } from '@ember/email';
 import { createAdminMembersRoutes } from './members.js';
 import { SESSION_COOKIE } from '../../lib/session.js';
+import { seedCompleteMemberProfile } from '../../test/complete-profile.js';
 
 vi.mock('@ember/email', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@ember/email')>();
@@ -41,6 +42,7 @@ describe('admin members routes', () => {
       id: string;
     };
     ensureCommunityMember(db, community.id, adminId, 'org_admin');
+    seedCompleteMemberProfile(db, community.id, adminId, { displayName: 'Org Admin' });
     const session = createSession(db, adminId);
     orgAdminCookie = `${SESSION_COOKIE}=${session.sessionId}`;
 

@@ -3,6 +3,7 @@ import type { GatheringDetail } from '@/lib/gathering.js';
 import { formatGatheringDate, gatheringTitle } from '@/lib/gathering.js';
 import { AppBadge } from './AppBadge.js';
 import { AppButton } from './AppButton.js';
+import { GatheringDateLine } from './GatheringDateLine.js';
 import { GatheringMetaChips } from './GatheringMetaChips.js';
 import { GatheringQuestionsList } from './GatheringQuestionsList.js';
 
@@ -33,13 +34,11 @@ export function GatheringOverviewCard({
   const title = gatheringTitle(gathering, t('facilitator.untitledGathering'));
   const slotLabels = Object.values(gathering.slotLabels);
 
+  const openedOnLabel = t('facilitator.gatheringOpenedOn', {
+    date: formatGatheringDate(gathering.createdAt, i18n.language),
+  });
+
   const metaItems = [
-    {
-      icon: 'calendar_today',
-      label: t('facilitator.gatheringOpenedOn', {
-        date: formatGatheringDate(gathering.createdAt, i18n.language),
-      }),
-    },
     gathering.createdByDisplayName
       ? {
           icon: 'person',
@@ -69,7 +68,7 @@ export function GatheringOverviewCard({
   ].filter(Boolean) as Array<{ icon: string; label: string }>;
 
   return (
-    <article className="relative overflow-hidden rounded-[28px] border border-outline-variant/25 bg-paper shadow-sm">
+    <article className="relative overflow-hidden rounded-card border border-outline-variant/25 bg-paper shadow-sm">
       <div
         className="pointer-events-none absolute -top-10 -right-10 size-36 rounded-full border border-primary/10"
         aria-hidden="true"
@@ -119,7 +118,10 @@ export function GatheringOverviewCard({
           </h2>
         </div>
 
-        <GatheringMetaChips items={metaItems} />
+        <div className="grid gap-3 border-t border-outline-variant/25 pt-4">
+          <GatheringDateLine label={openedOnLabel} />
+          <GatheringMetaChips items={metaItems} />
+        </div>
 
         {gathering.questions.length > 0 ? (
           <GatheringQuestionsList

@@ -2,6 +2,7 @@ import type { Context, Next } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { assertOrgAdmin, findValidSession, type ensureDatabaseReady } from '@ember/db';
 import { resolveCommunityId, SESSION_COOKIE, type AppVariables } from './session.js';
+import { isMemberProfileComplete } from './complete-profile.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -32,6 +33,13 @@ export function createRequireOrgAdmin(db: Db) {
 
     if (!assertOrgAdmin(db, communityId, session.user_id)) {
       return c.json({ error: { code: 'FORBIDDEN', message: 'Acesso restrito ao admin da organização' } }, 403);
+    }
+
+    if (!isMemberProfileComplete(db, communityId, session.user_id)) {
+      return c.json(
+        { error: { code: 'PROFILE_INCOMPLETE', message: 'Complete seu perfil antes de continuar.' } },
+        403,
+      );
     }
 
     c.set('communityId', communityId);

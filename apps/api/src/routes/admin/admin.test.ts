@@ -13,6 +13,7 @@ import {
 } from '@ember/db';
 import { createAdminRoutes } from './index.js';
 import { SESSION_COOKIE } from '../../lib/session.js';
+import { seedCompleteMemberProfile } from '../../test/complete-profile.js';
 
 const SLOTS = ['mon-19h', 'tue-19h', 'wed-19h', 'thu-19h', 'sat-10h'] as const;
 const roundBody = {
@@ -54,6 +55,8 @@ describe('admin routes', () => {
     const memberId = upsertUserByEmail(db, 'mem@example.com', pepper);
     ensureCommunityMember(db, communityId, facilitatorId, 'facilitador');
     ensureCommunityMember(db, communityId, memberId, 'member');
+    seedCompleteMemberProfile(db, communityId, facilitatorId, { displayName: 'Facilitator' });
+    seedCompleteMemberProfile(db, communityId, memberId, { displayName: 'Member' });
     facilitatorSession = createSession(db, facilitatorId).sessionId;
     memberSession = createSession(db, memberId).sessionId;
   });

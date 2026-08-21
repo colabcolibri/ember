@@ -24,7 +24,7 @@ export function AppCard({
   return (
     <Card
       className={cn(
-        'relative overflow-hidden rounded-(--radius-card) border-outline-variant/30 bg-paper shadow-sm',
+        'relative overflow-hidden rounded-card border border-outline-variant/30 bg-paper shadow-sm',
         interactive && 'transition-colors hover:border-primary/30',
         className,
       )}

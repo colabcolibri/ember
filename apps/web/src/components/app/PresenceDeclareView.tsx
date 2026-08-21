@@ -1,4 +1,5 @@
 import {
+  AppBackLink,
   AppButton,
   AppCard,
   AppLoading,
@@ -261,14 +262,7 @@ export function PresenceDeclareView({ roundId, showBackLink = false }: PresenceD
 
   return (
     <div className="grid w-full gap-8 pb-28 sm:pb-8">
-      {showBackLink ? (
-        <AppButton asChild variant="ghost" className="w-fit justify-start px-0">
-          <Link to="/presence">
-            <span className="material-symbols-outlined text-base">arrow_back</span>
-            {t('presence.backToOpenList')}
-          </Link>
-        </AppButton>
-      ) : null}
+      {showBackLink ? <AppBackLink to="/presence">{t('presence.backToOpenList')}</AppBackLink> : null}
 
       {profileIncomplete ? <ProfileOnboardingBanner missing={profileMissing} /> : null}
 

@@ -12,6 +12,7 @@ import {
 import { resetEmailSenderCacheForTests } from '@ember/email';
 import { createAdminBrandingRoutes } from './branding.js';
 import { SESSION_COOKIE } from '../../lib/session.js';
+import { seedCompleteMemberProfile } from '../../test/complete-profile.js';
 
 describe('admin branding routes', () => {
   let dbPath: string;
@@ -33,6 +34,7 @@ describe('admin branding routes', () => {
       id: string;
     };
     ensureCommunityMember(db, community.id, adminId, 'org_admin');
+    seedCompleteMemberProfile(db, community.id, adminId, { displayName: 'Org Admin' });
     const session = createSession(db, adminId);
     orgAdminCookie = `${SESSION_COOKIE}=${session.sessionId}`;
 

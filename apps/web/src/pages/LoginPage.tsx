@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../layouts/AppLayout.js';
+import { memberHomePath } from '../lib/member-home.js';
 import {
   AppButton,
   AppCard,
@@ -44,8 +45,8 @@ function MockLoginForm({
         method: 'POST',
         body: JSON.stringify({ email, code }),
       });
-      onAuthenticated();
-      navigate('/presence', { replace: true });
+      const complete = await onAuthenticated();
+      navigate(memberHomePath(complete), { replace: true });
     } catch {
       showError(t('login.codeError'));
     } finally {
@@ -177,8 +178,8 @@ export function LoginPage() {
         method: 'POST',
         body: JSON.stringify({ email, code }),
       });
-      onAuthenticated();
-      navigate('/presence', { replace: true });
+      const complete = await onAuthenticated();
+      navigate(memberHomePath(complete), { replace: true });
     } catch {
       showError(t('login.codeError'));
     } finally {

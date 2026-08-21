@@ -1,5 +1,7 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useOutletContext } from 'react-router-dom';
+import type { AppOutletContext } from '../layouts/AppLayout.js';
 import { profileCompleteness, type ProfileCompletenessInput } from '@ember/domain/profile/completeness';
 import type { PlaceRef } from '../lib/place.js';
 import {
@@ -18,6 +20,7 @@ import { apiFetch } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
 import { showError, showSuccess } from '../lib/app-toast.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
+import { memberHomePath } from '../lib/member-home.js';
 
 type Profile = {
   displayName: string;
@@ -32,6 +35,8 @@ const LANGUAGE_OPTIONS = ['pt', 'en'] as const;
 
 export function ProfilePage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { refreshProfile } = useOutletContext<AppOutletContext>();
   const [displayName, setDisplayName] = useState('');
   const [editionYear, setEditionYear] = useState('');
   const [timezone, setTimezone] = useState('America/Sao_Paulo');
@@ -93,7 +98,11 @@ export function ProfilePage() {
           residencePlace,
         }),
       });
+      const complete = await refreshProfile();
       showSuccess(t('profile.saved'));
+      if (complete) {
+        navigate(memberHomePath(true), { replace: true });
+      }
     } catch (err) {
       showError(formatApiError(err, t));
     } finally {

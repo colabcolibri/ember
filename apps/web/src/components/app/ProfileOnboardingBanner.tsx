@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ProfileCompletenessField } from '@ember/domain/profile/completeness';
 import { profileMissingFieldLabel } from '@ember/domain/profile/completeness';
@@ -10,7 +10,9 @@ type ProfileOnboardingBannerProps = {
 
 export function ProfileOnboardingBanner({ missing }: ProfileOnboardingBannerProps) {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
   const locale = i18n.language.startsWith('en') ? 'en' : 'pt';
+  const onProfilePage = location.pathname === '/profile';
 
   if (missing.length === 0) return null;
 
@@ -22,9 +24,14 @@ export function ProfileOnboardingBanner({ missing }: ProfileOnboardingBannerProp
           <li key={field}>{profileMissingFieldLabel(field, locale)}</li>
         ))}
       </ul>
-      <Link to="/profile" className="mt-3 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline">
-        {t('onboarding.goToProfile')}
-      </Link>
+      {onProfilePage ? null : (
+        <Link
+          to="/profile"
+          className="mt-3 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          {t('onboarding.goToProfile')}
+        </Link>
+      )}
     </AppAlert>
   );
 }

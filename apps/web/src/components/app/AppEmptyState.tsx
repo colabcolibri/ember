@@ -12,7 +12,7 @@ export function AppEmptyState({ title, description, action, className }: AppEmpt
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-(--radius-card)rder-dashed border-border/80 bg-card/60 px-6 py-10 text-center',
+        'relative overflow-hidden rounded-card border border-dashed border-border/80 bg-card/60 px-6 py-10 text-center',
         className,
       )}
     >

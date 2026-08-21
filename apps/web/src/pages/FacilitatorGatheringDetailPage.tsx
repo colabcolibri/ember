@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import {
   AppAlertDialog,
+  AppBackLink,
   AppButton,
   AppCard,
   AppLoading,
@@ -154,9 +155,7 @@ export function FacilitatorGatheringDetailPage() {
   if (!gathering) {
     return (
       <AppPage title={t('facilitator.gatheringDetailTitle')}>
-        <AppButton asChild variant="outline">
-          <Link to="/facilitator/gatherings">{t('facilitator.backToGatherings')}</Link>
-        </AppButton>
+        <AppBackLink to="/facilitator/gatherings">{t('facilitator.backToGatherings')}</AppBackLink>
       </AppPage>
     );
   }
@@ -178,9 +177,7 @@ export function FacilitatorGatheringDetailPage() {
       }
     >
       <div className="grid min-w-0 gap-6">
-      <AppButton asChild variant="outline" className="w-fit">
-        <Link to="/facilitator/gatherings">{t('facilitator.backToGatherings')}</Link>
-      </AppButton>
+      <AppBackLink to="/facilitator/gatherings">{t('facilitator.backToGatherings')}</AppBackLink>
 
       <GatheringOverviewCard
         gathering={gathering}

@@ -15,6 +15,7 @@ import {
 } from '@ember/db';
 import { isStoredRoundSlot, parseRoundSlotsJson, presenceInputSchema, ROUND_SLOTS } from '@ember/domain';
 import { createRequireAuth, resolveCommunityId, type AppVariables } from '../lib/session.js';
+import { createRequireCompleteProfile } from '../lib/complete-profile.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -80,8 +81,11 @@ function buildRoundPresencePayload(
 export function createRoundRoutes(db: Db) {
   const rounds = new Hono<{ Variables: AppVariables }>();
   const requireAuth = createRequireAuth(db);
+  const requireCompleteProfile = createRequireCompleteProfile(db);
 
-  rounds.get('/open', requireAuth, (c) => {
+  rounds.use('*', requireAuth, requireCompleteProfile);
+
+  rounds.get('/open', (c) => {
     const communityId = resolveCommunityId(c, db);
     const userId = c.get('userId');
     if (!communityId) {
@@ -114,7 +118,7 @@ export function createRoundRoutes(db: Db) {
     return c.json({ rounds: roundsPayload });
   });
 
-  rounds.get('/current', requireAuth, (c) => {
+  rounds.get('/current', (c) => {
     const communityId = resolveCommunityId(c, db);
     if (!communityId) {
       return c.json({ error: { code: 'COMMUNITY_NOT_FOUND', message: 'Comunidade não encontrada' } }, 404);
@@ -133,7 +137,7 @@ export function createRoundRoutes(db: Db) {
     return c.json(buildRoundPresencePayload(db, communityId, round, memberTimezone));
   });
 
-  rounds.get('/:id', requireAuth, (c) => {
+  rounds.get('/:id', (c) => {
     const communityId = resolveCommunityId(c, db);
     const roundId = c.req.param('id');
     if (!communityId || !roundId) {
@@ -155,7 +159,7 @@ export function createRoundRoutes(db: Db) {
     return c.json(buildRoundPresencePayload(db, communityId, round, memberTimezone));
   });
 
-  rounds.post('/:id/presence', requireAuth, async (c) => {
+  rounds.post('/:id/presence', async (c) => {
     const userId = c.get('userId');
     const roundId = c.req.param('id');
     if (!roundId) {
@@ -192,7 +196,7 @@ export function createRoundRoutes(db: Db) {
     });
   });
 
-  rounds.get('/:id/presence', requireAuth, (c) => {
+  rounds.get('/:id/presence', (c) => {
     const userId = c.get('userId');
     const roundId = c.req.param('id');
     if (!roundId) {

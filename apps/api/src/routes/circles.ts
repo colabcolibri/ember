@@ -13,6 +13,7 @@ import {
 import { attendanceInputSchema } from '@ember/domain';
 import { requireEmailPepper } from '@ember/email';
 import { createRequireAuth, resolveCommunityId, type AppVariables } from '../lib/session.js';
+import { createRequireCompleteProfile } from '../lib/complete-profile.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -27,8 +28,11 @@ function isAttendanceWindowOpen(scheduledAt: string | null, durationMinutes: num
 export function createCircleRoutes(db: Db) {
   const circles = new Hono<{ Variables: AppVariables }>();
   const requireAuth = createRequireAuth(db);
+  const requireCompleteProfile = createRequireCompleteProfile(db);
 
-  circles.get('/', requireAuth, (c) => {
+  circles.use('*', requireAuth, requireCompleteProfile);
+
+  circles.get('/', (c) => {
     const userId = c.get('userId');
     const communityId = resolveCommunityId(c, db);
     if (!communityId) {
@@ -46,7 +50,7 @@ export function createCircleRoutes(db: Db) {
     return c.json({ circles: items });
   });
 
-  circles.get('/:id', requireAuth, (c) => {
+  circles.get('/:id', (c) => {
     const userId = c.get('userId');
     const circleId = c.req.param('id');
     if (!circleId) {
@@ -83,7 +87,7 @@ export function createCircleRoutes(db: Db) {
     });
   });
 
-  circles.get('/:id/calendar.ics', requireAuth, (c) => {
+  circles.get('/:id/calendar.ics', (c) => {
     const userId = c.get('userId');
     const circleId = c.req.param('id');
     if (!circleId) {
@@ -103,7 +107,7 @@ export function createCircleRoutes(db: Db) {
     });
   });
 
-  circles.post('/:id/confirm', requireAuth, (c) => {
+  circles.post('/:id/confirm', (c) => {
     const userId = c.get('userId');
     const circleId = c.req.param('id');
     if (!circleId) {
@@ -117,7 +121,7 @@ export function createCircleRoutes(db: Db) {
     return c.json({ ok: true, status: 'confirmed' });
   });
 
-  circles.post('/:id/decline', requireAuth, (c) => {
+  circles.post('/:id/decline', (c) => {
     const userId = c.get('userId');
     const circleId = c.req.param('id');
     if (!circleId) {
@@ -131,7 +135,7 @@ export function createCircleRoutes(db: Db) {
     return c.json({ ok: true, status: 'declined' });
   });
 
-  circles.post('/:id/attendance', requireAuth, async (c) => {
+  circles.post('/:id/attendance', async (c) => {
     const userId = c.get('userId');
     const circleId = c.req.param('id');
     if (!circleId) {

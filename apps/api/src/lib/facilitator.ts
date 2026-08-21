@@ -2,6 +2,7 @@ import type { Context, Next } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { findValidSession, getMemberRole, type ensureDatabaseReady } from '@ember/db';
 import { resolveCommunityId, SESSION_COOKIE, type AppVariables } from './session.js';
+import { isMemberProfileComplete } from './complete-profile.js';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -38,6 +39,12 @@ export function createRequireFacilitator(db: Db) {
     if (!role || !FACILITATOR_ROLES.has(role)) {
       return c.json(
         { error: { code: 'FORBIDDEN', message: 'Acesso restrito ao facilitador' } },
+        403,
+      );
+    }
+    if (!isMemberProfileComplete(db, communityId, session.user_id)) {
+      return c.json(
+        { error: { code: 'PROFILE_INCOMPLETE', message: 'Complete seu perfil antes de continuar.' } },
         403,
       );
     }

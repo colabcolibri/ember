@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { AppLoading } from './components/app/index.js';
+import { AppLoading, RequireCompleteProfile } from './components/app/index.js';
 import { AppLayout } from './layouts/AppLayout.js';
 import { LandingLayout } from './layouts/LandingLayout.js';
 import { LoginPage } from './pages/LoginPage.js';
@@ -21,14 +21,21 @@ import { DesignComponentsPage } from './pages/design/DesignComponentsPage.js';
 import { DesignPatternsPage } from './pages/design/DesignPatternsPage.js';
 import { useSession } from './lib/useSession.js';
 import { isAppOnlyMode } from './lib/app-mode.js';
+import { memberHomePath } from './lib/member-home.js';
 
-function PublicRoot({ authed }: { authed: boolean | null }) {
-  if (authed === null) {
+function PublicRoot({
+  authed,
+  profileComplete,
+}: {
+  authed: boolean | null;
+  profileComplete: boolean | null;
+}) {
+  if (authed === null || (authed && profileComplete === null)) {
     return <AppLoading />;
   }
 
   if (authed) {
-    return <Navigate to="/presence" replace />;
+    return <Navigate to={memberHomePath(profileComplete)} replace />;
   }
 
   return <CommunityHomePage />;
@@ -77,14 +84,24 @@ function FacilitatorRoute({
 }
 
 export function App() {
-  const { authed, isFacilitator, isOrgAdmin, onAuthenticated, onLoggedOut } = useSession();
+  const {
+    authed,
+    isFacilitator,
+    isOrgAdmin,
+    profileComplete,
+    refreshProfile,
+    onAuthenticated,
+    onLoggedOut,
+  } = useSession();
 
   const layoutProps = {
     authed,
     isFacilitator,
     isOrgAdmin,
+    profileComplete,
     onLoggedOut,
     onAuthenticated,
+    refreshProfile,
   };
 
   return (
@@ -99,7 +116,7 @@ export function App() {
       ) : (
         <>
           <Route element={<LandingLayout />}>
-            <Route path="/" element={<PublicRoot authed={authed} />} />
+            <Route path="/" element={<PublicRoot authed={authed} profileComplete={profileComplete} />} />
           </Route>
 
           <Route element={<AppLayout {...layoutProps} mode="auth" auth="guest" />}>
@@ -109,47 +126,49 @@ export function App() {
       )}
 
       <Route element={<AppLayout {...layoutProps} mode="member" auth />}>
-        <Route path="/presence" element={<PresencePage />} />
-        <Route path="/presence/:roundId" element={<PresenceRoundPage />} />
-        <Route path="/circles" element={<CirclesPage />} />
-        <Route path="/circles/:id" element={<CircleDetailPage />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route
-          path="/facilitator"
-          element={<FacilitatorRoute authed={authed} isFacilitator={isFacilitator} isOrgAdmin={isOrgAdmin} />}
-        />
-        <Route
-          path="/facilitator/gatherings"
-          element={
-            <FacilitatorRoute authed={authed} isFacilitator={isFacilitator} isOrgAdmin={isOrgAdmin}>
-              <FacilitatorGatheringsPage />
-            </FacilitatorRoute>
-          }
-        />
-        <Route
-          path="/facilitator/gatherings/:id"
-          element={
-            <FacilitatorRoute authed={authed} isFacilitator={isFacilitator} isOrgAdmin={isOrgAdmin}>
-              <FacilitatorGatheringDetailPage />
-            </FacilitatorRoute>
-          }
-        />
-        <Route
-          path="/admin/community"
-          element={
-            <OrgAdminRoute authed={authed} isOrgAdmin={isOrgAdmin}>
-              <AdminCommunityPage />
-            </OrgAdminRoute>
-          }
-        />
-        <Route
-          path="/admin/members"
-          element={
-            <OrgAdminRoute authed={authed} isOrgAdmin={isOrgAdmin}>
-              <AdminMembersPage />
-            </OrgAdminRoute>
-          }
-        />
+        <Route element={<RequireCompleteProfile authed={authed} profileComplete={profileComplete} />}>
+          <Route path="/presence" element={<PresencePage />} />
+          <Route path="/presence/:roundId" element={<PresenceRoundPage />} />
+          <Route path="/circles" element={<CirclesPage />} />
+          <Route path="/circles/:id" element={<CircleDetailPage />} />
+          <Route
+            path="/facilitator"
+            element={<FacilitatorRoute authed={authed} isFacilitator={isFacilitator} isOrgAdmin={isOrgAdmin} />}
+          />
+          <Route
+            path="/facilitator/gatherings"
+            element={
+              <FacilitatorRoute authed={authed} isFacilitator={isFacilitator} isOrgAdmin={isOrgAdmin}>
+                <FacilitatorGatheringsPage />
+              </FacilitatorRoute>
+            }
+          />
+          <Route
+            path="/facilitator/gatherings/:id"
+            element={
+              <FacilitatorRoute authed={authed} isFacilitator={isFacilitator} isOrgAdmin={isOrgAdmin}>
+                <FacilitatorGatheringDetailPage />
+              </FacilitatorRoute>
+            }
+          />
+          <Route
+            path="/admin/community"
+            element={
+              <OrgAdminRoute authed={authed} isOrgAdmin={isOrgAdmin}>
+                <AdminCommunityPage />
+              </OrgAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/members"
+            element={
+              <OrgAdminRoute authed={authed} isOrgAdmin={isOrgAdmin}>
+                <AdminMembersPage />
+              </OrgAdminRoute>
+            }
+          />
+        </Route>
       </Route>
 
       {import.meta.env.DEV ? (

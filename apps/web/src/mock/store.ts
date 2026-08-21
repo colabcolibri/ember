@@ -1,4 +1,5 @@
 import type { PlaceRef } from '../lib/place.js';
+import { profileCompleteness } from '@ember/domain/profile/completeness';
 import {
   isFacilitatorDemoEmail,
   isNewMemberDemoEmail,
@@ -464,6 +465,7 @@ function canUseFacilitatorPanel(): boolean {
 
 function requireFacilitator() {
   requireSession();
+  assertProfileComplete();
   if (!canUseFacilitatorPanel()) {
     throw new Error('forbidden');
   }
@@ -471,8 +473,25 @@ function requireFacilitator() {
 
 function requireOrgAdmin() {
   requireSession();
+  assertProfileComplete();
   if (!state.profile.isOrgAdmin) {
     throw new Error('forbidden');
+  }
+}
+
+function assertProfileComplete() {
+  const profile = state.profile;
+  if (
+    !profileCompleteness({
+      displayName: profile.displayName,
+      editionYear: profile.editionYear,
+      timezone: profile.timezone,
+      languages: profile.languages,
+      originPlace: profile.originPlace,
+      residencePlace: profile.residencePlace,
+    }).complete
+  ) {
+    throw new Error('profile_incomplete');
   }
 }
 
@@ -484,6 +503,19 @@ export const mockStore = {
 
   isAuthed() {
     return Boolean(state.session);
+  },
+
+  isProfileComplete() {
+    if (!state.session) return false;
+    const profile = state.profile;
+    return profileCompleteness({
+      displayName: profile.displayName,
+      editionYear: profile.editionYear,
+      timezone: profile.timezone,
+      languages: profile.languages,
+      originPlace: profile.originPlace,
+      residencePlace: profile.residencePlace,
+    }).complete;
   },
 
   login(email: string) {

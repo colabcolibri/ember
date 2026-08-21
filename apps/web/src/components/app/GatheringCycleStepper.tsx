@@ -124,7 +124,7 @@ export function GatheringCycleStepper({ status, match, className }: GatheringCyc
     <nav
       aria-label={t('facilitator.cycle.title')}
       className={cn(
-        'min-w-0 rounded-[28px] border border-outline-variant/25 bg-paper p-5 shadow-sm sm:p-6',
+        'min-w-0 rounded-card border border-outline-variant/25 bg-paper p-5 shadow-sm sm:p-6',
         className,
       )}
     >

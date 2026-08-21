@@ -7,9 +7,10 @@ import { cn } from '@/lib/utils';
 type AppLogoutButtonProps = {
   onLoggedOut: () => void;
   className?: string;
+  showLabel?: boolean;
 };
 
-export function AppLogoutButton({ onLoggedOut, className }: AppLogoutButtonProps) {
+export function AppLogoutButton({ onLoggedOut, className, showLabel }: AppLogoutButtonProps) {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,15 @@ export function AppLogoutButton({ onLoggedOut, className }: AppLogoutButtonProps
         <span className="material-symbols-outlined text-base" aria-hidden>
           logout
         </span>
-        <span className="hidden sm:inline">{t('nav.logout')}</span>
+        <span
+          className={cn(
+            showLabel === false && 'hidden',
+            showLabel === true && 'inline',
+            showLabel === undefined && 'hidden sm:inline',
+          )}
+        >
+          {t('nav.logout')}
+        </span>
       </button>
 
       <AppAlertDialog

@@ -3,11 +3,15 @@ import { cn } from '@/lib/utils';
 
 const LOCALES = ['pt', 'en'] as const;
 
-export function LanguageSwitcher() {
+type LanguageSwitcherProps = {
+  className?: string;
+};
+
+export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
   const { i18n } = useTranslation();
 
   return (
-    <div className="flex items-center gap-1" role="group" aria-label="Language">
+    <div className={cn('flex items-center gap-1', className)} role="group" aria-label="Language">
       {LOCALES.map((locale, index) => (
         <span key={locale} className="flex items-center gap-1">
           {index > 0 ? <span className="text-outline-variant/50">/</span> : null}

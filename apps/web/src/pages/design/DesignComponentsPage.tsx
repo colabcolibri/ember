@@ -11,6 +11,7 @@ import {
   AppFormField,
   AppInput,
   AppPage,
+  AppSidebarNav,
   AttendancePrompt,
   AvailabilityPicker,
   CircleInviteCard,
@@ -33,6 +34,30 @@ export function DesignComponentsPage() {
         <div className="flex flex-wrap items-center gap-8">
           <AppBrand />
           <AppBrand markOnly={false} />
+        </div>
+      </section>
+
+      <section id="sidebar-nav" className="max-w-xs space-y-3">
+        <h2 className="font-serif text-2xl">Sidebar nav</h2>
+        <p className="text-sm text-muted-foreground">
+          Itens com ícone + label. No shell real, recolhe para só ícones com tooltip.
+        </p>
+        <div className="rounded-2xl border border-outline-variant/30 bg-paper/90 p-3">
+          <AppSidebarNav
+            items={[
+              { to: '/presence', label: 'Presença' },
+              { to: '/circles', label: 'Meus encontros' },
+            ]}
+          />
+        </div>
+        <div className="rounded-2xl border border-outline-variant/30 bg-paper/90 p-3">
+          <AppSidebarNav
+            collapsed
+            items={[
+              { to: '/presence', label: 'Presença' },
+              { to: '/circles', label: 'Meus encontros' },
+            ]}
+          />
         </div>
       </section>
 

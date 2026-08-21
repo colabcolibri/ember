@@ -13,7 +13,7 @@ export function CircleInviteCard({ communityName, question, when, status }: Circ
   return (
     <article
       className={cn(
-        'relative overflow-hidden rounded-[28px] border border-outline-variant/20 bg-paper p-8 shadow-sm',
+        'relative overflow-hidden rounded-card border border-outline-variant/20 bg-paper p-8 shadow-sm',
       )}
     >
       <div

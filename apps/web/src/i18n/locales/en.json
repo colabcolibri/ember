@@ -21,6 +21,18 @@
     "logoutConfirmDescription": "You will need to sign in again to access your gatherings.",
     "cancel": "Cancel"
   },
+  "sidebar": {
+    "navigation": "Navigation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar",
+    "groupParticipation": "Participation",
+    "groupFacilitation": "Facilitation",
+    "groupOrganization": "Organization",
+    "groupAccount": "Account",
+    "groupDesign": "Design system"
+  },
   "login": {
     "title": "Sign in with email",
     "subtitle": "Use the email from your community.",
@@ -467,7 +479,7 @@
     "profileIncomplete": "Incomplete"
   },
   "onboarding": {
-    "bannerTitle": "Complete your profile before declaring presence:",
+    "bannerTitle": "Complete your profile to access presence, circles, and other areas:",
     "goToProfile": "Go to profile",
     "presenceHint": "Some profile fields are still missing to join the round."
   }
