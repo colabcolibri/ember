@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { ScrollArea } from '@/components/ui/scroll-area.js';
+import { ScrollArea, scrollAreaFillClass } from '@/components/ui/scroll-area.js';
 import {
   Sidebar,
   SidebarContent,
@@ -19,13 +19,6 @@ type AppSidebarProps = {
   showLogout?: boolean;
   onLoggedOut?: () => void;
 };
-
-const sidebarScrollAreaClass = cn(
-  'h-full min-h-0',
-  '[&_[data-slot=scroll-area-viewport]]:h-full',
-  '[&_[data-slot=scroll-area-scrollbar]]:w-1.5',
-  '[&_[data-slot=scroll-area-thumb]]:bg-outline-variant/70',
-);
 
 export function AppSidebar({
   groups,
@@ -48,7 +41,7 @@ export function AppSidebar({
       className="border-outline-variant/30 bg-paper/95 backdrop-blur-md"
     >
       <SidebarContent className="gap-0 overflow-hidden p-0">
-        <ScrollArea className={sidebarScrollAreaClass}>
+        <ScrollArea className={scrollAreaFillClass}>
           <div className={cn('py-4', collapsed ? 'px-1' : 'px-2')}>
             <AppSidebarNavGroups
               groups={groups}

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { SearchIcon } from 'lucide-react';
 
+import { ScrollArea } from '@/components/ui/scroll-area.js';
 import { cn } from '@/lib/utils';
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
@@ -38,11 +39,13 @@ function CommandInput({
 
 function CommandList({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) {
   return (
-    <CommandPrimitive.List
-      data-slot="command-list"
-      className={cn('max-h-60 overflow-x-hidden overflow-y-auto', className)}
-      {...props}
-    />
+    <ScrollArea className={cn('max-h-60', className)}>
+      <CommandPrimitive.List
+        data-slot="command-list"
+        className="overflow-visible p-1"
+        {...props}
+      />
+    </ScrollArea>
   );
 }
 
@@ -64,7 +67,7 @@ function CommandGroup({
     <CommandPrimitive.Group
       data-slot="command-group"
       className={cn(
-        'overflow-hidden p-1 text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground',
+        'overflow-hidden text-foreground **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground',
         className,
       )}
       {...props}

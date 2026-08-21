@@ -4,6 +4,7 @@ import {
   AppSidebarNavGroups,
   type AppSidebarNavGroup,
 } from './AppSidebarNav.js';
+import { ScrollArea, scrollAreaFillClass } from '@/components/ui/scroll-area.js';
 import { cn } from '@/lib/utils';
 
 export const SIDEBAR_WIDTH_EXPANDED = 'w-60';
@@ -51,9 +52,11 @@ export function AppSidebarRail({
       )}
       aria-label={t('sidebar.navigation')}
     >
-      <div className="min-h-0 flex-1 overflow-y-auto py-4">
-        <AppSidebarNavGroups groups={groups} collapsed={collapsed} onNavigate={onNavigate} />
-      </div>
+      <ScrollArea className={cn(scrollAreaFillClass, 'flex-1')}>
+        <div className="py-4">
+          <AppSidebarNavGroups groups={groups} collapsed={collapsed} onNavigate={onNavigate} />
+        </div>
+      </ScrollArea>
 
       {hasFooter ? (
         <div className="shrink-0 border-t border-outline-variant/20 py-4">

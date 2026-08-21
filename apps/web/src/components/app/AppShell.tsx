@@ -6,6 +6,7 @@ import { AppSidebarLayout } from './AppSidebarLayout.js';
 import { DemoResetButton } from './DemoResetButton.js';
 import { LanguageSwitcher } from '../LanguageSwitcher.js';
 import { emberWidthClass, EMBER_PAGE_X } from '@/lib/layout';
+import { ScrollArea, scrollAreaFillClass } from '@/components/ui/scroll-area.js';
 import { isMockMode } from '@/lib/mock-mode.js';
 import { loginPath } from '@/lib/app-mode.js';
 import { memberHomePath } from '@/lib/member-home.js';
@@ -94,12 +95,12 @@ export function AppShell({
 
   if (useSidebar) {
     return (
-      <div className="relative min-h-dvh bg-background ember-orbital-radial">
+      <div className="relative h-dvh overflow-hidden bg-background ember-orbital-radial">
         <div className="ember-orbit-bg" aria-hidden="true" />
         <div className="ember-orbit-dot-rust" aria-hidden="true" />
         <div className="ember-orbit-dot-sage" aria-hidden="true" />
 
-        <div className="relative z-10 min-h-dvh w-full">
+        <div className="relative z-10 h-full w-full">
           <AppSidebarLayout
             homeTo={homeTo}
             groups={sidebarGroups}
@@ -121,8 +122,8 @@ export function AppShell({
   return (
     <div
       className={cn(
-        'relative min-h-dvh overflow-x-hidden bg-background ember-orbital-radial',
-        mode === 'auth' && 'flex flex-col',
+        'relative flex h-dvh flex-col overflow-hidden bg-background ember-orbital-radial',
+        mode === 'auth' && 'min-h-0',
       )}
     >
       <div className="ember-orbit-bg" aria-hidden="true" />
@@ -131,26 +132,27 @@ export function AppShell({
 
       <div
         className={cn(
-          'relative z-10 mx-auto w-full pb-12 pt-4 sm:pt-6',
+          'relative z-10 mx-auto flex min-h-0 w-full flex-1 flex-col pb-12 pt-4 sm:pt-6',
           EMBER_PAGE_X,
           emberWidthClass(),
-          mode === 'auth' && 'flex min-h-dvh flex-1 flex-col',
         )}
       >
-        <header className="mb-6 sm:mb-8">
+        <header className="mb-6 shrink-0 sm:mb-8">
           {demoBanner}
           <AppNav homeTo={homeTo} items={flatNavItems.length ? flatNavItems : guestItems} utilities={utilities} />
         </header>
 
-        <main
-          className={cn(
-            'w-full',
-            mode === 'auth' && 'flex flex-1 flex-col justify-center',
-            isMockMode && 'pb-20',
-          )}
-        >
-          {children}
-        </main>
+        <ScrollArea className={cn(scrollAreaFillClass, 'flex-1')}>
+          <main
+            className={cn(
+              'w-full',
+              mode === 'auth' && 'flex min-h-[min(100%,32rem)] flex-col justify-center',
+              isMockMode && 'pb-20',
+            )}
+          >
+            {children}
+          </main>
+        </ScrollArea>
 
         {isMockMode ? <DemoResetButton /> : null}
       </div>

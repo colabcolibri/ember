@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AppBrand, AppButton } from '../components/app/index.js';
 import { DemoResetButton } from '../components/app/DemoResetButton.js';
 import { LanguageSwitcher } from '../components/LanguageSwitcher.js';
+import { ScrollArea, scrollAreaFillClass } from '@/components/ui/scroll-area.js';
 import { shellContainerClass } from '@/lib/layout';
 import { loginPath } from '@/lib/app-mode.js';
 import { isMockMode } from '@/lib/mock-mode.js';
@@ -15,12 +16,12 @@ export function LandingLayout() {
   const hero = data?.settings.hero;
 
   return (
-    <div className="relative min-h-dvh overflow-x-hidden bg-background ember-orbital-radial">
+    <div className="relative flex h-dvh flex-col overflow-hidden bg-background ember-orbital-radial">
       <div className="ember-orbit-bg" aria-hidden="true" />
       <div className="ember-orbit-dot-rust" aria-hidden="true" />
       <div className="ember-orbit-dot-sage" aria-hidden="true" />
 
-      <header className="sticky top-0 z-20 border-b border-outline-variant/20 bg-paper/80 backdrop-blur-md">
+      <header className="relative z-20 shrink-0 border-b border-outline-variant/20 bg-paper/80 backdrop-blur-md">
         <div className={cn(shellContainerClass(), 'flex items-center justify-between gap-4 py-3 sm:py-4')}>
           <Link to="/" className="shrink-0" aria-label={data?.name ?? t('app.title')}>
             {hero?.logoUrl ? (
@@ -42,7 +43,9 @@ export function LandingLayout() {
         </div>
       </header>
 
-      <Outlet />
+      <ScrollArea className={cn(scrollAreaFillClass, 'relative z-10 flex-1')}>
+        <Outlet />
+      </ScrollArea>
 
       {isMockMode ? <DemoResetButton /> : null}
     </div>

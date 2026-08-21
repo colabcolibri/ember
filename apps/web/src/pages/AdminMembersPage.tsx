@@ -8,6 +8,7 @@ import {
   AppLoading,
   AppPage,
 } from '@/components/app/index.js';
+import { ScrollArea } from '@/components/ui/scroll-area.js';
 import { apiFetch } from '@/lib/api.js';
 import { formatApiError } from '@/lib/api-errors.js';
 import { showError, showSuccess } from '@/lib/app-toast.js';
@@ -121,7 +122,7 @@ export function AdminMembersPage() {
         </AppCard>
 
         <AppCard>
-          <div className="overflow-x-auto">
+          <ScrollArea horizontal>
             <table className="min-w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-outline-variant/20 text-muted-foreground">
@@ -145,7 +146,7 @@ export function AdminMembersPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollArea>
         </AppCard>
       </div>
     </AppPage>

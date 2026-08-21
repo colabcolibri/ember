@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet.js';
 import { useIsMobile } from '@/hooks/use-mobile.js';
 import { readSidebarCollapsed, writeSidebarCollapsed } from '@/lib/app-sidebar-storage.js';
+import { ScrollArea, scrollAreaFillClass } from '@/components/ui/scroll-area.js';
 import { cn } from '@/lib/utils';
 import { AppShellHeader } from './AppShellHeader.js';
 import { AppSidebarRail } from './AppSidebarRail.js';
@@ -91,15 +92,12 @@ export function AppSidebarShell({
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <AppShellHeader homeTo={homeTo} onToggleSidebar={handleToggleSidebar} />
 
-        <div
-          className={cn(
-            'min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 pb-12 pt-4 sm:px-6 sm:pt-6',
-            mainClassName,
-          )}
-        >
-          {demoBanner}
-          {children}
-        </div>
+        <ScrollArea className={cn(scrollAreaFillClass, 'flex-1')}>
+          <div className={cn('px-4 pb-12 pt-4 sm:px-6 sm:pt-6', mainClassName)}>
+            {demoBanner}
+            {children}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );

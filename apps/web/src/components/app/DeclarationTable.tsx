@@ -176,7 +176,7 @@ export function DeclarationTable({ items, emptyMessage, slotLabels = {} }: Decla
         ))}
       </div>
 
-      <div className="hidden min-w-0 overflow-x-auto rounded-xl border lg:block">
+      <div className="hidden min-w-0 rounded-xl border lg:block">
         <Table className="min-w-[640px] table-fixed">
           <TableHeader>
             <TableRow>
