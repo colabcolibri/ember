@@ -5,12 +5,18 @@ import Database from 'better-sqlite3';
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
+/** Monorepo root — relative EMBER_DB_PATH is always under here (see README / docs/08). */
+export function resolveRepoRoot(): string {
+  return resolve(packageRoot, '../..');
+}
+
 export function resolveDbPath(): string {
   const fromEnv = process.env.EMBER_DB_PATH?.trim();
+  const repoRoot = resolveRepoRoot();
   if (fromEnv) {
-    return resolve(fromEnv);
+    return resolve(fromEnv.startsWith('/') ? fromEnv : resolve(repoRoot, fromEnv));
   }
-  return resolve(process.cwd(), 'data/ember.db');
+  return resolve(repoRoot, 'data/ember.db');
 }
 
 export function resolveMigrationsDir(): string {

@@ -57,17 +57,19 @@ function OrgAdminRoute({
 function FacilitatorRoute({
   authed,
   isFacilitator,
+  isOrgAdmin,
   children,
 }: {
   authed: boolean | null;
   isFacilitator: boolean;
+  isOrgAdmin: boolean;
   children?: ReactNode;
 }) {
   if (authed === null) {
     return <AppLoading />;
   }
 
-  if (!isFacilitator) {
+  if (!isFacilitator && !isOrgAdmin) {
     return <Navigate to="/presence" replace />;
   }
 
@@ -114,12 +116,12 @@ export function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route
           path="/facilitator"
-          element={<FacilitatorRoute authed={authed} isFacilitator={isFacilitator} />}
+          element={<FacilitatorRoute authed={authed} isFacilitator={isFacilitator} isOrgAdmin={isOrgAdmin} />}
         />
         <Route
           path="/facilitator/gatherings"
           element={
-            <FacilitatorRoute authed={authed} isFacilitator={isFacilitator}>
+            <FacilitatorRoute authed={authed} isFacilitator={isFacilitator} isOrgAdmin={isOrgAdmin}>
               <FacilitatorGatheringsPage />
             </FacilitatorRoute>
           }
@@ -127,7 +129,7 @@ export function App() {
         <Route
           path="/facilitator/gatherings/:id"
           element={
-            <FacilitatorRoute authed={authed} isFacilitator={isFacilitator}>
+            <FacilitatorRoute authed={authed} isFacilitator={isFacilitator} isOrgAdmin={isOrgAdmin}>
               <FacilitatorGatheringDetailPage />
             </FacilitatorRoute>
           }

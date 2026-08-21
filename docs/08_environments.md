@@ -48,6 +48,17 @@ pnpm install
 
 Portas locais: `config/dev-ports.json` — web `2000`, API `2001`, Mailpit SMTP `1025`, UI `8025`.
 
+### SQLite (local)
+
+| Regra | Detalhe |
+| ----- | ------- |
+| Arquivo canônico | `<repo>/data/ember.db` via `EMBER_DB_PATH=data/ember.db` |
+| Quem usa | `pnpm db:migrate`, `pnpm db:seed`, API (`pnpm dev`), testes com path explícito |
+| Resolução | `@ember/db` `resolveDbPath()` — relativo à raiz do monorepo, **não** ao `cwd` de `apps/api` |
+| Proibido | Duplicar em `apps/api/data/` ou outros paths relativos ao pacote |
+
+Wal/shm (`ember.db-wal`, `ember.db-shm`) ficam ao lado do `.db` em `data/`; também gitignored.
+
 ### Daily commands
 
 | Task | Command |
@@ -62,7 +73,7 @@ Portas locais: `config/dev-ports.json` — web `2000`, API `2001`, Mailpit SMTP 
 
 | Variable | Required | Secret | Purpose | Example (non-secret) |
 | -------- | -------- | ------ | ------- | -------------------- |
-| `EMBER_DB_PATH` | yes | no | SQLite MVP 0 | `data/ember.db` |
+| `EMBER_DB_PATH` | yes | no | SQLite MVP 0 — **único arquivo**; path relativo = raiz do monorepo | `data/ember.db` |
 | `EMBER_API_PORT` | no | no | porta da API | `3001` |
 | `EMBER_APP_URL` | yes | no | links em templates | `http://localhost:2000` |
 

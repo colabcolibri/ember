@@ -39,7 +39,7 @@ export function AppShell({
           { to: '/presence', label: t('nav.presence') },
           { to: '/circles', label: t('nav.circles') },
           { to: '/profile', label: t('nav.profile') },
-          ...(isFacilitator
+          ...(isFacilitator || isOrgAdmin
             ? [
                 { to: '/facilitator/gatherings', label: t('nav.gatherings') },
                 { to: '/facilitator', label: t('nav.facilitator'), end: true },

@@ -15,6 +15,7 @@ export type RoundDetailRow = RoundRow & {
   questions_json: string | null;
   slots_json: string | null;
   template_id: string | null;
+  created_by_user_id: string | null;
   created_at: string;
 };
 
@@ -30,6 +31,8 @@ export type MatchingRoundListItem = {
   circleSize: number | null;
   durationMinutes: number | null;
   createdAt: string;
+  createdByUserId: string | null;
+  createdByDisplayName: string | null;
   declarationCount: number;
   circleCount: number;
 };
@@ -41,11 +44,15 @@ export function listMatchingRounds(
   const rows = db
     .prepare(
       `SELECT r.id, r.status, r.theme, r.question, r.questions_json, r.slots_json, r.template_id, r.created_at,
+              r.created_by_user_id,
+              mp.display_name AS creator_display_name,
               mt.name AS template_name, mt.circle_size, mt.duration_minutes,
               (SELECT COUNT(*) FROM round_declarations rd WHERE rd.round_id = r.id AND rd.response = 'attending') AS declaration_count,
               (SELECT COUNT(*) FROM circles c WHERE c.round_id = r.id) AS circle_count
        FROM rounds r
        LEFT JOIN meeting_templates mt ON mt.id = r.template_id
+       LEFT JOIN member_profiles mp
+         ON mp.user_id = r.created_by_user_id AND mp.community_id = r.community_id
        WHERE r.community_id = ?
        ORDER BY r.created_at DESC`,
     )
@@ -61,6 +68,8 @@ export function listMatchingRounds(
     circle_size: number | null;
     duration_minutes: number | null;
     created_at: string;
+    created_by_user_id: string | null;
+    creator_display_name: string | null;
     declaration_count: number;
     circle_count: number;
   }[];
@@ -77,6 +86,8 @@ export function listMatchingRounds(
     circleSize: row.circle_size,
     durationMinutes: row.duration_minutes,
     createdAt: row.created_at,
+    createdByUserId: row.created_by_user_id,
+    createdByDisplayName: row.creator_display_name,
     declarationCount: row.declaration_count,
     circleCount: row.circle_count,
   }));
@@ -85,7 +96,7 @@ export function listMatchingRounds(
 export function listOpenRounds(db: Database.Database, communityId: string): RoundDetailRow[] {
   return db
     .prepare(
-      `SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id, created_at
+      `SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id, created_by_user_id, created_at
        FROM rounds WHERE community_id = ? AND status = 'open' ORDER BY created_at DESC`,
     )
     .all(communityId) as RoundDetailRow[];
@@ -95,7 +106,7 @@ export function findOpenRound(db: Database.Database, communityId: string): Round
   return (
     (db
       .prepare(
-        `SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id, created_at
+        `SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id, created_by_user_id, created_at
          FROM rounds WHERE community_id = ? AND status = 'open' ORDER BY created_at DESC LIMIT 1`,
       )
       .get(communityId) as RoundDetailRow | undefined) ?? null
@@ -106,7 +117,7 @@ export function findRoundById(db: Database.Database, roundId: string): RoundDeta
   return (
     (db
       .prepare(
-        'SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id, created_at FROM rounds WHERE id = ?',
+        'SELECT id, community_id, status, theme, question, questions_json, slots_json, template_id, created_by_user_id, created_at FROM rounds WHERE id = ?',
       )
       .get(roundId) as RoundDetailRow | undefined) ?? null
   );
@@ -175,14 +186,15 @@ export function createMatchingRound(
   communityId: string,
   input: CreateRoundInput,
   templateId: string,
+  createdByUserId?: string | null,
 ): RoundDetailRow {
   const id = randomUUID();
   const now = new Date().toISOString();
   const primaryQuestion = input.questions[0] ?? '';
   const questionsJson = JSON.stringify(input.questions);
   db.prepare(
-    `INSERT INTO rounds (id, community_id, status, theme, question, questions_json, slots_json, template_id, created_at)
-     VALUES (?, ?, 'open', ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO rounds (id, community_id, status, theme, question, questions_json, slots_json, template_id, created_by_user_id, created_at)
+     VALUES (?, ?, 'open', ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     id,
     communityId,
@@ -191,6 +203,7 @@ export function createMatchingRound(
     questionsJson,
     JSON.stringify(input.slots),
     templateId,
+    createdByUserId ?? null,
     now,
   );
   return findRoundById(db, id)!;

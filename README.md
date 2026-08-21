@@ -107,8 +107,25 @@ cd ember
 pnpm install
 cp .env.example .env   # adjust values as needed
 pnpm db:migrate
+pnpm db:seed           # optional: 100 members, 12 rounds (like mock demo)
 pnpm dev
 ```
+
+### Banco SQLite (local)
+
+Há **um único arquivo** de dados em desenvolvimento:
+
+| Item | Valor |
+| ---- | ----- |
+| Variável | `EMBER_DB_PATH=data/ember.db` (no `.env`) |
+| Caminho real | `<raiz-do-repo>/data/ember.db` |
+| Resolução | Caminhos relativos são sempre relativos à **raiz do monorepo**, não ao `cwd` do processo (API, seed, migrate). |
+
+Comandos que leem/escrevem esse mesmo arquivo: `pnpm db:migrate`, `pnpm db:seed`, `pnpm dev` (API).
+
+**Não** crie `apps/api/data/ember.db` — era um artefato antigo quando a API resolvia o path pelo diretório de trabalho; foi removido. Se aparecer de novo, apague a pasta `apps/api/data/`.
+
+Para inspecionar: `sqlite3 data/ember.db ".tables"`
 
 | Service | URL |
 | ------- | --- |
@@ -169,7 +186,7 @@ pnpm docker:prod
 
 | Variable | Purpose |
 | -------- | ------- |
-| `EMBER_BOOTSTRAP_FACILITATOR_EMAIL` | Admin email — first magic-link login assigns **facilitator** role |
+| `EMBER_BOOTSTRAP_ADMIN_EMAIL` | Admin email — first magic-link login assigns **org_admin** (facilitador + painel admin) |
 | `EMBER_EMAIL_PROVIDER` | Must be `smtp` or `resend` (not `noop`) so the admin receives login codes |
 | `EMBER_APP_URL` | Public URL for magic links (e.g. `http://localhost:8080` locally) |
 

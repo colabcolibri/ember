@@ -32,6 +32,12 @@ export function GatheringListRow({
       icon: 'calendar_today',
       label: formatGatheringDate(gathering.createdAt, i18n.language),
     },
+    gathering.createdByDisplayName
+      ? {
+          icon: 'person',
+          label: t('facilitator.gatheringCreatedBy', { name: gathering.createdByDisplayName }),
+        }
+      : null,
     gathering.templateName
       ? {
           icon: 'local_fire_department',

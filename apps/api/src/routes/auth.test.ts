@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Hono } from 'hono';
-import { createLoginCode, ensureDatabaseReady, getMemberRole } from '@ember/db';
+import { createLoginCode, ensureCommunityMember, ensureDatabaseReady, getMemberRole, upsertUserByEmail } from '@ember/db';
 import { resetEmailSenderCacheForTests, sendTransactionalEmail } from '@ember/email';
 import { createAuthRoutes } from './auth.js';
 import { resetRateLimitsForTests } from '../lib/rate-limit.js';
@@ -67,7 +67,7 @@ describe('auth routes', () => {
     });
     const sessionCookie = verifyRes.headers.get('set-cookie') ?? '';
 
-    process.env.EMBER_BOOTSTRAP_FACILITATOR_EMAIL = 'admin@example.com';
+    process.env.EMBER_BOOTSTRAP_ADMIN_EMAIL = 'admin@example.com';
     const communityId = db.prepare('SELECT id FROM communities WHERE slug = ?').get('gsa-pilot') as {
       id: string;
     };
@@ -146,7 +146,7 @@ describe('auth routes', () => {
   });
 
   it('bootstrap email receives org_admin role', async () => {
-    process.env.EMBER_BOOTSTRAP_FACILITATOR_EMAIL = 'admin@example.com';
+    process.env.EMBER_BOOTSTRAP_ADMIN_EMAIL = 'admin@example.com';
     const pepper = 'test-pepper';
     const { code } = createLoginCode(db, 'admin@example.com', pepper);
 
@@ -162,6 +162,48 @@ describe('auth routes', () => {
     };
     const userId = db.prepare('SELECT id FROM users LIMIT 1').get() as { id: string };
     expect(getMemberRole(db, communityId.id, userId.id)).toBe('org_admin');
+  });
+
+  it('legacy bootstrap env var still assigns org_admin', async () => {
+    delete process.env.EMBER_BOOTSTRAP_ADMIN_EMAIL;
+    process.env.EMBER_BOOTSTRAP_FACILITATOR_EMAIL = 'legacy@example.com';
+    const pepper = 'test-pepper';
+    const { code } = createLoginCode(db, 'legacy@example.com', pepper);
+
+    const res = await app.request('/auth/code/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'legacy@example.com', code }),
+    });
+    expect(res.status).toBe(200);
+
+    const communityId = db.prepare('SELECT id FROM communities WHERE slug = ?').get('gsa-pilot') as {
+      id: string;
+    };
+    const userId = db.prepare('SELECT id FROM users WHERE email_hash IS NOT NULL LIMIT 1').get() as {
+      id: string;
+    };
+    expect(getMemberRole(db, communityId.id, userId.id)).toBe('org_admin');
+  });
+
+  it('bootstrap admin is promoted from facilitador on login', async () => {
+    process.env.EMBER_BOOTSTRAP_ADMIN_EMAIL = 'admin@example.com';
+    const pepper = 'test-pepper';
+    const userId = upsertUserByEmail(db, 'admin@example.com', pepper);
+    const communityId = db.prepare('SELECT id FROM communities WHERE slug = ?').get('gsa-pilot') as {
+      id: string;
+    };
+    ensureCommunityMember(db, communityId.id, userId, 'facilitador');
+    expect(getMemberRole(db, communityId.id, userId)).toBe('facilitador');
+
+    const { code } = createLoginCode(db, 'admin@example.com', pepper);
+    const res = await app.request('/auth/code/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'admin@example.com', code }),
+    });
+    expect(res.status).toBe(200);
+    expect(getMemberRole(db, communityId.id, userId)).toBe('org_admin');
   });
 
   it('logout clears session cookie', async () => {

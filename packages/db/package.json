@@ -14,6 +14,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "migrate": "node dist/migrate-cli.js",
+    "seed:dev": "tsx src/seed-cli.ts",
     "test": "vitest run"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.29",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "vitest": "^3.2.1"
   }

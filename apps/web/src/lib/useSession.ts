@@ -35,7 +35,7 @@ export function useSession() {
         }
 
         setAuthed(true);
-        setIsFacilitator(Boolean(session.isFacilitator));
+        setIsFacilitator(Boolean(session.isFacilitator) || session.role === 'org_admin');
         setIsOrgAdmin(Boolean(session.isOrgAdmin) || session.role === 'org_admin');
       })
       .catch(() => {

@@ -10,6 +10,7 @@ import {
   findOpenRound,
   findRoundById,
   findTemplateById,
+  getMemberProfile,
   createMeetingTemplate,
   listMeetingTemplates,
   listCircleMembers,
@@ -112,6 +113,7 @@ function mapGatheringSummary(db: Db, communityId: string, row: MatchingRoundList
     theme: row.theme,
     questions,
     createdAt: row.createdAt,
+    createdByDisplayName: row.createdByDisplayName?.trim() || null,
     declarationCount: row.declarationCount,
     templateName: row.templateName,
     circleSize: row.circleSize,
@@ -132,6 +134,10 @@ function mapGatheringDetail(
   const questions = parseRoundQuestions(round);
   const slots = buildSlotPreview(db, communityId, round.slots_json);
   const template = round.template_id ? findTemplateById(db, round.template_id) : null;
+  const creatorProfile =
+    round.created_by_user_id
+      ? getMemberProfile(db, communityId, round.created_by_user_id)
+      : null;
 
   return {
     id: round.id,
@@ -141,6 +147,7 @@ function mapGatheringDetail(
     slots: round.slots_json ? parseRoundSlotsJson(round.slots_json) : [],
     templateId: round.template_id,
     createdAt: round.created_at,
+    createdByDisplayName: creatorProfile?.display_name?.trim() || null,
     declarationCount,
     templateName: template?.name ?? null,
     circleSize: template?.circle_size ?? null,
@@ -212,6 +219,7 @@ export function createAdminRoundRoutes(db: Db) {
       communityId,
       { ...parsed.data, slots: normalizedSlots as CreateRoundInput['slots'] },
       templateId,
+      c.get('userId'),
     );
     await sendRoundOpenNotifications(db, {
       communityId,

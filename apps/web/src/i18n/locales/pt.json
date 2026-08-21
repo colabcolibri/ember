@@ -284,6 +284,7 @@
     "gatheringSlotsTitle": "Horários oferecidos",
     "gatheringCirclesMeta": "{{count}} encontro(s) formado(s)",
     "gatheringOpenedOn": "Aberto em {{date}}",
+    "gatheringCreatedBy": "Criado por {{name}}",
     "editGathering": "Editar encontro",
     "editGatheringHint": "Ajuste tema, perguntas e horários enquanto as inscrições estiverem abertas.",
     "saveGathering": "Salvar alterações",

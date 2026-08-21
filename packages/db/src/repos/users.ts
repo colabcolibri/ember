@@ -70,9 +70,10 @@ export function ensureCommunityMember(
     .prepare('SELECT id, role FROM community_members WHERE community_id = ? AND user_id = ?')
     .get(communityId, userId) as { id: string; role: string } | undefined;
   if (existing) {
-    const privileged = role === 'facilitador' || role === 'org_admin';
-    if (privileged && existing.role === 'member') {
-      db.prepare('UPDATE community_members SET role = ? WHERE id = ?').run(role, existing.id);
+    if (role === 'org_admin' && existing.role !== 'org_admin') {
+      db.prepare('UPDATE community_members SET role = ? WHERE id = ?').run('org_admin', existing.id);
+    } else if (role === 'facilitador' && existing.role === 'member') {
+      db.prepare('UPDATE community_members SET role = ? WHERE id = ?').run('facilitador', existing.id);
     }
     return;
   }

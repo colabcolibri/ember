@@ -285,6 +285,7 @@
     "gatheringSlotsTitle": "Offered time slots",
     "gatheringCirclesMeta": "{{count}} gathering(s) formed",
     "gatheringOpenedOn": "Opened on {{date}}",
+    "gatheringCreatedBy": "Created by {{name}}",
     "editGathering": "Edit gathering",
     "editGatheringHint": "Adjust theme, questions, and time slots while sign-ups are open.",
     "saveGathering": "Save changes",

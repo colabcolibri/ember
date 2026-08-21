@@ -10,6 +10,7 @@
     "test": "pnpm -r test",
     "test:e2e": "pnpm --filter @ember/web test:e2e",
     "db:migrate": "pnpm --filter @ember/db migrate",
+    "db:seed": "pnpm --filter @ember/domain build && pnpm --filter @ember/db seed:dev",
     "docker:dev": "docker compose up --build",
     "docker:dev:down": "docker compose down",
     "docker:prod": "docker compose -f docker-compose.prod.yml up --build -d",

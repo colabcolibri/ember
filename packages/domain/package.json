@@ -6,7 +6,8 @@
   "exports": {
     ".": "./dist/index.js",
     "./profile/completeness": "./dist/profile/completeness.js",
-    "./schemas/community-branding": "./dist/schemas/community-branding.js"
+    "./schemas/community-branding": "./dist/schemas/community-branding.js",
+    "./fixtures/dev-population": "./dist/fixtures/dev-population.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

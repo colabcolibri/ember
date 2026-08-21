@@ -17,6 +17,7 @@ import {
   resolveEmailFromLoginCode,
   upsertUserByEmail,
 } from '@ember/db';
+import { resolveBootstrapAdminEmail } from '../lib/bootstrap-admin.js';
 import { createRateLimit, resetRateLimitsForTests } from '../lib/rate-limit.js';
 import { resolveCommunityId, setSessionCookie, clearSessionCookie, SESSION_COOKIE } from '../lib/session.js';
 
@@ -34,7 +35,7 @@ function bootstrapUser(db: Db, email: string, pepper: string): string {
   const communitySlug = process.env.EMBER_DEFAULT_COMMUNITY_SLUG ?? 'gsa-pilot';
   const community = findCommunityBySlug(db, communitySlug);
   if (community) {
-    const bootstrapEmail = process.env.EMBER_BOOTSTRAP_FACILITATOR_EMAIL?.trim().toLowerCase();
+    const bootstrapEmail = resolveBootstrapAdminEmail();
     const role =
       bootstrapEmail && email.toLowerCase() === bootstrapEmail ? 'org_admin' : 'member';
     ensureCommunityMember(db, community.id, userId, role);

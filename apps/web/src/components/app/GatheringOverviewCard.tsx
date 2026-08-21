@@ -40,6 +40,12 @@ export function GatheringOverviewCard({
         date: formatGatheringDate(gathering.createdAt, i18n.language),
       }),
     },
+    gathering.createdByDisplayName
+      ? {
+          icon: 'person',
+          label: t('facilitator.gatheringCreatedBy', { name: gathering.createdByDisplayName }),
+        }
+      : null,
     gathering.templateName
       ? {
           icon: 'local_fire_department',

@@ -4,6 +4,7 @@ export type GatheringSummary = {
   theme: string | null;
   questions: string[];
   createdAt: string;
+  createdByDisplayName?: string | null;
   declarationCount: number;
   templateName: string | null;
   circleSize: number | null;

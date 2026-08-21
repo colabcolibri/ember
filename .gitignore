@@ -6,8 +6,9 @@
 # Dependencies
 node_modules/
 
-# Local data
+# Local data (SQLite — único arquivo canônico na raiz do repo)
 data/
+apps/**/data/
 
 # Build
 dist/
