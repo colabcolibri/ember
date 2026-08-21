@@ -47,19 +47,24 @@ export function AppSidebarRail({
     <aside
       className={cn(
         'flex shrink-0 flex-col border-r border-outline-variant/30 bg-paper/95 backdrop-blur-md transition-[width] duration-300 ease-in-out',
-        collapsed ? cn(SIDEBAR_WIDTH_COLLAPSED, 'px-1') : cn(SIDEBAR_WIDTH_EXPANDED, 'px-3'),
+        collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED,
         className ?? 'h-dvh',
       )}
       aria-label={t('sidebar.navigation')}
     >
       <ScrollArea className={cn(scrollAreaFillClass, 'flex-1')}>
-        <div className="py-4">
+        <div className={cn('py-4', collapsed ? 'px-1' : 'px-3')}>
           <AppSidebarNavGroups groups={groups} collapsed={collapsed} onNavigate={onNavigate} />
         </div>
       </ScrollArea>
 
       {hasFooter ? (
-        <div className="shrink-0 border-t border-outline-variant/20 py-4">
+        <div
+          className={cn(
+            'shrink-0 border-t border-outline-variant/20 py-4',
+            collapsed ? 'px-1' : 'px-3',
+          )}
+        >
           {visibleFooterGroups.length > 0 ? (
             <AppSidebarNavGroups
               groups={visibleFooterGroups}

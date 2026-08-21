@@ -9,7 +9,6 @@ import {
   RoundSlotBuilder,
   type DraftRoundSlot,
 } from './index.js';
-import { ScrollArea } from '@/components/ui/scroll-area.js';
 
 type GatheringEditDialogProps = {
   gathering: GatheringDetail;
@@ -103,8 +102,7 @@ export function GatheringEditDialog({
       description={t('facilitator.editGatheringHint')}
       size="lg"
       body={
-        <ScrollArea className="max-h-[70vh]">
-          <div className="grid gap-4 pr-3">
+        <div className="grid gap-4">
           <AppFormField label={t('facilitator.theme')}>
             <AppInput value={theme} onChange={(event) => setTheme(event.target.value)} />
           </AppFormField>
@@ -129,8 +127,7 @@ export function GatheringEditDialog({
           </div>
 
           <RoundSlotBuilder slots={draftSlots} onAdd={addSlot} onRemove={removeSlot} />
-          </div>
-        </ScrollArea>
+        </div>
       }
       footer={
         <>

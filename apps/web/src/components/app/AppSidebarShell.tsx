@@ -83,7 +83,7 @@ export function AppSidebarShell({
             <AppSidebarRail
               {...railProps}
               collapsed={false}
-              className="h-full w-full max-w-none border-0 px-3"
+              className="h-full w-full max-w-none border-0"
             />
           </SheetContent>
         </Sheet>
