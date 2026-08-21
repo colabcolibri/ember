@@ -4,7 +4,7 @@ import {
   isNewMemberDemoEmail,
   isOrgAdminDemoEmail,
 } from '../lib/mock-mode.js';
-import { buildJitsiRoomUrl } from '@ember/domain';
+import { buildJitsiRoomUrl } from '../lib/jitsi-room-url.js';
 import {
   DEFAULT_COMMUNITY_PUBLIC_SETTINGS,
   mergeCommunityPublicSettings,
