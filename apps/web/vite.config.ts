@@ -27,6 +27,6 @@ export default defineConfig({
   },
   test: {
     dir: 'src',
-    environment: 'jsdom',
+    environment: 'node',
   },
 });
