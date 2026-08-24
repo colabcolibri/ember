@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiFetch, ApiError } from '../lib/api.js';
 import { formatApiError } from '../lib/api-errors.js';
 import { showError, showSuccess } from '../lib/app-toast.js';
+import { fetchAllRoundDeclarations } from '../lib/round-declarations.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
 
 type Declaration = {
@@ -130,9 +131,9 @@ export function FacilitatorPage() {
   };
 
   const loadDeclarations = async (id: string) => {
-    const res = await apiFetch<{ items: Declaration[] }>(`/admin/matching-rounds/${id}/declarations`);
-    setDeclarations(res.items);
-    return res.items;
+    const items = await fetchAllRoundDeclarations<Declaration>(id);
+    setDeclarations(items);
+    return items;
   };
 
   if (initialLoading) {

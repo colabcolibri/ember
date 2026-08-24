@@ -345,7 +345,8 @@
     "matchReloaded": "Matching draft reloaded.",
     "rerunMatch": "Draw again",
     "publishConfirmBody": "{{groups}} group(s) will be published. {{unmatched}} member(s) will remain without a group in this gathering.",
-    "groupScore": "Fit {{score}}",
+    "groupScore": "Priority {{score}}",
+    "groupScoreHint": "Higher means more new connections in the group. +10 per pair that has not met, +1 if they already met, +3 when frontier and surprise intentions mix.",
     "publishConfirm": "This publishes the groups, sends email invites, and closes the gathering.",
     "declarationsCount": "{{count}} presence declaration(s)",
     "groupLabel": "Group {{index}}",
@@ -385,7 +386,8 @@
       "INCOMPLETE_PROFILE": "Incomplete profile",
       "NO_COMMON_LANGUAGE": "No common language",
       "NO_COMMON_SLOT": "No shared slot",
-      "ODD_POOL": "Odd pool leftover"
+      "ODD_POOL": "Single leftover",
+      "NOT_PLACED": "Not placed in this draw"
     },
     "emailFailuresTitle": "Partial email delivery failure",
     "emailFailuresHint": "Groups were published, but some invite emails failed.",

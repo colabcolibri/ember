@@ -2,12 +2,14 @@ import type { ensureDatabaseReady } from '@ember/db';
 import {
   deleteMatchingRoundDraft,
   findMatchingRoundDraft,
+  findTemplateById,
   insertMatchingAuditEvent,
   loadMatchingMembers,
   loadMetPairs,
   upsertMatchingRoundDraft,
+  findRoundById,
 } from '@ember/db';
-import { runMatchingEngine, type GroupProposal, type UnmatchedMember } from '@ember/domain';
+import { runMatchingEngine, matchingOptionsFromCircleSize, type GroupProposal, type UnmatchedMember } from '@ember/domain';
 
 type Db = ReturnType<typeof ensureDatabaseReady>;
 
@@ -31,7 +33,13 @@ export function executeAutoMatch(
   }
 
   const metPairs = loadMetPairs(db, input.communityId);
-  const result = runMatchingEngine(members, metPairs);
+  const round = findRoundById(db, input.roundId);
+  const template = round?.template_id ? findTemplateById(db, round.template_id) : null;
+  const result = runMatchingEngine(
+    members,
+    metPairs,
+    matchingOptionsFromCircleSize(template?.circle_size),
+  );
 
   const draft = upsertMatchingRoundDraft(db, {
     roundId: input.roundId,

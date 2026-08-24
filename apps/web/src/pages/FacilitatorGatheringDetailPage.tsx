@@ -28,6 +28,7 @@ import {
 } from '../lib/gathering-cycle.js';
 import type { GatheringDetail } from '../lib/gathering.js';
 import { gatheringTitle } from '../lib/gathering.js';
+import { fetchAllRoundDeclarations } from '../lib/round-declarations.js';
 import { useInitialLoad } from '../lib/useInitialLoad.js';
 
 export function FacilitatorGatheringDetailPage() {
@@ -49,8 +50,8 @@ export function FacilitatorGatheringDetailPage() {
     if (!id) return;
     const detail = await apiFetch<{ round: GatheringDetail }>(`/admin/matching-rounds/${id}`);
     setGathering(detail.round);
-    const res = await apiFetch<{ items: DeclarationRow[] }>(`/admin/matching-rounds/${id}/declarations`);
-    setDeclarations(res.items);
+    const items = await fetchAllRoundDeclarations<DeclarationRow>(id);
+    setDeclarations(items);
     if (detail.round.circleCount > 0 || detail.round.status === 'published') {
       const metricsRes = await apiFetch<RoundMetricsResponse>(`/admin/matching-rounds/${id}/metrics`);
       setMetrics(metricsRes);
@@ -80,9 +81,9 @@ export function FacilitatorGatheringDetailPage() {
 
   async function loadDeclarations() {
     if (!id) return declarations;
-    const res = await apiFetch<{ items: DeclarationRow[] }>(`/admin/matching-rounds/${id}/declarations`);
-    setDeclarations(res.items);
-    return res.items;
+    const items = await fetchAllRoundDeclarations<DeclarationRow>(id);
+    setDeclarations(items);
+    return items;
   }
 
   async function saveGathering(input: {

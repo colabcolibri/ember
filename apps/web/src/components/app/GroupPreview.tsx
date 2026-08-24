@@ -48,6 +48,9 @@ export function GroupPreview({
 
   return (
     <div className="grid gap-3">
+      {rows.length > 0 ? (
+        <p className="text-xs leading-relaxed text-muted-foreground">{t('facilitator.groupScoreHint')}</p>
+      ) : null}
       {unmatched && unmatched > 0 && unmatchedLabel ? (
         <p className="text-sm text-muted-foreground">{unmatchedLabel}</p>
       ) : null}
@@ -68,7 +71,7 @@ export function GroupPreview({
                 {slotLabels[group.slot] ?? group.slot}
               </p>
             </div>
-            <AppBadge variant="muted">
+            <AppBadge variant="muted" title={t('facilitator.groupScoreHint')}>
               {t('facilitator.groupScore', { score: group.score })}
             </AppBadge>
           </div>

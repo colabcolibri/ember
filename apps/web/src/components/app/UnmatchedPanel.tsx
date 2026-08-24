@@ -8,7 +8,8 @@ export type UnmatchedReason =
   | 'INCOMPLETE_PROFILE'
   | 'NO_COMMON_LANGUAGE'
   | 'NO_COMMON_SLOT'
-  | 'ODD_POOL';
+  | 'ODD_POOL'
+  | 'NOT_PLACED';
 
 export type UnmatchedMemberRow = {
   userId: string;

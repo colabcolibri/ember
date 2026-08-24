@@ -1,4 +1,8 @@
 import type { PlaceRef } from '../schemas/place.js';
+import type { MatchingMember } from '../matching/constraints.js';
+import type { MemberLanguage } from '../schemas/profile.js';
+import type { PresenceIntention } from '../schemas/auth.js';
+import { matchingOptionsFromCircleSize, runMatchingEngine } from '../matching/run-match.js';
 
 /** Bilingual copy helper — PT / EN in one string for demo fidelity. */
 export function devBilingual(pt: string, en: string): string {
@@ -626,61 +630,41 @@ export type MockTrio = {
 
 export type MockUnmatchedMember = {
   userId: string;
-  reasons: readonly ('NO_COMMON_SLOT' | 'ODD_POOL' | 'INCOMPLETE_PROFILE')[];
+  reasons: readonly (
+    | 'NO_COMMON_SLOT'
+    | 'NO_COMMON_LANGUAGE'
+    | 'ODD_POOL'
+    | 'INCOMPLETE_PROFILE'
+    | 'NOT_PLACED'
+  )[];
 };
 
 export function buildMatchDraftFromDeclarations(
   declarations: MockPopulationDeclaration[],
   templateId: string,
-  seed: number,
+  _seed: number,
 ) {
   const template = MOCK_TEMPLATES.find((item) => item.id === templateId) ?? MOCK_TEMPLATES[0]!;
-  const circleSize = template.circleSize;
-  const rng = mulberry32(seed);
-  const shuffled = [...declarations].sort(() => rng() - 0.5);
-  const trios: MockTrio[] = [];
-  const slotRefs = MOCK_REGIONAL_SLOTS.map((slot) => slot.ref);
-
-  for (let i = 0; i + circleSize <= shuffled.length; i += circleSize) {
-    const group = shuffled.slice(i, i + circleSize);
-    const commonSlot =
-      group
-        .map((member) => member.slots)
-        .reduce<string | null>((found, slots) => {
-          if (found) return found;
-          return slots.find((slot) => group.every((other) => other.slots.includes(slot))) ?? null;
-        }, null) ?? group[0]!.slots[0]!;
-
-    if (circleSize === 3) {
-      trios.push({
-        memberIds: [group[0]!.userId, group[1]!.userId, group[2]!.userId],
-        slot: commonSlot ?? slotRefs[0]!,
-        score: 0.62 + rng() * 0.35,
-      });
-    } else if (circleSize === 4) {
-      trios.push({
-        memberIds: [group[0]!.userId, group[1]!.userId, group[2]!.userId, group[3]!.userId],
-        slot: commonSlot ?? slotRefs[0]!,
-        score: 0.58 + rng() * 0.35,
-      });
-    }
-  }
-
-  const matchedIds = new Set(trios.flatMap((trio) => trio.memberIds));
-  const unmatchedMembers: MockUnmatchedMember[] = shuffled
-    .filter((member) => !matchedIds.has(member.userId))
-    .slice(0, 8)
-    .map((member, index) => ({
-      userId: member.userId,
-      reasons: [
-        index % 3 === 0 ? 'NO_COMMON_SLOT' : index % 3 === 1 ? 'ODD_POOL' : 'INCOMPLETE_PROFILE',
-      ] as MockUnmatchedMember['reasons'],
-    }));
+  const members: MatchingMember[] = declarations.map((declaration) => ({
+    userId: declaration.userId,
+    slots: declaration.slots,
+    languages: declaration.languages as MemberLanguage[],
+    intention: declaration.intention as PresenceIntention,
+  }));
+  const result = runMatchingEngine(
+    members,
+    new Set<string>(),
+    matchingOptionsFromCircleSize(template.circleSize),
+  );
 
   return {
-    trios,
-    unmatchedMembers,
-    unmatchedCount: unmatchedMembers.length,
+    trios: result.groups.map((group) => ({
+      memberIds: group.memberIds as MockTrio['memberIds'],
+      slot: group.slot,
+      score: group.score,
+    })),
+    unmatchedMembers: result.unmatchedMembers as MockUnmatchedMember[],
+    unmatchedCount: result.unmatched,
   };
 }
 

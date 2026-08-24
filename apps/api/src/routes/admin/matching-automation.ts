@@ -7,11 +7,13 @@ import {
   listRoundDeclarations,
   loadMatchingMembers,
   loadMetPairs,
+  findTemplateById,
 } from '@ember/db';
 import {
   publishGroupsSchema,
   publishMatchSchema,
   runMatchingEngine,
+  matchingOptionsFromCircleSize,
   analyzeUnmatched,
   type UnmatchedReason,
 } from '@ember/domain';
@@ -69,8 +71,12 @@ function unmatchedReasonLabel(reason: UnmatchedReason, locale: 'pt' | 'en'): str
       en: 'No shared slot to form a trio',
     },
     ODD_POOL: {
-      pt: 'Número ímpar de inscritos — sobra após formar trios',
-      en: 'Odd participant count — leftover after forming trios',
+      pt: 'Sobra de 1 pessoa após formar grupos',
+      en: 'Single leftover after forming groups',
+    },
+    NOT_PLACED: {
+      pt: 'Compatível, mas não encaixou neste sorteio',
+      en: 'Compatible, but not placed in this draw',
     },
   };
   return labels[reason][locale];
@@ -254,7 +260,12 @@ export function createAdminMatchingAutomationRoutes(db: Db) {
     const draft = loadAutoMatchDraft(db, roundId);
     const members = loadMatchingMembers(db, communityId, roundId);
     const metPairs = loadMetPairs(db, communityId);
-    const fallback = runMatchingEngine(members, metPairs);
+    const template = round.template_id ? findTemplateById(db, round.template_id) : null;
+    const fallback = runMatchingEngine(
+      members,
+      metPairs,
+      matchingOptionsFromCircleSize(template?.circle_size),
+    );
     const unmatchedMembers = draft?.unmatchedMembers ?? fallback.unmatchedMembers;
 
     const pepper = requireEmailPepper();

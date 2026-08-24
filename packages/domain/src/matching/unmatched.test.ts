@@ -35,4 +35,34 @@ describe('analyzeUnmatched', () => {
     const groups = proposeGroups(members, new Set());
     expect(countUnmatched(members, groups)).toBe(0);
   });
+
+  it('labels multiple compatible leftovers as not placed', () => {
+    const members = [
+      baseMember('a'),
+      baseMember('b'),
+      baseMember('c'),
+      baseMember('d'),
+      baseMember('e'),
+    ];
+    const groups = [{ memberIds: ['a', 'b', 'c'], slot: 'mon-evening', score: 30 }];
+    const unmatched = analyzeUnmatched(members, groups);
+    expect(unmatched).toHaveLength(2);
+    for (const row of unmatched) {
+      expect(row.reasons).toContain('NOT_PLACED');
+      expect(row.reasons).not.toContain('ODD_POOL');
+    }
+  });
+
+  it('uses odd pool only for a single compatible leftover', () => {
+    const members = [
+      baseMember('a'),
+      baseMember('b'),
+      baseMember('c'),
+      baseMember('d'),
+    ];
+    const groups = [{ memberIds: ['a', 'b', 'c'], slot: 'mon-evening', score: 30 }];
+    const unmatched = analyzeUnmatched(members, groups);
+    expect(unmatched).toHaveLength(1);
+    expect(unmatched[0]?.reasons).toContain('ODD_POOL');
+  });
 });

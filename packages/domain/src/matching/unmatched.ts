@@ -5,7 +5,8 @@ export type UnmatchedReason =
   | 'INCOMPLETE_PROFILE'
   | 'NO_COMMON_LANGUAGE'
   | 'NO_COMMON_SLOT'
-  | 'ODD_POOL';
+  | 'ODD_POOL'
+  | 'NOT_PLACED';
 
 export type UnmatchedMember = {
   userId: string;
@@ -63,12 +64,16 @@ export function analyzeUnmatched(
       }
     }
 
-    if (unmatchedMembers.length === 1 && members.length > 1) {
-      reasons.push('ODD_POOL');
+    if (canJoin) {
+      if (unmatchedMembers.length === 1) {
+        reasons.push('ODD_POOL');
+      } else {
+        reasons.push('NOT_PLACED');
+      }
     }
 
     if (reasons.length === 0) {
-      reasons.push('ODD_POOL');
+      reasons.push('NOT_PLACED');
     }
 
     return { userId: member.userId, reasons: [...new Set(reasons)] };

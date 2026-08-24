@@ -34,6 +34,7 @@ import {
   publishMatchSchema,
   publishGroupsSchema,
   runMatchingEngine,
+  matchingOptionsFromCircleSize,
   type CreateRoundInput,
   type GroupProposal,
 } from '@ember/domain';
@@ -493,7 +494,12 @@ export function createAdminRoundRoutes(db: Db) {
     }
 
     const metPairs = loadMetPairs(db, communityId);
-    const result = runMatchingEngine(members, metPairs);
+    const template = round.template_id ? findTemplateById(db, round.template_id) : null;
+    const result = runMatchingEngine(
+      members,
+      metPairs,
+      matchingOptionsFromCircleSize(template?.circle_size),
+    );
 
     return c.json({
       groups: result.groups,

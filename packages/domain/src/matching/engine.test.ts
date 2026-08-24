@@ -98,6 +98,27 @@ describe('matching engine', () => {
     expect(groups[0]?.memberIds).toHaveLength(2);
   });
 
+  it('prefers quartets when template size is four', () => {
+    const members = [
+      m('1', ['mon-evening'], ['pt']),
+      m('2', ['mon-evening'], ['pt']),
+      m('3', ['mon-evening'], ['pt']),
+      m('4', ['mon-evening'], ['pt']),
+    ];
+    const groups = proposeGroups(members, new Set(), { preferredSize: 4 });
+    expect(groups).toHaveLength(1);
+    expect(groups[0]?.memberIds).toHaveLength(4);
+  });
+
+  it('places thirty-one compatible members using flexible group sizes', () => {
+    const members = Array.from({ length: 31 }, (_, index) =>
+      m(String(index + 1), ['mon-evening'], ['pt']),
+    );
+    const groups = proposeGroups(members, new Set(), { preferredSize: 4 });
+    const matched = groups.reduce((total, group) => total + group.memberIds.length, 0);
+    expect(matched).toBe(31);
+  });
+
   it('keeps proposeTrios alias working', () => {
     const members = [
       m('1', ['mon-evening'], ['pt']),

@@ -344,7 +344,8 @@
     "matchReloaded": "Rascunho do sorteio recarregado.",
     "rerunMatch": "Sortear de novo",
     "publishConfirmBody": "Serão publicados {{groups}} grupo(s). {{unmatched}} membro(s) ficarão sem grupo neste encontro.",
-    "groupScore": "Afinidade {{score}}",
+    "groupScore": "Prioridade {{score}}",
+    "groupScoreHint": "Quanto maior, mais pares novos o grupo traz. Soma +10 por par que ainda não conversou, +1 se já se encontraram, +3 se mistura intenções fronteira e surpresa.",
     "publishConfirm": "Isso publica os grupos, envia convites por e-mail e encerra o encontro.",
     "declarationsCount": "{{count}} presença(s) declarada(s)",
     "groupLabel": "Grupo {{index}}",
@@ -385,7 +386,8 @@
       "INCOMPLETE_PROFILE": "Perfil incompleto",
       "NO_COMMON_LANGUAGE": "Sem idioma em comum",
       "NO_COMMON_SLOT": "Sem horário em comum",
-      "ODD_POOL": "Sobra por número ímpar"
+      "ODD_POOL": "Sobra de 1 pessoa",
+      "NOT_PLACED": "Não encaixou neste sorteio"
     },
     "emailFailuresTitle": "Falha parcial no envio de e-mails",
     "emailFailuresHint": "Os grupos foram publicados, mas alguns convites por e-mail falharam.",
