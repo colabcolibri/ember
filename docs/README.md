@@ -28,6 +28,7 @@ Estes documentos seguem o protocolo **Meridian** e são a fonte de verdade do pr
 | [discovery/product-brief.md](discovery/product-brief.md) | ready for scope |
 | [discovery/orientacao-produto.md](discovery/orientacao-produto.md) | draft — tese, ritual, matching |
 | [discovery/roadmap.md](discovery/roadmap.md) | draft — MVP 0–3 |
+| [discovery/convite-primeiro-encontro-gsa.md](discovery/convite-primeiro-encontro-gsa.md) | draft — convite e direção de arte do primeiro encontro |
 | [architecture/email.md](architecture/email.md) | approved | envio, persistência, Mailpit |
 | [mockup/fogo-de-conselho-apresentacao.html](../mockup/fogo-de-conselho-apresentacao.html) | pitch piloto — não é escopo do produto |
 

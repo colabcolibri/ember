@@ -30,12 +30,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build config package
-        run: pnpm --filter @ember/config build
-
-      - name: Build domain package
-        run: pnpm --filter @ember/domain build
-
       - name: Unit tests
         run: pnpm test
 
