@@ -5,7 +5,7 @@ import {
   parseMemberProfilePlaces,
 } from './profile.js';
 import { getMemberRole, getUserEmailById, upsertUserByEmail } from './users.js';
-import { profileCompleteness, type ProfileCompletenessField } from '@ember/domain';
+import { profileCompleteness, type ProfileCompletenessField, type ProfileCompletenessInput } from '@ember/domain';
 
 export type CommunityMemberListItem = {
   userId: string;
@@ -50,7 +50,7 @@ export function listCommunityMembers(
       languages,
       originPlace,
       residencePlace,
-    });
+    } as ProfileCompletenessInput);
 
     return {
       userId: row.user_id,

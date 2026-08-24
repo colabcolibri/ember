@@ -11,9 +11,9 @@ export function DesignPatternsPage() {
             coluna principal em 100% da largura.
           </p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>Participação — presença e meus grupos.</li>
-            <li>Facilitação — encontros e painel (facilitador/admin).</li>
-            <li>Organização — identidade e membros (org admin).</li>
+            <li>Participação — participar e meus grupos.</li>
+            <li>Facilitação — encontros e organização (facilitador/admin).</li>
+            <li>Organização — aparência e membros (org admin).</li>
             <li>Conta — perfil e sair no rodapé.</li>
           </ul>
         </div>

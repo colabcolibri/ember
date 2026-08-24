@@ -67,16 +67,16 @@ function unmatchedReasonLabel(reason: UnmatchedReason, locale: 'pt' | 'en'): str
       en: 'No common language with other participants',
     },
     NO_COMMON_SLOT: {
-      pt: 'Sem horário em comum para formar trio',
-      en: 'No shared slot to form a trio',
+      pt: 'Sem horário em comum para formar grupo',
+      en: 'No shared slot to form a group',
     },
     ODD_POOL: {
       pt: 'Sobra de 1 pessoa após formar grupos',
       en: 'Single leftover after forming groups',
     },
     NOT_PLACED: {
-      pt: 'Compatível, mas não encaixou neste sorteio',
-      en: 'Compatible, but not placed in this draw',
+      pt: 'Compatível, mas não encaixou nesta formação',
+      en: 'Compatible, but not placed in this formation',
     },
   };
   return labels[reason][locale];

@@ -6,12 +6,12 @@ test.describe('facilitator round smoke', () => {
     await mockLogin(page, 'facilitador@demo.ember');
 
     await page.goto('/facilitator');
-    await expect(page.getByRole('heading', { name: /painel do facilitador/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /organizar encontros/i })).toBeVisible();
 
-    await page.getByRole('tab', { name: /novo convite/i }).click();
+    await page.getByRole('tab', { name: /novo encontro/i }).click();
     await page.getByRole('button', { name: /abrir inscrições/i }).click();
 
     await expect(page.getByText(/inscrições abertas/i)).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText(/presenças confirmadas/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/quem respondeu/i)).toBeVisible({ timeout: 10_000 });
   });
 });

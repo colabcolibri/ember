@@ -270,7 +270,7 @@ const UNMATCHED_CSV_LABELS: Record<
   NO_COMMON_LANGUAGE: { pt: 'Sem idioma em comum', en: 'No common language' },
   NO_COMMON_SLOT: { pt: 'Sem horário em comum', en: 'No common slot' },
   ODD_POOL: { pt: 'Sobra de 1 pessoa', en: 'Single leftover' },
-  NOT_PLACED: { pt: 'Não encaixou neste sorteio', en: 'Not placed in this draw' },
+  NOT_PLACED: { pt: 'Não encaixou nesta formação', en: 'Not placed in this formation' },
 };
 
 function listOpenRounds(state: PersistedState): MockRound[] {

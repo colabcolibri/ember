@@ -63,7 +63,10 @@ export function updateCommunityPublicSettings(
     hero: { ...current.hero, ...input.hero },
     introParagraph: input.introParagraph ?? current.introParagraph,
     blocks: input.blocks ?? current.blocks,
-    theme: { ...current.theme, ...input.theme },
+    theme: {
+      preset: input.theme?.preset ?? current.theme?.preset ?? 'ember',
+      primaryOverride: input.theme?.primaryOverride ?? current.theme?.primaryOverride,
+    },
   };
 
   const validated = communityPublicSettingsSchema.parse(next);

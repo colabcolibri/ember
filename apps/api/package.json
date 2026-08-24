@@ -7,7 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "test": "vitest run"
+    "test": "pnpm --filter @ember/domain build && pnpm --filter @ember/db build && pnpm --filter @ember/email build && vitest run"
   },
   "dependencies": {
     "@ember/config": "workspace:*",

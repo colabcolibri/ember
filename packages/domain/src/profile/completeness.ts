@@ -19,7 +19,7 @@ export type ProfileCompletenessInput = Partial<ProfileInput> & {
 
 const FIELD_LABELS: Record<ProfileCompletenessField, { pt: string; en: string }> = {
   displayName: { pt: 'nome', en: 'name' },
-  editionYear: { pt: 'ano da edição', en: 'edition year' },
+  editionYear: { pt: 'ano em que entrou na comunidade', en: 'year you joined the community' },
   timezone: { pt: 'fuso horário', en: 'timezone' },
   languages: { pt: 'idiomas', en: 'languages' },
   originPlace: { pt: 'cidade de origem', en: 'origin city' },

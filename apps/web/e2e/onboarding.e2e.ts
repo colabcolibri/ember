@@ -24,8 +24,8 @@ test.describe('onboarding smoke', () => {
     await expect(page.getByText(/complete seu perfil/i)).toHaveCount(0);
 
     await page.locator('button[type="button"]').filter({ hasText: /seg 19:00/i }).first().click();
-    await page.locator('#presence-form').getByRole('button', { name: /confirmar presença/i }).click();
+    await page.locator('#presence-form').getByRole('button', { name: /confirmar participação/i }).click();
 
-    await expect(page.getByText(/presença confirmada/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/participação confirmada/i)).toBeVisible({ timeout: 10_000 });
   });
 });
