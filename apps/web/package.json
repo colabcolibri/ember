@@ -10,7 +10,7 @@
     "build:mock": "tsc -p tsconfig.json && vite build --mode mock.production",
     "preview": "vite preview",
     "preview:mock": "VITE_MOCK=true vite preview",
-    "test": "vitest run",
+    "test": "pnpm --filter @ember/domain build && vitest run",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install --with-deps chromium"
   },
