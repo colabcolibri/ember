@@ -1,5 +1,8 @@
 import type { PlaceRef } from '../lib/place.js';
-import { profileCompleteness } from '@ember/domain/profile/completeness';
+import {
+  profileCompleteness,
+  type ProfileCompletenessInput,
+} from '@ember/domain/profile/completeness';
 import {
   isFacilitatorDemoEmail,
   isNewMemberDemoEmail,
@@ -481,18 +484,20 @@ function requireOrgAdmin() {
   }
 }
 
+function mockProfileCompletenessInput(profile: MockProfile): ProfileCompletenessInput {
+  return {
+    displayName: profile.displayName,
+    editionYear: profile.editionYear,
+    timezone: profile.timezone,
+    languages: profile.languages,
+    originPlace: profile.originPlace,
+    residencePlace: profile.residencePlace,
+  } as ProfileCompletenessInput;
+}
+
 function assertProfileComplete() {
   const profile = state.profile;
-  if (
-    !profileCompleteness({
-      displayName: profile.displayName,
-      editionYear: profile.editionYear,
-      timezone: profile.timezone,
-      languages: profile.languages,
-      originPlace: profile.originPlace,
-      residencePlace: profile.residencePlace,
-    }).complete
-  ) {
+  if (!profileCompleteness(mockProfileCompletenessInput(profile)).complete) {
     throw new Error('profile_incomplete');
   }
 }
@@ -510,14 +515,7 @@ export const mockStore = {
   isProfileComplete() {
     if (!state.session) return false;
     const profile = state.profile;
-    return profileCompleteness({
-      displayName: profile.displayName,
-      editionYear: profile.editionYear,
-      timezone: profile.timezone,
-      languages: profile.languages,
-      originPlace: profile.originPlace,
-      residencePlace: profile.residencePlace,
-    }).complete;
+    return profileCompleteness(mockProfileCompletenessInput(profile)).complete;
   },
 
   login(email: string) {

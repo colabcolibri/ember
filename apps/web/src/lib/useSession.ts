@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { profileCompleteness, type ProfileCompletenessField } from '@ember/domain/profile/completeness';
+import {
+  profileCompleteness,
+  type ProfileCompletenessField,
+  type ProfileCompletenessInput,
+} from '@ember/domain/profile/completeness';
 import { apiFetch } from './api.js';
 import { loginPath } from './app-mode.js';
 
@@ -39,7 +43,7 @@ export function useSession() {
   const refreshProfile = useCallback(async (): Promise<boolean | null> => {
     try {
       const profile = await apiFetch<ProfileResponse>('/me/profile');
-      const result = profileCompleteness(profile);
+      const result = profileCompleteness(profile as ProfileCompletenessInput);
       setProfileComplete(result.complete);
       setProfileMissing(result.missing);
       return result.complete;

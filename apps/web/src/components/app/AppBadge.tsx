@@ -14,9 +14,15 @@ const variantClasses: Record<AppBadgeVariant, string> = {
 export function AppBadge({
   children,
   variant = 'default',
+  title,
 }: {
   children: ReactNode;
   variant?: AppBadgeVariant;
+  title?: string;
 }) {
-  return <Badge className={cn('rounded-full font-semibold', variantClasses[variant])}>{children}</Badge>;
+  return (
+    <Badge title={title} className={cn('rounded-full font-semibold', variantClasses[variant])}>
+      {children}
+    </Badge>
+  );
 }
